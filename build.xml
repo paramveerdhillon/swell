@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="SpectralLearning">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="SpectralLearning.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="libs/Jama-1.0.2.jar"/>
+        <pathelement location="libs/ant.jar"/>
+        <pathelement location="libs/netlib-java-0.9.3.jar"/>
+        <pathelement location="libs/mtj-0.9.14.jar"/>
+        <pathelement location="libs/arpack_combined_all.jar"/>
+        <pathelement location="libs/Utils.jar"/>
+        <pathelement location="libs/parallelcolt-0.9.4.jar"/>
+        <pathelement location="libs/optimization.jar"/>
+        <pathelement location="libs/jplasma.jar"/>
+        <pathelement location="libs/csparsej.jar"/>
+        <pathelement location="libs/arpack-combo.jar"/>
+    </path>
+    <path id="run.ContextPCA.bootclasspath">
+        <fileset dir="${java.home}/lib" includes="*.jar"/>
+        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
+    </path>
+    <path id="run.ContextPCANGrams.bootclasspath">
+        <fileset dir="${java.home}/lib" includes="*.jar"/>
+        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
+    </path>
+    <path id="run.LRMVLEmbed.bootclasspath">
+        <fileset dir="${java.home}/lib" includes="*.jar"/>
+        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
+    </path>
+    <path id="run.LSA.bootclasspath">
+        <fileset dir="${java.home}/lib" includes="*.jar"/>
+        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="SpectralLearning.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target name="ContextPCA">
+        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.ContextPCA" failonerror="true" fork="yes">
+            <jvmarg line="-ea"/>
+            <arg line="unlab-train train unlab-train-file:Input_Files/train_demo.txt  train-file:Input_Files/test_demo.txt bagofWordsSVD contextSizeEachSide:3 doc-separator:DOCSTART-X-0 vocab-size:50 serialize-run-file:Output_Files/runCPCA.ser eigen-dict-name:Output_Files/eigenFeatCPCA.dict left-singular-vec-name:Output_Files/Phi_L_CPCA.txt right-singular-vec-name:Output_Files/Phi_R_CPCA.txt hidden-state:20 context-specific-embed-name:Output_Files/contextSpecificEmbedForTrain_CPCA.txt  context-obl-embed-name:Output_Files/contextObliviousEmbedForTrain_CPCA.txt serialize-corpus-file:Output_Files/corpusCPCA.ser"/>
+            <classpath refid="SpectralLearning.classpath"/>
+        </java>
+    </target>
+    <target name="ContextPCANGrams">
+        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.ContextPCANGrams" failonerror="true" fork="yes">
+            <jvmarg line="-ea"/>
+            <arg line="unlab-train train unlab-train-file:Input_Files/train_bigrams.txt  train-file:Input_Files/test_demo.txt ngrams numLabels:2 doc-separator:DOCSTART-X-0 vocab-size:50 serialize-run-file:Output_Files/runCPCANGrams.ser eigen-dict-name:Output_Files/eigenFeatCPCANGrams.dict hidden-state:20  context-obl-embed-name:Output_Files/contextObliviousEmbedForTrain_CPCANGrams.txt serialize-corpus-file:Output_Files/corpusCPCANGrams.ser"/>
+            <classpath refid="SpectralLearning.classpath"/>
+			</java>
+    </target>
+    <target name="LRMVLEmbed">
+        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.LRMVLEmbed" failonerror="true" fork="yes">
+            <jvmarg line="-ea"/>
+            <arg line="train unlab-train unlab-train-file:Input_Files/train_demo.txt  train-file:Input_Files/test_demo.txt smooths:.1,.5,.9 doc-separator:DOCSTART-X-0 vocab-size:50 serialize-run-file:Output_Files/runLRMVL.ser eigen-dict-name:Output_Files/eigenFeatLRMVL.dict left-singular-vec-name:Output_Files/Phi_L_LRMVL.txt right-singular-vec-name:Output_Files/Phi_R_LRMVL.txt hidden-state:20 context-specific-embed-name:Output_Files/contextSpecificEmbedForTrainLRMVL.txt context-obl-embed-name:Output_Files/contextOblEmbedForTrainLRMVL.txt serialize-corpus-file:Output_Files/corpusLRMVL.ser"/>
+            <classpath refid="SpectralLearning.classpath"/>
+                    </java>
+    </target>
+    <target name="LSA">
+        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.LSA" failonerror="true" fork="yes">
+            <jvmarg line="-ea"/>
+            <arg line="unlab-train train unlab-train-file:Input_Files/train_demo1.txt  train-file:Input_Files/test_demo.txt doc-separator:DOCSTART-X-0 vocab-size:100 serialize-run-file:Output_Files/runLSA.ser eigen-dict-name:Output_Files/eigenFeatLSA.dict hidden-state:4 context-obl-embed-name:Output_Files/contextOblEmbedForTrainLSA.txt serialize-corpus-file:Output_Files/corpusLSA.ser"/>
+            <classpath refid="SpectralLearning.classpath"/>
+           
+        </java>
+    </target>
+</project>

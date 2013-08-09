@@ -1,0 +1,6 @@
+the cat 1
+ate the 1
+rat . 1
+cat ate 1
+the rat 1
+. , 1

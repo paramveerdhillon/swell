@@ -1,0 +1,14 @@
+
+all_ptb.txt		running text
+
+all_ptb_5grams.txt	5-grams
+all_ptb_3grams.txt	3-grams
+
+ptb_3_bgrams.txt	bigram version  (when first extracted -- has redundancy)
+ptb_5_bgrams.txt	bigram version  (when first extracted -- has redundancy)
+
+ptb_3_bigrams.txt	sorted with sort (still has redundancy)
+ptb_5_bigrams.txt	sorted with sort (still has redundancy)
+
+3gram_bigrams.txt       made unique -- use this!
+5gram_bigrams.txt       made unique -- use this!

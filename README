@@ -1,0 +1,88 @@
+SpectralLearning Toolkit README Ver. 0.0.1
+==========================================
+
+The spectral learning toolkit contains implementation of 4 spectral learning algorithms. All the algorithms learn from some large amounts of unlabeled text (e.g. WSJ, NYT, Reuters etc.) and output a dictionary (context oblivious) or context sensitive mapping from each word in the text to a low dimensional, typically ~30-50 dimensional real valued vector. The dictionary (or context oblivious mapping) maps each word (type) to a vector e.g. "bank" will have a single vector associated with it for all occurrences of "bank" in the text, irrespective of the fact whether it referred to "river bank" or "JPM Chase bank". On the other hand, context sensitive mappings map each word (token) to a vector, and hence would map "river bank" and "JPM Chase bank" to differ vectors based on context.
+
+The goal behind learning all these embeddings is that they should provide supplementary information in addition to a baseline set of features that one might use for a task. For example, if you're doing NER where the standard train/test sets are sections of CoNLL '03 data and your classifier is some discriminative classifier e.g. CRF, where its easy to add new features. Then you would have a baseline set of features for NER e.g. word identities, capitalization in a fixed window around the given word etc. Now in order to improve the performance of your NER system, you might want to add spectral embeddings learned above as extra features with the hope that they would provide some non-redundant information in addition to the baseline set of features and hence would give a boost in classification accuracy for the task concerned, NER in this case. 
+
+With that in mind, the processing occurs in two stages. In the first stage we learn a dictionary (context oblivious) from large amounts of data (e.g. WSJ, NYT, Reuters etc.) and then in the second stage we "induce" embeddings/mappings for a given corpus e.g. CoNLL train/test set in the NER example. The first stage embeddings are necessarily context oblivious, since we don't use that corpus for some actual task e.g. NER. The second stage embeddings which are for a given task e.g. NER can be context oblivious or can be context insensitive. 
+
+Now, you might ask that why don't we add even the CoNLL train/test sets to the unlabeled learning in first stage? In principle you can do that and that would certainly improve the performance over not doing so since now there won't be any out-of-vocabulary words, however I'd prefer not do it for the risk of overfitting. 
+
+The basic experimental framework I described above is the one used in our NIPS 11 paper. You also might want to have a look at the paper.
+"Multi-View Learning of Word Embeddings via CCA" 
+Dhillon, Foster and Ungar
+
+=================================================
+The four algorithms currently implemented in the toolkit are:
+
+1). LR-MVL embeddings. This is the CCA based algorithm proposed in the NIPS 11 paper and the one that I have played around with the most. I was successfully able to train it on ~200 million tokens of Reuters corpora, though I haven't tried a bigger size.
+
+2). LSA (Latent Semantic Analysis) Embeddings. This is a standard algorithm which performs SVD decomposition of document-term matrix. You might want to check its Wikipedia page. The left and right eigenvectors of the LSA matrix give us mapping from each document to a vector (not particularly useful for us) and eigenwords (i.e a context oblivious dictionary) respectively.
+
+3). ContextPCA and 4). ContextPCANGrams. These perform SVD decomposition on the word co-occurrence matrix i.e. assuming that we consider a "h" word context for each token, then it does SVD of the (vocab-size)*(2hvocab-size+1) matrix or something similar (Details below). The difference between them would become clear below. The left and right eigenvectors of the context matrix give us eigenwords (i.e a context oblivious dictionary) and eigencontexts respectively.
+
+
+The SpectralLearning code can be run via "ant" as "ant ContextPCA" etc. where all the 4 targets are mentioned in the build.xml file. Since, the unlabeled data can be huge, so there might be memory issues. In Java the default heap size allotted is 4G, so you might want to increase that by adding "-Xmx" option in the relevant target in the "build.xml" file.  
+
+
+Program Arguments (mentioned in build.xml) file.
+===============================================
+All the 4 algorithms have some common set of arguments and they have the same meaning for each one of them.
+"unlab-train": This is the option to run the 1st stage unsupervised learning part from some big corpora (e.g. WSJ, NYT, Reuters etc.). The location of data is specified by: "unlab-train-file". There are some preprocessed datasets in the correct format available on sobolev e.g. Reuters RCV (~205M tokens) "/data/dhillonReuters/Reuters/ReutersProcessed/reuters_rcv1_all.txt"
+
+
+"train": This is the option to run the 2nd stage unsupervised learning part i.e. inducing embeddings on some smaller problem specific corpora e.g. CoNLL data for the NER problem . The location of data is specified by: "train-file".
+
+You might want to run both of "train" and "unlab-train" together or separately. Typically, one would run "unlab-train" once and learn the dictionary from large corpora and then use/re-use that dictionary to induce embeddings for various train/test sets (smaller corpora) using "train" option. 
+
+
+"doc-separator:" For some algorithms we care about document boundaries and collect/aggregate statistics across different documents. So, we need to specify the document separator, currently, I am using "DOCSTART-X-0" as separator. Note that 3 of the 4 algorithms i.e. ContextPCA, LSA, LRMVLEmbed expect the input files to be running text with documents separated via the document separator. ContextPCANGrams works with different kind of input file. Its input file contains bigrams separated by space by their counts and needs no document separators. If you're using Google n-gram data then ContextPCANGrams might be the algorithm you might want to consider running. 
+
+** Please look at sample input files in Input_Files/ folder and make sure that there are no additional or fewer newlines, tabs etc. in your data in addition to the ones that I have in the files there. The I/O of the code is not too robust so it might barf if you add extra newlines etc. and create documents of empty size and so on.**
+
+"vocab-size": This option specifies the size of dictionary i.e. how many unique words (types) we want to learn the embeddings for, from the 1st stage of unlabeled data learning. Typical sizes that I used were 100k to 300k. However, there are not more than 50k words in typical english, so you might want to play around with this number or choose it based on some linguistic knowledge that you might have. The final dictionary size is "vocab-size +1" i.e. for all the other words less frequent words which don't make it to the "vocab-size" we learn an "Out Of Vocabulary (OOV)" vector, which is a generic embedding to use for an unseen word.
+
+"hidden-state": This is the size of embeddings. Typical numbers vary from 20-50.
+
+**Note that if even after increasing heap size you're getting memory errors, then you might want to try with a slightly smaller vocab-size and hidden state size. However, I won't go below vocab-size of 30k and hidden state size of 10. If, even then you get memory errors, the only remaining option is to try smaller unlabeled data sizes for stage 1. I am using standard linear algebra libraries for JAVA like parallel COLT and MTJ, which are supposed to be very fast and efficient. However, if you know of better ones, I would love to hear from you.**
+
+"eigen-dict-name": This is the name of the output dictionary after the 1st stage of learning. It is a matrix of size (num-vocab +1)* hidden-state.
+
+For 2 of the 4 algorithms, i.e. LRMVLEmbed and ContextPCA you can learn context specific as well as context oblivious embeddings for the 2nd stage smaller corpora using options. The name of the output files is specified as "context-obl-embed-name" and "context-specific-embed-name".
+
+For LSA and ContextPCANGrams, its not totally clear what context specific embeddings would mean so for these algorithms you can only learn context oblivious embeddings where the name of the output embeddings is specified as "context-obl-embed-name".
+
+Then, there are options to serialize/deserialize different objects, but you need not care about them unless you're building on/developing the code, in which case, they might be useful.
+
+
+Extra Algorithm specific options
+================================
+
+"smooths": LRMVLEmbed performs exponential smooths on the neighboring words and concatenates them. So, you should specify a single or combination (comma separated) of smooths you want to consider. Using lots of smooths might slow down the algorithm (!). For details about exponential smooths please see the NIPS 11 paper.
+
+
+"contextSizeEachSide": ContextPCA requires the amount of context on each size to consider while constructing the word by context matrix. I won't go beyond 2 or at max. 3.
+
+"bagofWordsSVD": This is an option in ContextPCA. In ContexPCA, one can either consider the words on each side (number specified by "contextSizeEachSide" option, mentioned ab
+ove) as a bag of words, in which case the context matrix will be of size (vocab-size+1)*(vocab-size+1). Or if you don't specify "bagofWordsSVD" option, it will perform SVD on (vocab-size+1)*(contextSizeEachSide(vocab-size+1)) matrix. In other words we distinguish between words 1 to the left and 2 to the left and so on at the expense of making the matrix bigger and the computation a bit slower.
+
+"ngrams": This is bit redundant argument. For the time being, keep it as it is. Its used by ContextPCANGrams and says that the input data will be in the form of n-grams.
+
+
+**Lastly, I invite you to look at the code yourself if you are curious about how things are implemented or if something is misbehaving etc. Also, please feel free to report potential bugs or other suggestions. We plan to release the code sometime in the next few months so it will be good to get feedback.**
+
+**Also note that there are dummy input files in the Input_Files folder, so the code is in "just push play" (No, I am not an Aerosmith fan!) state. You can just run one of the algorithms with the specified options in build.xml and it should run. The generated output will be in Output_Files folder.**
+
+**This is a continuously evolving document and I have tried my best to ensure everything is factually correct, however there might be some discrepancies, so I will keep on updating this document. (2/10/13)**
+
+cheers and best of luck!
+dhillon@cis.upenn.edu 
+
+
+
+
+
+
+
+ 
