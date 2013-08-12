@@ -6,14 +6,17 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import Jama.Matrix;
 import edu.upenn.cis.SpectralLearning.IO.ContextPCANGramsWriter;
+import edu.upenn.cis.SpectralLearning.IO.ContextPCAWriter;
 import edu.upenn.cis.SpectralLearning.IO.Options;
 import edu.upenn.cis.SpectralLearning.IO.ReadDataFile;
 import edu.upenn.cis.SpectralLearning.Runs.ContextPCANGramsRun;
 import edu.upenn.cis.SpectralLearning.SpectralRepresentations.ContextPCANGramsRepresentation;
+import edu.upenn.cis.SpectralLearning.SpectralRepresentations.ContextPCARepresentation;
 
 public class ContextPCANGrams implements Serializable {
 			static final long serialVersionUID = 42L;
@@ -61,11 +64,20 @@ public class ContextPCANGrams implements Serializable {
 				woutNGrams=new ContextPCANGramsWriter(opt,all_Docs,matrices,rin);
 				woutNGrams.writeEigenDict();
 				woutNGrams.writeEigContextVectors();
+				
+				if (opt.randomBaseline){
+					woutNGrams.writeEigenDictRandom();
+					woutNGrams.writeEigContextVectorsRandom();
+				}
+				
 				System.out.println("+++Context PCA NGrams Embedddings Induced+++\n");
 			}
+
+		
 			
 		}
 
+			
 		public static HashMap<String,Integer> deserializeCorpusIntMapped(Options opt) throws ClassNotFoundException{
 			File f= new File(opt.serializeCorpus);
 			HashMap<String,Integer> corpus_intM=null;

@@ -64,6 +64,11 @@ public class LSA implements Serializable {
 			wout.writeEigenDict();
 			//wout.writeDocDictL();
 			System.out.println("+++LSA Embedddings Induced+++\n");
+			
+			if (opt.randomBaseline){
+				wout.writeEigenDictRandom();
+			}
+			
 		}
 		if (opt.train){
 			System.out.println("+++Generating LSA Embedddings for training data+++\n");
@@ -86,6 +91,11 @@ public class LSA implements Serializable {
 			
 			
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
+			
+			if (opt.randomBaseline){
+				wout.writeContextObliviousEmbedRandom();
+			}
+			
 			System.out.println("+++Generated LSA Embedddings for training data+++\n");
 		}
 	

@@ -84,7 +84,10 @@ public class CCAVariantsNGrams implements Serializable {
 		    System.out.println("Total memory (bytes): " + 
 		        Runtime.getRuntime().totalMemory());
 			
-			
+			if (opt.randomBaseline){
+				woutNGrams.writeEigenDictRandom();
+				woutNGrams.writeEigContextVectorsRandom();
+			}
 			System.out.println("+++CCA NGram Embedddings Induced+++\n");
 		}
 	

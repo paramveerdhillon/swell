@@ -247,6 +247,7 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 	throws InterruptedException, ExecutionException{
 		
 			int threads = Runtime.getRuntime().availableProcessors();
+			System.out.println(threads);
 			ExecutorService service = Executors.newFixedThreadPool(threads);
 			List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 			final Iterator<ArrayList<Integer>> it= _allDocs.iterator();
@@ -255,7 +256,7 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 					public Integer call() throws Exception {
 						Matrix eigDict=left_right_smooths_doc(it.next(),eigenFeatDict, left_singular_vectors,right_singular_vectors);
 						update_dict(eigDict);
-							
+						System.out.println("+++Doc Thread Submitted for Smoothing++");	
 					
 						return 1;
 					}

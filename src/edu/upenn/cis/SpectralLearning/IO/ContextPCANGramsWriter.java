@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import Jama.Matrix;
@@ -122,6 +123,47 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 		writer.close();	
 	}
 	
+	
+	public void writeEigenDictRandom() throws IOException{
+		
+		Random r=new Random();
+		ArrayList<String> vocab=_rin.getSortedWordListString();
+		String eigDict ="Output_Files/EigDictRandom";
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigDict),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		for (int i=0; i<=vocab.size(); i++) {
+			
+			if (i==0){
+				writer.write("<OOV>");
+				writer.write(' ');
+			}
+			else{
+				writer.write(vocab.get(i-1));
+				writer.write(' ');
+			}
+			for (int j=0; j<_opt.hiddenStateSize;j++){
+				
+				if ( j != _opt.hiddenStateSize-1){
+					writer.write(Double.toString(r.nextGaussian()));
+					writer.write(' ');
+				}
+				else{
+					writer.write(Double.toString(r.nextGaussian()));
+					writer.write('\n');
+				}
+			}
+			
+		}
+		
+		writer.close();	
+	}
+	
 	public void writeEigContextVectors() throws IOException{
 		Matrix eigenDictContext=(Matrix)_matrices[1];
 		double[][] eigenDictArrContext=eigenDictContext.getArray();
@@ -195,5 +237,68 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 		writer.close();
 	}
 
+	public void writeEigContextVectorsRandom() throws IOException{
+		Matrix eigenDictContext=(Matrix)_matrices[1];
+		double[][] eigenDictArrContext=eigenDictContext.getArray();
+		ArrayList<String> vocab=null;
+		
+		Random r =new Random();
+		
+		if(_opt.depbigram){
+			vocab=_rin.getSortedWordListContextString();
+		}
+		else{
+			vocab=_rin.getSortedWordListString();
+		}
+		String contextFile ="Output_Files/contextDictRandom";
+		int counter=0;
+		
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(contextFile),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		if(_opt.depbigram){
+			counter=_opt.numLabels;
+		}
+		else{
+			counter=_opt.numGrams-1;
+		}
+		int c=0;
+		for (int i=0; i<counter*(vocab.size()+1); i++) {
+			if(i%(vocab.size()+1)==0 && i!=0)
+				c++;
+				
+			if (i==0 || i==c*(vocab.size()+1)){
+				writer.write("<OOV>");
+				writer.write(' ');
+			}
+			else{
+				if(i<=vocab.size()){
+					writer.write(vocab.get(i-1));
+					writer.write(' ');
+				}else{
+					writer.write(vocab.get(i-(c*vocab.size())-1-c));
+					writer.write(' ');
+				}
+					
+			}
+			for (int j=0; j<_opt.hiddenStateSize;j++){
+			
+					if ( j != _opt.hiddenStateSize-1){
+						writer.write(Double.toString(r.nextGaussian()));
+						writer.write(' ');
+					}
+					else{
+						writer.write(Double.toString(r.nextGaussian()));
+						writer.write('\n');
+					}
+			}
+		}
+		writer.close();
+	}
 	
 }

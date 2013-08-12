@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import Jama.Matrix;
 import edu.upenn.cis.SpectralLearning.Data.Corpus;
@@ -69,6 +70,49 @@ public class CCAWriter extends WriteDataFile implements EmbeddingWriter {
 				}
 				else{
 					writer.write(Double.toString(eigenDictArr[i][j]));
+					writer.write('\n');
+				}
+			}
+			
+		}
+		
+		writer.close();
+		
+	}
+	
+	public void writeEigenDictRandom() throws IOException{
+		//Matrix eigenDict=_utils.center_and_scale((Matrix)_matrices[2]);
+		Matrix eigenDict=(Matrix)_matrices[2];
+		double[][] eigenDictArr=eigenDict.getArray();
+		ArrayList<String> vocab=_rin.getSortedWordListString();
+		
+		Random r=new Random();
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.eigendictName+"Random"),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		for (int i=0; i<=vocab.size(); i++) {
+			
+			if (i==0){
+				writer.write("<OOV>");
+				writer.write(' ');
+			}
+			else{
+				writer.write(vocab.get(i-1));
+				writer.write(' ');
+			}
+			for (int j=0; j<_opt.hiddenStateSize;j++){
+				
+				if ( j != _opt.hiddenStateSize-1){
+					writer.write(Double.toString(r.nextGaussian()));
+					writer.write(' ');
+				}
+				else{
+					writer.write(Double.toString(r.nextGaussian()));
 					writer.write('\n');
 				}
 			}
@@ -199,5 +243,45 @@ public class CCAWriter extends WriteDataFile implements EmbeddingWriter {
 		
 	}
 
+	public void writeContextObliviousEmbedRandom() throws IOException {
+		int i=0,idxDoc=0,idx=0;
+		
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.contextOblEmbed+"Random"),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		Random r=new Random();
+		//Matrix m1=jutils.colsum(contextObliviousEmbed);
+	
+	while(idxDoc<_allDocs.size()){	
+			int tok_idx=0;	
+			ArrayList<Integer> doc=_allDocs.get(idxDoc++);
+			
+			while(tok_idx<doc.size()){
+				writer.write(_rin.getTokForIntTrain(idx++));
+				writer.write(' ');
+				for (int j=0;j<_opt.hiddenStateSize;j++){
+					
+					if ( j != (_opt.hiddenStateSize)-1){
+						writer.write(Double.toString(r.nextGaussian()));
+						writer.write(' ');
+					}
+					else{
+						writer.write(Double.toString(r.nextGaussian()));
+						writer.write('\n');
+					}
+				}
+				i++;
+				tok_idx++;
+			}
+	}
+		writer.close();
+			
+	}
 
+	
 }

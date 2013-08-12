@@ -77,10 +77,13 @@ public class ContextPCA implements Serializable {
 			wout.writeEigenDict();
 			wout.writeEigContextVectors();
 			
-		    /* Total memory currently in use by the JVM */
-		    System.out.println("Total memory (bytes): " + 
-		        Runtime.getRuntime().totalMemory());
+			if (opt.randomBaseline){
+				wout.writeEigenDictRandom();
+				wout.writeEigContextVectorsRandom();
+			}
 			
+		    /* Total memory currently in use by the JVM */
+		    System.out.println("Total memory (bytes): " + Runtime.getRuntime().totalMemory());
 			
 			System.out.println("+++Context PCA Embedddings Induced+++\n");
 		}
@@ -106,6 +109,11 @@ public class ContextPCA implements Serializable {
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
 			wout.writeContextSpecificEmbed(contextSpecificEmbed);
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
+			
+			if (opt.randomBaseline){
+				wout.writeContextObliviousEmbedRandom();
+			}
+			
 			System.out.println("+++Generated Context PCA Embedddings for training data+++\n");
 		}
 	}

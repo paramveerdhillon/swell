@@ -78,6 +78,13 @@ public class CCAVariants implements Serializable {
 			if(!opt.typeofDecomp.equals("TwoStepLRvsW"))
 				wout.writeEigContextVectors();
 			
+			
+			if (opt.randomBaseline){
+				wout.writeEigenDictRandom();
+				wout.writeEigContextVectorsRandom();
+			}
+			
+			
 		    /* Total memory currently in use by the JVM */
 		    System.out.println("Total memory (bytes): " + 
 		        Runtime.getRuntime().totalMemory());

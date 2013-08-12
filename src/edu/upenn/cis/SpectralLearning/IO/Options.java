@@ -41,6 +41,7 @@ public final class Options implements Serializable {
  public int vocabSize = 30000;
  public int hiddenStateSize=50;
  public int contextSizeOneSide=2;
+ public boolean randomBaseline=true;
  public int numIters = 2;
  public int numGrams=2;
  public String outfile = "out.txt";
@@ -86,6 +87,10 @@ public boolean depbigram=false;
 	    if (pair[0].equals("train")) {
 		train = true;
 	    }
+	    
+	    if (pair[0].equals("no-random")) {
+			 randomBaseline= false;
+		    }
 	    
 	    if (pair[0].equals("eval")) {
 		eval = true;

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import Jama.Matrix;
@@ -70,6 +71,45 @@ public class LSAWriter extends WriteDataFile implements EmbeddingWriter {
 	}
 	
 	
+	public void writeEigenDictRandom() throws IOException{
+		
+		Random r= new Random();
+		ArrayList<String> vocab=_rin.getSortedWordListString();
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.eigendictName),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		for (int i=0; i<=vocab.size(); i++) {
+			
+			if (i==0){
+				writer.write("<OOV>");
+				writer.write(' ');
+			}
+			else{
+				writer.write(vocab.get(i-1));
+				writer.write(' ');
+			}
+			for (int j=0; j<_opt.hiddenStateSize;j++){
+				
+				if ( j != _opt.hiddenStateSize-1){
+					writer.write(Double.toString(r.nextGaussian()));
+					writer.write(' ');
+				}
+				else{
+					writer.write(Double.toString(r.nextGaussian()));
+					writer.write('\n');
+				}
+			}
+			
+		}
+		
+		writer.close();
+		
+	}
 	
 	
 	public void writeContextObliviousEmbed(Matrix contextObliviousEmbed) throws IOException {
@@ -112,5 +152,46 @@ public class LSAWriter extends WriteDataFile implements EmbeddingWriter {
 		
 	}
 
+	public void writeContextObliviousEmbedRandom() throws IOException {
+		int i=0,idxDoc=0,idx=0;
+		Random r= new Random();
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.contextOblEmbed),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		//Matrix m1=jutils.colsum(contextObliviousEmbed);
+	
+	while(idxDoc<_allDocs.size()){	
+			int tok_idx=0;	
+			ArrayList<Integer> doc=_allDocs.get(idxDoc++);
+			
+			while(tok_idx<doc.size()){
+				writer.write(_rin.getTokForIntTrain(idx++));
+				writer.write(' ');
+				for (int j=0;j<_opt.hiddenStateSize;j++){
+					
+					if ( j != (_opt.hiddenStateSize)-1){
+						writer.write(Double.toString(r.nextGaussian()));
+						writer.write(' ');
+					}
+					else{
+						writer.write(Double.toString(r.nextGaussian()));
+						writer.write('\n');
+					}
+				}
+				i++;
+				tok_idx++;
+			}
+	}
+		writer.close();
+		
+		
+	}
 
+	
+	
 }

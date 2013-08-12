@@ -68,6 +68,12 @@ public static void main(String[] args) throws Exception{
 			wout=new CCAWriter(opt,all_Docs,matrices,rin,utils);
 			wout.writeEigenDict();
 			wout.writeLREigVectors();
+			
+			if (opt.randomBaseline){
+				wout.writeEigenDictRandom();
+			}
+			
+			
 			System.out.println("+++LR-MVL Embedddings Induced+++\n");	
 		}
 		if (opt.train){
@@ -92,6 +98,10 @@ public static void main(String[] args) throws Exception{
 			wout=new CCAWriter(opt,all_Docs,matrices,rin,utils);
 			wout.writeContextSpecificEmbed(contextSpecificEmbed);
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
+			if (opt.randomBaseline){
+				wout.writeContextObliviousEmbedRandom();
+			}
+			
 			System.out.println("+++Generated LR-MVL Embedddings for training data+++\n");
 			
 		}

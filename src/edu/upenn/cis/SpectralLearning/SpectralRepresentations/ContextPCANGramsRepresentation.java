@@ -28,7 +28,13 @@ public class ContextPCANGramsRepresentation extends SpectralRepresentation imple
 	//private Corpus _corpus;
 	ReadDataFile _rin;
 	SparseDoubleMatrix2D CMatrix_vTimeslv,CTMatrix_vTimeslv,WMatrix_nTimesv,WMatrix_vTimesv,WLMatrix3gram,WLTMatrix3gram,
-	WRMatrix3gram,WRTMatrix3gram,WLMatrix5gram,WLTMatrix5gram,WRMatrix5gram,WRTMatrix5gram;
+	WRMatrix3gram,WRTMatrix3gram,WLMatrix5gram,WLTMatrix5gram,WRMatrix5gram,WRTMatrix5gram,WL_OR_WRMatrix3gram,WLT_OR_WRTMatrix3gram,
+	WL_OR_WRMatrix5gram,WLT_OR_WRTMatrix5gram,L1L2_OR_R1R2_L1R1Matrix_vTimesv,L1L3_OR_R1R3_L1R2Matrix_vTimesv,L1L4_OR_R1R4_L2R1Matrix_vTimesv
+	,L2L3_OR_R2R3_L2R2Matrix_vTimesv,L2L4_OR_R2R4_L1L2Matrix_vTimesv,L3L4_OR_R3R4_R1R2Matrix_vTimesv,L1L2_OR_R1R2_L1R1Matrix_vTimesvT,L1L3_OR_R1R3_L1R2Matrix_vTimesvT,L1L4_OR_R1R4_L2R1Matrix_vTimesvT
+	,L2L3_OR_R2R3_L2R2Matrix_vTimesvT,L2L4_OR_R2R4_L1L2Matrix_vTimesvT,L3L4_OR_R3R4_R1R2Matrix_vTimesvT;
+	
+	
+	
 	int _contextSize;
 	static final long serialVersionUID = 42L;
 	long _numTok;
@@ -82,20 +88,44 @@ public void computeLRContextMatricesSingleVocab(){
 		CMatrix_vTimeslv=new SparseDoubleMatrix2D(_vocab_size+1,_contextSize*(_vocab_size+1));
 		CTMatrix_vTimeslv=new SparseDoubleMatrix2D(_contextSize*(_vocab_size+1),_vocab_size+1);
 		
+		WL_OR_WRMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		WLT_OR_WRTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
+		
 		WLMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
 		WLTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
-		
+
 		WRMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
 		WRTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
-		
-		
+
+
 		WLMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
 		WLTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
-		
+
 		WRMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
 		WRTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
+
+
 		
-		WMatrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));	
+		WL_OR_WRMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
+		WLT_OR_WRTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
+		
+		WMatrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		//Used for 3 as well as 5 grams
+		L1L2_OR_R1R2_L1R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L1L2_OR_R1R2_L1R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		
+		L1L3_OR_R1R3_L1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L1L4_OR_R1R4_L2R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L2L3_OR_R2R3_L2R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L2L4_OR_R2R4_L1L2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L3L4_OR_R3R4_R1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		
+		L1L3_OR_R1R3_L1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L1L4_OR_R1R4_L2R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L2L3_OR_R2R3_L2R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L2L4_OR_R2R4_L1L2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		L3L4_OR_R3R4_R1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+		
 		
 		HashMap<Double,Double> hMCounts1=new HashMap<Double,Double>();
 		HashMap<Double,Double> hMCounts2=new HashMap<Double,Double>();
@@ -106,6 +136,13 @@ public void computeLRContextMatricesSingleVocab(){
 		HashMap<Double, Integer> hMap2=new HashMap<Double,Integer>();
 		HashMap<Double, Integer> hMap3=new HashMap<Double,Integer>();
 		HashMap<Double, Integer> hMap4=new HashMap<Double,Integer>();
+		
+		HashMap<Double, Integer> hMap5=new HashMap<Double,Integer>();
+		HashMap<Double, Integer> hMap6=new HashMap<Double,Integer>();
+		HashMap<Double, Integer> hMap7=new HashMap<Double,Integer>();
+		HashMap<Double, Integer> hMap8=new HashMap<Double,Integer>();
+		HashMap<Double, Integer> hMap9=new HashMap<Double,Integer>();
+		HashMap<Double, Integer> hMap10=new HashMap<Double,Integer>();
 		
 		double[] vals=new double[2];
 		CenterScaleNormalizeUtils cUtils=new CenterScaleNormalizeUtils(_opt);
@@ -120,6 +157,8 @@ public void computeLRContextMatricesSingleVocab(){
 			CTMatrix_vTimeslv.set((int)vals[1],(int)vals[0], hMap1.get(keys));
 
 		}
+		
+		
 
 		for(int i=0; i<_vocab_size+1;i++){
 			
@@ -132,16 +171,31 @@ public void computeLRContextMatricesSingleVocab(){
 			}
 			}
 		
+		
+		
+		
 		if(_opt.numGrams==3 && !_opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
 				hMap2=(HashMap<Double, Integer>)_allDocs[1];
+				hMap3=(HashMap<Double, Integer>)_allDocs[2];
+				
 				hMCounts2=buildCountMaps(hMap2);
+				
 			
 			for(Double keys: hMap2.keySet()){
 				vals=cUtils.cantorPairingInverseMap(keys);
 				CMatrix_vTimeslv.set((int)vals[0], (_vocab_size+1) +(int)vals[1],  hMap2.get(keys));
 				CTMatrix_vTimeslv.set((_vocab_size+1)+(int)vals[1],(int)vals[0], hMap2.get(keys));
 			}
+			
+			for(Double keys: hMap3.keySet()){
+				
+				vals=cUtils.cantorPairingInverseMap(keys);
+				L1L2_OR_R1R2_L1R1Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap3.get(keys));
+				L1L2_OR_R1R2_L1R1Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap3.get(keys));
+
+				}
+			
 			
 			for(int i=0; i<_vocab_size+1;i++){
 				
@@ -162,6 +216,7 @@ public void computeLRContextMatricesSingleVocab(){
 		if(_opt.numGrams==3 && _opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
 			hMap2=(HashMap<Double, Integer>)_allDocs[1];
+			hMap3=(HashMap<Double, Integer>)_allDocs[2];
 			hMCounts2=buildCountMaps(hMap2);
 		
 		for(Double keys: hMap1.keySet()){
@@ -175,6 +230,14 @@ public void computeLRContextMatricesSingleVocab(){
 			WRMatrix3gram.set((int)vals[0],(int)vals[1],  hMap2.get(keys));
 			WRTMatrix3gram.set((int)vals[1],(int)vals[0], hMap2.get(keys));
 		}
+		
+		for(Double keys: hMap3.keySet()){
+			
+			vals=cUtils.cantorPairingInverseMap(keys);
+			L1L2_OR_R1R2_L1R1Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap3.get(keys));
+			L1L2_OR_R1R2_L1R1Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap3.get(keys));
+
+			}
 		
 		for(int i=0; i<_vocab_size+1;i++){
 			
@@ -204,8 +267,21 @@ public void computeLRContextMatricesSingleVocab(){
 				hMCounts3=buildCountMaps(hMap3);
 				
 				hMap4=(HashMap<Double, Integer>)_allDocs[3];
-				hMCounts4=buildCountMaps(hMap4);	
-		
+				hMCounts4=buildCountMaps(hMap4);
+				
+				hMap5=(HashMap<Double, Integer>)_allDocs[4];
+				
+				hMap6=(HashMap<Double, Integer>)_allDocs[5];
+				
+				hMap7=(HashMap<Double, Integer>)_allDocs[6];
+				
+				hMap8=(HashMap<Double, Integer>)_allDocs[7];
+				
+				hMap9=(HashMap<Double, Integer>)_allDocs[8];
+				
+				hMap10=(HashMap<Double, Integer>)_allDocs[9];
+				
+				
 			for(Double keys: hMap2.keySet()){
 				vals=cUtils.cantorPairingInverseMap(keys);
 				CMatrix_vTimeslv.set((int)vals[0], (_vocab_size+1) +(int)vals[1],  hMap2.get(keys));
@@ -223,6 +299,43 @@ public void computeLRContextMatricesSingleVocab(){
 				CMatrix_vTimeslv.set((int)vals[0], (3*(_vocab_size+1)) +(int)vals[1],  hMap4.get(keys));
 				CTMatrix_vTimeslv.set((3*(_vocab_size+1))+(int)vals[1],(int)vals[0], hMap4.get(keys));
 			}
+			
+			
+			///
+			for(Double keys: hMap5.keySet()){
+				vals=cUtils.cantorPairingInverseMap(keys);
+				L1L2_OR_R1R2_L1R1Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap5.get(keys));
+				L1L2_OR_R1R2_L1R1Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap5.get(keys));
+			}
+				
+			for(Double keys: hMap6.keySet()){
+				vals=cUtils.cantorPairingInverseMap(keys);
+				L1L3_OR_R1R3_L1R2Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap6.get(keys));
+				L1L3_OR_R1R3_L1R2Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap6.get(keys));
+			}
+			for(Double keys: hMap7.keySet()){
+				vals=cUtils.cantorPairingInverseMap(keys);
+				L1L4_OR_R1R4_L2R1Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap7.get(keys));
+				L1L4_OR_R1R4_L2R1Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap7.get(keys));
+			}
+			for(Double keys: hMap8.keySet()){
+				vals=cUtils.cantorPairingInverseMap(keys);
+				L2L3_OR_R2R3_L2R2Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap8.get(keys));
+				L2L3_OR_R2R3_L2R2Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap8.get(keys));
+			}
+			for(Double keys: hMap9.keySet()){
+				vals=cUtils.cantorPairingInverseMap(keys);
+				L2L4_OR_R2R4_L1L2Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap9.get(keys));
+				L2L4_OR_R2R4_L1L2Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap9.get(keys));
+			}
+			for(Double keys: hMap10.keySet()){
+				vals=cUtils.cantorPairingInverseMap(keys);
+				L3L4_OR_R3R4_R1R2Matrix_vTimesv.set((int)vals[0], (int)vals[1], hMap10.get(keys));
+				L3L4_OR_R3R4_R1R2Matrix_vTimesvT.set((int)vals[1], (int)vals[0], hMap10.get(keys));
+			}
+			
+			
+			
 			
 			for(int i=0; i<_vocab_size+1;i++){
 				
@@ -359,10 +472,68 @@ HashMap<Double,Double> buildCountMaps(HashMap<Double,Integer> hMap){
 	return hMCounts;
 }
 
+
+
+
+
+///////////////
+public SparseDoubleMatrix2D getL1L3_OR_R1R3_L1R2Matrix_vTimesv(){
+	return L1L3_OR_R1R3_L1R2Matrix_vTimesv;
+}
+
+public SparseDoubleMatrix2D getL1L3_OR_R1R3_L1R2Matrix_vTimesvT(){
+return L1L3_OR_R1R3_L1R2Matrix_vTimesvT;
+}
+
+public SparseDoubleMatrix2D getL1L4_OR_R1R4_L2R1Matrix_vTimesv(){
+	return L1L4_OR_R1R4_L2R1Matrix_vTimesv;
+}
+
+public SparseDoubleMatrix2D getL1L4_OR_R1R4_L2R1Matrix_vTimesvT(){
+return L1L4_OR_R1R4_L2R1Matrix_vTimesvT;
+}
+
+public SparseDoubleMatrix2D getL2L3_OR_R2R3_L2R2Matrix_vTimesv(){
+	return L2L3_OR_R2R3_L2R2Matrix_vTimesv;
+}
+
+public SparseDoubleMatrix2D getL2L3_OR_R2R3_L2R2Matrix_vTimesvT(){
+return L2L3_OR_R2R3_L2R2Matrix_vTimesvT;
+}
+
+public SparseDoubleMatrix2D getL2L4_OR_R2R4_L1L2Matrix_vTimesv(){
+	return L2L4_OR_R2R4_L1L2Matrix_vTimesv;
+}
+
+public SparseDoubleMatrix2D getL2L4_OR_R2R4_L1L2Matrix_vTimesvT(){
+return L2L4_OR_R2R4_L1L2Matrix_vTimesvT;
+}
+
+public SparseDoubleMatrix2D getL3L4_OR_R3R4_R1R2Matrix_vTimesv(){
+	return L3L4_OR_R3R4_R1R2Matrix_vTimesv;
+}
+
+public SparseDoubleMatrix2D getL3L4_OR_R3R4_R1R2Matrix_vTimesvT(){
+return L3L4_OR_R3R4_R1R2Matrix_vTimesvT;
+}
+
+
+
+//////////////
+
+	public SparseDoubleMatrix2D getL1L2_OR_R1R2_L1R1Matrix_vTimesv(){
+			return L1L2_OR_R1R2_L1R1Matrix_vTimesv;
+	}
+	
+	public SparseDoubleMatrix2D getL1L2_OR_R1R2_L1R1Matrix_vTimesvT(){
+		return L1L2_OR_R1R2_L1R1Matrix_vTimesvT;
+}
+
 	
 	public SparseDoubleMatrix2D getContextMatrix(){
-			return CMatrix_vTimeslv;
-	}
+		return CMatrix_vTimeslv;
+}
+	
 	
 	public SparseDoubleMatrix2D getContextMatrixT(){
 		return CTMatrix_vTimeslv;
@@ -469,6 +640,45 @@ HashMap<Double,Double> buildCountMaps(HashMap<Double,Integer> hMap){
 			}
 		}
 		return finalProjection;
+	}
+
+	public SparseDoubleMatrix2D  concatenateMultiRow(SparseDoubleMatrix2D xtx,
+			SparseDoubleMatrix2D l1l2_OR_R1R2_L1R1,
+			SparseDoubleMatrix2D l1l3_OR_R1R3_L1R2,
+			SparseDoubleMatrix2D l1l4_OR_R1R4_L2R1) {
+		
+		int ncols=xtx.columns()+l1l2_OR_R1R2_L1R1.columns()+l1l3_OR_R1R3_L1R2.columns()+l1l4_OR_R1R4_L2R1.columns();
+SparseDoubleMatrix2D finalProjection=new SparseDoubleMatrix2D(xtx.rows(),ncols);
+		
+		for (int i=0;i<xtx.rows();i++){
+			for(int j=0; j<xtx.columns();j++){
+				finalProjection.set(i, j, xtx.get(i, j));
+				finalProjection.set(i, j+xtx.columns(), l1l2_OR_R1R2_L1R1.get(i, j));
+				finalProjection.set(i, j+xtx.columns()+l1l2_OR_R1R2_L1R1.columns(), l1l3_OR_R1R3_L1R2.get(i, j));
+				finalProjection.set(i, j+xtx.columns()+l1l2_OR_R1R2_L1R1.columns()+l1l3_OR_R1R3_L1R2.columns(), l1l4_OR_R1R4_L2R1.get(i, j));
+			}
+		}
+		return finalProjection;	
+	}
+	
+	public SparseDoubleMatrix2D  concatenateMultiCol(SparseDoubleMatrix2D xtx,
+			SparseDoubleMatrix2D l1l2_OR_R1R2_L1R1,
+			SparseDoubleMatrix2D l1l3_OR_R1R3_L1R2,
+			SparseDoubleMatrix2D l1l4_OR_R1R4_L2R1) {
+		
+		int nrows=xtx.rows()+l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows()+l1l4_OR_R1R4_L2R1.rows();
+SparseDoubleMatrix2D finalProjection=new SparseDoubleMatrix2D(nrows, xtx.columns());
+		
+		for (int i=0;i<xtx.rows();i++){
+			for(int j=0; j<xtx.columns();j++){
+				finalProjection.set(i, j, xtx.get(i, j));
+				finalProjection.set(i+xtx.rows(),j, l1l2_OR_R1R2_L1R1.get(i, j));
+				finalProjection.set(i+xtx.rows()+l1l2_OR_R1R2_L1R1.rows(), j, l1l3_OR_R1R3_L1R2.get(i, j));
+				finalProjection.set(i+xtx.rows()+l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(), j, l1l4_OR_R1R4_L2R1.get(i, j));
+			}
+		}
+		return finalProjection;
+		
 	}
 	
 	/*

@@ -199,7 +199,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 		
 		in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
 		HashMap<Double,Integer> word_contextCounts,word_contextCounts3WR1,word_contextCounts3WR2,
-		word_contextCounts3WL1,word_contextCounts3WL2,word_contextCounts3WL,word_contextCounts3WR ;
+		word_contextCounts3WL1,word_contextCounts3WL2,word_contextCounts3WL,word_contextCounts3WR,word_contextCounts3R1R2_OR_LR_OR_L1L2;
 		Object[] wordHashMaps;
 		
 			word_contextCounts =new HashMap<Double,Integer>();
@@ -207,6 +207,8 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 			word_contextCounts3WR1 =new HashMap<Double,Integer>();
 			word_contextCounts3WR2 =new HashMap<Double,Integer>();
 	
+			word_contextCounts3R1R2_OR_LR_OR_L1L2 =new HashMap<Double,Integer>();
+			
 			word_contextCounts3WL1 =new HashMap<Double,Integer>();
 			word_contextCounts3WL2 =new HashMap<Double,Integer>();
 		
@@ -223,16 +225,23 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 			HashMap<Double, Integer> word_contextCounts5WL2 = new HashMap<Double,Integer>();
 			HashMap<Double, Integer> word_contextCounts5WL3 = new HashMap<Double,Integer>();
 			HashMap<Double, Integer> word_contextCounts5WL4 = new HashMap<Double,Integer>();
-		
+			
+			HashMap<Double, Integer> word_contextCounts5R1R2_OR_L1L2_OR_L1R1 = new HashMap<Double,Integer>();
+			HashMap<Double, Integer> word_contextCounts5R1R3_OR_L1L3_OR_L1R2 = new HashMap<Double,Integer>();
+			HashMap<Double, Integer> word_contextCounts5R1R4_OR_L1L4_OR_L2R1 = new HashMap<Double,Integer>();
+			HashMap<Double, Integer> word_contextCounts5R2R3_OR_L2L3_OR_L2R2 = new HashMap<Double,Integer>();
+			HashMap<Double, Integer> word_contextCounts5R2R4_OR_L2L4_OR_L1L2 = new HashMap<Double,Integer>();
+			HashMap<Double, Integer> word_contextCounts5R3R4_OR_L3L4_OR_R1R2 = new HashMap<Double,Integer>();
+				
 			
 		
 		CenterScaleNormalizeUtils utils=new CenterScaleNormalizeUtils(_opt);
 		
 		 wordHashMaps=new Object[1];
 		    if(_opt.numGrams==3)
-		    	wordHashMaps=new Object[2];
+		    	wordHashMaps=new Object[3];
 		    if(_opt.numGrams==5)
-		    	wordHashMaps=new Object[4];
+		    	wordHashMaps=new Object[10];
 		
 		String line=in.readLine();
 		while (line != null ) {
@@ -276,6 +285,8 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						}
 				}
 				
+				
+				
 				/////
 				if(_opt.numGrams==3 && (_opt.typeofDecomp.equals("2viewWvsL") || _opt.typeofDecomp.equals("WvsL") )){
 					while (itArrList.hasNext()){
@@ -296,13 +307,16 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						else
 							l1Int=corpusIntMapped.get("<OOV>");
 						numTokens++;
-						int l1ExistingCounts=0,l2ExistingCounts=0;
+						int l1ExistingCounts=0,l2ExistingCounts=0,l1l2ExistingCounts=0;
 						if(word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,l1Int))!=null)
 							l1ExistingCounts=word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,l1Int));
 						if(word_contextCounts3WR2.get(utils.cantorPairingMap(wInt,l2Int))!=null)
 							l2ExistingCounts=word_contextCounts3WR2.get(utils.cantorPairingMap(wInt,l2Int));
+						if(word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(l1Int,l2Int))!=null)
+							l1l2ExistingCounts=word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(l1Int,l2Int));
 						
 						int count=Integer.parseInt(itArrList.next());
+						word_contextCounts3R1R2_OR_LR_OR_L1L2.put(utils.cantorPairingMap(l1Int,l2Int), l1l2ExistingCounts +count);
 						word_contextCounts3WL1.put(utils.cantorPairingMap(wInt,l1Int), l1ExistingCounts +count);
 						word_contextCounts3WL2.put(utils.cantorPairingMap(wInt,l2Int), l2ExistingCounts + count);
 						}
@@ -327,13 +341,16 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						else
 							r1Int=corpusIntMapped.get("<OOV>");
 						numTokens++;
-						int r1ExistingCounts=0,r2ExistingCounts=0;
+						int r1ExistingCounts=0,r2ExistingCounts=0,r1r2ExistingCounts=0;
 						if(word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,r1Int))!=null)
 							r1ExistingCounts=word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,r1Int));
 						if(word_contextCounts3WR2.get(utils.cantorPairingMap(wInt,r2Int))!=null)
 							r2ExistingCounts=word_contextCounts3WR2.get(utils.cantorPairingMap(wInt,r2Int));
+						if(word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(r1Int,r2Int))!=null)
+							r1r2ExistingCounts=word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(r1Int,r2Int));
 						
 						int count=Integer.parseInt(itArrList.next());
+						word_contextCounts3R1R2_OR_LR_OR_L1L2.put(utils.cantorPairingMap(r1Int,r2Int), r1r2ExistingCounts +count);
 						word_contextCounts3WR1.put(utils.cantorPairingMap(wInt,r1Int), r1ExistingCounts +count);
 						word_contextCounts3WR2.put(utils.cantorPairingMap(wInt,r2Int), r2ExistingCounts + count);
 						}
@@ -359,7 +376,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							rInt=corpusIntMapped.get("<OOV>");
 						numTokens++;
 						
-						int wrExistingCounts=0,wlExistingCounts=0;
+						int wrExistingCounts=0,wlExistingCounts=0,lrExistingCounts=0;
 						
 						if(word_contextCounts3WR.get(utils.cantorPairingMap(wInt,rInt)) !=null)
 							wrExistingCounts=word_contextCounts3WR.get(utils.cantorPairingMap(wInt,rInt));
@@ -367,7 +384,12 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						if(word_contextCounts3WL.get(utils.cantorPairingMap(wInt,lInt))!=null)
 							wlExistingCounts=word_contextCounts3WL.get(utils.cantorPairingMap(wInt,lInt));
 						
+						if(word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(lInt,rInt))!=null)
+							lrExistingCounts=word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(lInt,rInt));
+						
+						
 						int count=Integer.parseInt(itArrList.next());
+						word_contextCounts3R1R2_OR_LR_OR_L1L2.put(utils.cantorPairingMap(lInt,rInt), lrExistingCounts +count);
 						word_contextCounts3WL.put(utils.cantorPairingMap(wInt,lInt), wlExistingCounts +count);
 						word_contextCounts3WR.put(utils.cantorPairingMap(wInt,rInt), wrExistingCounts + count);
 						}
@@ -407,7 +429,9 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						
 						numTokens++;
 						
-						int l1ExistingCounts=0,l2ExistingCounts=0,l3ExistingCounts=0,l4ExistingCounts=0;
+						int l1ExistingCounts=0,l2ExistingCounts=0,l3ExistingCounts=0,l4ExistingCounts=0,
+								l1l2ExistingCounts=0,l1l3ExistingCounts=0,l1l4ExistingCounts=0,l2l3ExistingCounts=0,
+										l2l4ExistingCounts=0,l3l4ExistingCounts=0;
 						
 						if(word_contextCounts5WL1.get(utils.cantorPairingMap(wInt,l1Int)) !=null)
 							l1ExistingCounts=word_contextCounts5WL1.get(utils.cantorPairingMap(wInt,l1Int));
@@ -421,7 +445,35 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						if(word_contextCounts5WL4.get(utils.cantorPairingMap(wInt,l4Int)) !=null)
 							l4ExistingCounts=word_contextCounts5WL4.get(utils.cantorPairingMap(wInt,l4Int));
 						
+						
+						
+						if(word_contextCounts5R1R2_OR_L1L2_OR_L1R1.get(utils.cantorPairingMap(l1Int,l2Int)) !=null)
+							l1l2ExistingCounts=word_contextCounts5R1R2_OR_L1L2_OR_L1R1.get(utils.cantorPairingMap(l1Int,l2Int));
+						
+						if(word_contextCounts5R1R3_OR_L1L3_OR_L1R2.get(utils.cantorPairingMap(l1Int,l3Int)) !=null)
+							l1l3ExistingCounts=word_contextCounts5R1R3_OR_L1L3_OR_L1R2.get(utils.cantorPairingMap(l1Int,l3Int));
+						
+						if(word_contextCounts5R1R4_OR_L1L4_OR_L2R1.get(utils.cantorPairingMap(l1Int,l4Int)) !=null)
+							l1l4ExistingCounts=word_contextCounts5R1R4_OR_L1L4_OR_L2R1.get(utils.cantorPairingMap(l1Int,l4Int));
+						
+						if(word_contextCounts5R2R3_OR_L2L3_OR_L2R2.get(utils.cantorPairingMap(l2Int,l3Int)) !=null)
+							l2l3ExistingCounts=word_contextCounts5R2R3_OR_L2L3_OR_L2R2.get(utils.cantorPairingMap(l2Int,l3Int));
+						
+						if(word_contextCounts5R2R4_OR_L2L4_OR_L1L2.get(utils.cantorPairingMap(l2Int,l4Int)) !=null)
+							l2l4ExistingCounts=word_contextCounts5R2R4_OR_L2L4_OR_L1L2.get(utils.cantorPairingMap(l2Int,l4Int));
+						
+						if(word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(l3Int,l4Int)) !=null)
+							l3l4ExistingCounts=word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(l3Int,l4Int));
+						
+						
 						int count=Integer.parseInt(itArrList.next());
+						
+						word_contextCounts5R1R2_OR_L1L2_OR_L1R1.put(utils.cantorPairingMap(l1Int,l2Int), l1l2ExistingCounts +count);
+						word_contextCounts5R1R3_OR_L1L3_OR_L1R2.put(utils.cantorPairingMap(l1Int,l3Int), l1l3ExistingCounts +count);
+						word_contextCounts5R1R4_OR_L1L4_OR_L2R1.put(utils.cantorPairingMap(l1Int,l4Int), l1l4ExistingCounts +count);
+						word_contextCounts5R2R3_OR_L2L3_OR_L2R2.put(utils.cantorPairingMap(l2Int,l3Int), l2l3ExistingCounts +count);
+						word_contextCounts5R2R4_OR_L2L4_OR_L1L2.put(utils.cantorPairingMap(l2Int,l4Int), l2l4ExistingCounts +count);
+						word_contextCounts5R3R4_OR_L3L4_OR_R1R2.put(utils.cantorPairingMap(l3Int,l4Int), l3l4ExistingCounts +count);
 						
 						word_contextCounts5WL1.put(utils.cantorPairingMap(wInt,l1Int), l1ExistingCounts +count);
 						word_contextCounts5WL2.put(utils.cantorPairingMap(wInt,l2Int), l2ExistingCounts +count);
@@ -463,7 +515,9 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							r1Int=corpusIntMapped.get("<OOV>");
 						
 						numTokens++;
-						int r1ExistingCounts=0,r2ExistingCounts=0,r3ExistingCounts=0,r4ExistingCounts=0;
+						int r1ExistingCounts=0,r2ExistingCounts=0,r3ExistingCounts=0,r4ExistingCounts=0,
+								r1r2ExistingCounts=0,r1r3ExistingCounts=0,r1r4ExistingCounts=0,r2r3ExistingCounts=0,
+										r2r4ExistingCounts=0,r3r4ExistingCounts=0;
 						
 						if(word_contextCounts5WR1.get(utils.cantorPairingMap(wInt,r1Int)) !=null)
 							r1ExistingCounts=word_contextCounts5WR1.get(utils.cantorPairingMap(wInt,r1Int));
@@ -477,7 +531,33 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						if(word_contextCounts5WR4.get(utils.cantorPairingMap(wInt,r4Int)) !=null)
 							r4ExistingCounts=word_contextCounts5WR4.get(utils.cantorPairingMap(wInt,r4Int));
 						
+						if(word_contextCounts5R1R2_OR_L1L2_OR_L1R1.get(utils.cantorPairingMap(r1Int,r2Int)) !=null)
+							r1r2ExistingCounts=word_contextCounts5R1R2_OR_L1L2_OR_L1R1.get(utils.cantorPairingMap(r1Int,r2Int));
+						
+						if(word_contextCounts5R1R3_OR_L1L3_OR_L1R2.get(utils.cantorPairingMap(r1Int,r3Int)) !=null)
+							r1r3ExistingCounts=word_contextCounts5R1R3_OR_L1L3_OR_L1R2.get(utils.cantorPairingMap(r1Int,r3Int));
+						
+						if(word_contextCounts5R1R4_OR_L1L4_OR_L2R1.get(utils.cantorPairingMap(r1Int,r4Int)) !=null)
+							r1r4ExistingCounts=word_contextCounts5R1R4_OR_L1L4_OR_L2R1.get(utils.cantorPairingMap(r1Int,r4Int));
+						
+						if(word_contextCounts5R2R3_OR_L2L3_OR_L2R2.get(utils.cantorPairingMap(r2Int,r3Int)) !=null)
+							r2r3ExistingCounts=word_contextCounts5R2R3_OR_L2L3_OR_L2R2.get(utils.cantorPairingMap(r2Int,r3Int));
+						
+						if(word_contextCounts5R2R4_OR_L2L4_OR_L1L2.get(utils.cantorPairingMap(r2Int,r4Int)) !=null)
+							r2r4ExistingCounts=word_contextCounts5R2R4_OR_L2L4_OR_L1L2.get(utils.cantorPairingMap(r2Int,r4Int));
+						
+						if(word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(r3Int,r4Int)) !=null)
+							r3r4ExistingCounts=word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(r3Int,r4Int));
+						
+						
 						int count=Integer.parseInt(itArrList.next());
+						
+						word_contextCounts5R1R2_OR_L1L2_OR_L1R1.put(utils.cantorPairingMap(r1Int,r2Int), r1r2ExistingCounts +count);
+						word_contextCounts5R1R3_OR_L1L3_OR_L1R2.put(utils.cantorPairingMap(r1Int,r3Int), r1r3ExistingCounts +count);
+						word_contextCounts5R1R4_OR_L1L4_OR_L2R1.put(utils.cantorPairingMap(r1Int,r4Int), r1r4ExistingCounts +count);
+						word_contextCounts5R2R3_OR_L2L3_OR_L2R2.put(utils.cantorPairingMap(r2Int,r3Int), r2r3ExistingCounts +count);
+						word_contextCounts5R2R4_OR_L2L4_OR_L1L2.put(utils.cantorPairingMap(r2Int,r4Int), r2r4ExistingCounts +count);
+						word_contextCounts5R3R4_OR_L3L4_OR_R1R2.put(utils.cantorPairingMap(r3Int,r4Int), r3r4ExistingCounts +count);
 						
 						word_contextCounts5WR1.put(utils.cantorPairingMap(wInt,r1Int), r1ExistingCounts +count);
 						word_contextCounts5WR2.put(utils.cantorPairingMap(wInt,r2Int), r2ExistingCounts +count);
@@ -520,7 +600,9 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							l1Int=corpusIntMapped.get("<OOV>");
 						
 						numTokens++;
-						int l1ExistingCounts=0,l2ExistingCounts=0,r1ExistingCounts=0,r2ExistingCounts=0;
+						int l1ExistingCounts=0,l2ExistingCounts=0,r1ExistingCounts=0,r2ExistingCounts=0,
+								l1r1ExistingCounts=0,l1r2ExistingCounts=0,l2r1ExistingCounts=0,l2r2ExistingCounts=0,
+								l1l2ExistingCounts=0,r1r2ExistingCounts=0;
 						
 						if(word_contextCounts5WL1.get(utils.cantorPairingMap(wInt,l1Int)) !=null)
 							l1ExistingCounts=word_contextCounts5WL1.get(utils.cantorPairingMap(wInt,l1Int));
@@ -534,7 +616,34 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						if(word_contextCounts5WR2.get(utils.cantorPairingMap(wInt,r2Int)) !=null)
 							r2ExistingCounts=word_contextCounts5WR2.get(utils.cantorPairingMap(wInt,r2Int));
 						
+						if(word_contextCounts5R1R2_OR_L1L2_OR_L1R1.get(utils.cantorPairingMap(l1Int,r1Int)) !=null)
+							l1r1ExistingCounts=word_contextCounts5R1R2_OR_L1L2_OR_L1R1.get(utils.cantorPairingMap(l1Int,r1Int));
+						
+						if(word_contextCounts5R1R3_OR_L1L3_OR_L1R2.get(utils.cantorPairingMap(l1Int,r2Int)) !=null)
+							l1r2ExistingCounts=word_contextCounts5R1R3_OR_L1L3_OR_L1R2.get(utils.cantorPairingMap(l1Int,r2Int));
+						
+						if(word_contextCounts5R1R4_OR_L1L4_OR_L2R1.get(utils.cantorPairingMap(l2Int,r1Int)) !=null)
+							l2r1ExistingCounts=word_contextCounts5R1R4_OR_L1L4_OR_L2R1.get(utils.cantorPairingMap(l2Int,r1Int));
+						
+						if(word_contextCounts5R2R3_OR_L2L3_OR_L2R2.get(utils.cantorPairingMap(l2Int,r2Int)) !=null)
+							l2r2ExistingCounts=word_contextCounts5R2R3_OR_L2L3_OR_L2R2.get(utils.cantorPairingMap(l2Int,r2Int));
+						
+						if(word_contextCounts5R2R4_OR_L2L4_OR_L1L2.get(utils.cantorPairingMap(l1Int,l2Int)) !=null)
+							l1l2ExistingCounts=word_contextCounts5R2R4_OR_L2L4_OR_L1L2.get(utils.cantorPairingMap(l1Int,l2Int));
+						
+						if(word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(r1Int,r2Int)) !=null)
+							r1r2ExistingCounts=word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(r1Int,r2Int));
+						
+						
 						int count=Integer.parseInt(itArrList.next());
+						
+						word_contextCounts5R1R2_OR_L1L2_OR_L1R1.put(utils.cantorPairingMap(l1Int,r1Int), l1r1ExistingCounts +count);
+						word_contextCounts5R1R3_OR_L1L3_OR_L1R2.put(utils.cantorPairingMap(l1Int,r2Int), l1r2ExistingCounts +count);
+						word_contextCounts5R1R4_OR_L1L4_OR_L2R1.put(utils.cantorPairingMap(l2Int,r1Int), l2r1ExistingCounts +count);
+						word_contextCounts5R2R3_OR_L2L3_OR_L2R2.put(utils.cantorPairingMap(l2Int,r2Int), l2r2ExistingCounts +count);
+						word_contextCounts5R2R4_OR_L2L4_OR_L1L2.put(utils.cantorPairingMap(l1Int,l2Int), l1l2ExistingCounts +count);
+						word_contextCounts5R3R4_OR_L3L4_OR_R1R2.put(utils.cantorPairingMap(r1Int,r2Int), r1r2ExistingCounts +count);
+						
 						
 						word_contextCounts5WL1.put(utils.cantorPairingMap(wInt,l1Int), l1ExistingCounts +count);
 						word_contextCounts5WL2.put(utils.cantorPairingMap(wInt,l2Int), l2ExistingCounts +count);
@@ -551,16 +660,19 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 		if(_opt.numGrams==3 && (_opt.typeofDecomp.equals("2viewWvsL") || _opt.typeofDecomp.equals("WvsL")) ){    
 			wordHashMaps[0] =(Object) word_contextCounts3WL1;
 			wordHashMaps[1] =(Object) word_contextCounts3WL2;
+			wordHashMaps[2] =(Object) word_contextCounts3R1R2_OR_LR_OR_L1L2;
 		}
 		
 		if(_opt.numGrams==3 &&  (_opt.typeofDecomp.equals("2viewWvsR") || _opt.typeofDecomp.equals("WvsR")) ){   
 			wordHashMaps[0] =(Object) word_contextCounts3WR1; 
 			wordHashMaps[1] =(Object) word_contextCounts3WR2; 
+			wordHashMaps[2] =(Object) word_contextCounts3R1R2_OR_LR_OR_L1L2;
 		}
 		
 		if(_opt.numGrams==3 && (_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR") || _opt.typeofDecomp.equals("TwoStepLRvsW")) ){    
 			wordHashMaps[0] =(Object) word_contextCounts3WL; 
 			wordHashMaps[1] =(Object) word_contextCounts3WR; 
+			wordHashMaps[2] =(Object) word_contextCounts3R1R2_OR_LR_OR_L1L2;
 		}
 		////////////////
 		
@@ -569,6 +681,14 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 			wordHashMaps[1] =(Object) word_contextCounts5WL2;
 			wordHashMaps[2] =(Object) word_contextCounts5WL3;
 			wordHashMaps[3] =(Object) word_contextCounts5WL4;
+			
+			
+			wordHashMaps[4] =(Object) word_contextCounts5R1R2_OR_L1L2_OR_L1R1;
+			wordHashMaps[5] =(Object) word_contextCounts5R1R3_OR_L1L3_OR_L1R2;
+			wordHashMaps[6] =(Object) word_contextCounts5R1R4_OR_L1L4_OR_L2R1;
+			wordHashMaps[7] =(Object) word_contextCounts5R2R3_OR_L2L3_OR_L2R2;
+			wordHashMaps[8] =(Object) word_contextCounts5R2R4_OR_L2L4_OR_L1L2;
+			wordHashMaps[9] =(Object) word_contextCounts5R3R4_OR_L3L4_OR_R1R2;
 		}
 		
 		if(_opt.numGrams==5 && (_opt.typeofDecomp.equals("2viewWvsR") || _opt.typeofDecomp.equals("WvsR")) ){   
@@ -576,6 +696,14 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 			wordHashMaps[1] =(Object) word_contextCounts5WR2;
 			wordHashMaps[2] =(Object) word_contextCounts5WR3;
 			wordHashMaps[3] =(Object) word_contextCounts5WR4;
+			
+			wordHashMaps[4] =(Object) word_contextCounts5R1R2_OR_L1L2_OR_L1R1;
+			wordHashMaps[5] =(Object) word_contextCounts5R1R3_OR_L1L3_OR_L1R2;
+			wordHashMaps[6] =(Object) word_contextCounts5R1R4_OR_L1L4_OR_L2R1;
+			wordHashMaps[7] =(Object) word_contextCounts5R2R3_OR_L2L3_OR_L2R2;
+			wordHashMaps[8] =(Object) word_contextCounts5R2R4_OR_L2L4_OR_L1L2;
+			wordHashMaps[9] =(Object) word_contextCounts5R3R4_OR_L3L4_OR_R1R2;
+
 		}
 		
 		if(_opt.numGrams==5 && (_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR") || _opt.typeofDecomp.equals("TwoStepLRvsW")) ){    
@@ -583,6 +711,14 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 			wordHashMaps[1] =(Object) word_contextCounts5WL2;
 			wordHashMaps[2] =(Object) word_contextCounts5WR1;
 			wordHashMaps[3] =(Object) word_contextCounts5WR2;
+			
+			wordHashMaps[4] =(Object) word_contextCounts5R1R2_OR_L1L2_OR_L1R1;
+			wordHashMaps[5] =(Object) word_contextCounts5R1R3_OR_L1L3_OR_L1R2;
+			wordHashMaps[6] =(Object) word_contextCounts5R1R4_OR_L1L4_OR_L2R1;
+			wordHashMaps[7] =(Object) word_contextCounts5R2R3_OR_L2L3_OR_L2R2;
+			wordHashMaps[8] =(Object) word_contextCounts5R2R4_OR_L2L4_OR_L1L2;
+			wordHashMaps[9] =(Object) word_contextCounts5R3R4_OR_L3L4_OR_R1R2;
+
 		}
 		    
 		
