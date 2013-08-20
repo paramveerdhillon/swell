@@ -77,44 +77,66 @@ public class ContextPCARun implements Serializable {
 	private void computeCPCA(ContextPCARepresentation _cpcaR2) {
 		_cpcaR2.computeContextLRMatrices();
 		
-		SparseDoubleMatrix2D wtl =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
-		SparseDoubleMatrix2D wtlr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
-		SparseDoubleMatrix2D wtr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
-		
-		SparseDoubleMatrix2D wtl1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
-		SparseDoubleMatrix2D wtlr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
-		SparseDoubleMatrix2D wtr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
-		
-		SparseDoubleMatrix2D ltw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
-		SparseDoubleMatrix2D rtw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
-		
+		SparseDoubleMatrix2D wtl=null,wtl1=null,wtr=null,wtr1=null,rtw=null,wtlr=null,lrtw=null, wtlr1=null,ltw=null;
 		SparseDoubleMatrix2D wtw =new SparseDoubleMatrix2D(_opt.vocabSize+1,_opt.vocabSize+1);
-		SparseDoubleMatrix2D lrtw =new SparseDoubleMatrix2D(dim2,_opt.vocabSize+1);
+		
 		
 		SVDTemplates svdTC;
 		
 		
-		wtl1=_cpcaR.getWTLMatrix();
-		wtr1=_cpcaR.getWTRMatrix();
-		ltw=_cpcaR.getLTWMatrix();
-		rtw=_cpcaR.getRTWMatrix();
 		wtw=_cpcaR.getWTWMatrix();
-		wtlr1=_cpcaR.getWTLRMatrix();
-		lrtw=_cpcaR.getLRTWMatrix();
 		
-		
-		if(_opt.normalizePCA){
-			wtw.zMult(wtl1, wtl);
-			wtw.zMult(wtr1, wtr);
-			wtw.zMult(wtlr1, wtlr);
+		if(_opt.typeofDecomp.equals("WvsL")){
+			 wtl =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+			 wtl1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+			 ltw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
+			
+			wtl1=_cpcaR.getWTLMatrix();
+			ltw=_cpcaR.getLTWMatrix();
+			if(_opt.normalizePCA){
+				wtw.zMult(wtl1, wtl);
+			}
+			else{
+				wtl=wtl1;
+			}
 		}
-		else{
-			wtl=wtl1;
-			wtr=wtr1;
-			wtlr=wtlr1;
+		
+		if(_opt.typeofDecomp.equals("WvsR")){
+			 wtr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+			 wtr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+			 rtw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
+			
+			
+			wtr1=_cpcaR.getWTRMatrix();
+			rtw=_cpcaR.getRTWMatrix();
+			if(_opt.normalizePCA){
+				wtw.zMult(wtr1, wtr);
+			}
+			else{
+				wtr=wtr1;
+			}
+			
 		}
 		
-			svdTC=new SVDTemplates(_opt,dim2);
+		if(_opt.typeofDecomp.equals("WvsLR")){
+			
+			 lrtw =new SparseDoubleMatrix2D(dim2,_opt.vocabSize+1);
+			 wtlr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
+			 wtlr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
+			
+			
+			wtlr1=_cpcaR.getWTLRMatrix();
+			lrtw=_cpcaR.getLRTWMatrix();
+			if(_opt.normalizePCA){
+				wtw.zMult(wtlr1, wtlr);
+			}
+			else{
+				wtlr=wtlr1;
+			}
+			
+		}
+		
+		svdTC=new SVDTemplates(_opt,dim2);
 
 			
 		System.out.println("+++Generated the Context Matrix+++");
