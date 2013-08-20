@@ -93,13 +93,36 @@ public class LSARepresentation extends SpectralRepresentation implements Seriali
 	public Matrix getContextOblEmbeddings(Matrix eigenFeatDict) {
 		Matrix WProjectionMatrix;
 		
-		WProjectionMatrix=generateWProjections(_allDocs,_rin.getSortedWordList(),eigenFeatDict);
+		WProjectionMatrix=generateWProjections(_rin.getSortedWordList(),eigenFeatDict);
 		
 		
 		return WProjectionMatrix;
 
 	}
 	
+	
+	protected Matrix generateWProjections(ArrayList<Integer> sortedWordList, Matrix eigenFeatDict) {
+		ArrayList<Integer> doc;
+
+			int count=0;
+			
+		double[][] wProjection=new double[(int)_num_tokens][_num_hidden];
+		int idxDoc=0;
+		
+		while (idxDoc<_allDocs.size()){
+			
+				doc=_allDocs.get(idxDoc++);
+				int idxTok=0;
+				while(idxTok<doc.size()){
+					for (int j=0;j<_num_hidden;j++){
+						wProjection[count][j]=eigenFeatDict.get(doc.get(idxTok), j);
+					}
+					count++;
+					idxTok++;
+				}
+			}
+		return new Matrix(wProjection);
+	}
 	
 	public void serializeLSARepresentation() {
 		File f= new File(_opt.serializeRep);

@@ -46,7 +46,8 @@ public class LSA implements Serializable {
 			docSize=new ArrayList<Integer>();
 			rin=new ReadDataFile(opt);
 			corpusInt= rin.convertAllDocsInt(0);
-			all_Docs=rin.readAllDocs(0);
+			rin.readAllDocs(0);
+			all_Docs=rin.getAllDocs();
 			docSize=rin.getDocSizes();
 			numTokens=rin.getNumTokens();
 			rin.serializeCorpusIntMapped();
@@ -77,7 +78,8 @@ public class LSA implements Serializable {
 			corpusIntOldMapping=deserializeCorpusIntMapped(opt);
 			rin=new ReadDataFile(opt);
 			rin.setCorpusIntMapped(corpusIntOldMapping);
-			all_Docs=rin.readAllDocs(1);
+			rin.readAllDocs(1);
+			all_Docs=rin.getAllDocs();
 			docSize=rin.getDocSizes();
 			numTokens=rin.getNumTokens();
 			//corpus=new Corpus(all_Docs,docSize,opt);

@@ -14,17 +14,21 @@ import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import Jama.Matrix;
 import edu.upenn.cis.SpectralLearning.Data.Corpus;
 import edu.upenn.cis.SpectralLearning.Data.Document;
+import edu.upenn.cis.SpectralLearning.SpectralRepresentations.ContextPCANGramsRepresentation;
 
 public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWriter {
 
 	private Object[] _matrices=new Object[1];
 	private BufferedWriter writer;
 	private ReadDataFile _rin;
-	HashMap<Double, Integer>  _allDocs;
+	//HashMap<Double, Integer>  _allDocs;
+	int docSize=0;
 	
-	public ContextPCANGramsWriter(Options opt, Object[] all_Docs,Object[] matrices,ReadDataFile rin) {
-		super(opt, all_Docs);
+	
+	public ContextPCANGramsWriter(Options opt, int _size,Object[] matrices,ReadDataFile rin) {
+		super(opt);
 		//_allDocs=all_Docs;
+		docSize=_size;
 		_matrices=matrices;
 		_rin=rin;
 		
@@ -57,7 +61,7 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 			int tok_idx=0;	
 			//HashMap<Double, Integer> all_Docs =_allDocs.get(idxDoc++);
 			
-			while(tok_idx<_allDocs.size()){
+			while(tok_idx<docSize){
 				writer.write(_rin.getTokForIntTrain(idx++));
 				writer.write(' ');
 				for (int j=0;j<_opt.hiddenStateSize;j++){

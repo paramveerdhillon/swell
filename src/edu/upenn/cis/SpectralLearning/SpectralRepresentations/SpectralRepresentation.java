@@ -47,29 +47,7 @@ public abstract class SpectralRepresentation implements Serializable{
 		eigenFeatDictMatrix=mathUtils.center_and_scale(eigenFeatDictMatrix);
 	}
 	
-	protected Matrix generateWProjections(ArrayList<ArrayList<Integer>> _allDocs,
-			ArrayList<Integer> sortedWordList, Matrix eigenFeatDict) {
-		ArrayList<Integer> doc;
-
-			int count=0;
-			
-		double[][] wProjection=new double[(int)_num_tokens][_num_hidden];
-		int idxDoc=0;
-		
-		while (idxDoc<_allDocs.size()){
-			
-				doc=_allDocs.get(idxDoc++);
-				int idxTok=0;
-				while(idxTok<doc.size()){
-					for (int j=0;j<_num_hidden;j++){
-						wProjection[count][j]=eigenFeatDict.get(doc.get(idxTok), j);
-					}
-					count++;
-					idxTok++;
-				}
-			}
-		return new Matrix(wProjection);
-	}
+	
 	
 	
 	

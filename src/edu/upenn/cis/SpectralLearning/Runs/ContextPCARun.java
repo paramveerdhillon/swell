@@ -75,40 +75,32 @@ public class ContextPCARun implements Serializable {
 
 
 	private void computeCPCA(ContextPCARepresentation _cpcaR2) {
-		_cpcaR2.computeTrainLRMatrices();
-		SparseDoubleMatrix2D W=_cpcaR2.getWnMatrix();
-		SparseDoubleMatrix2D WT=_cpcaR2.getWnTMatrix();
-		SparseDoubleMatrix2D L=_cpcaR2.getLnMatrix();
-		SparseDoubleMatrix2D LT=_cpcaR2.getLnTMatrix();
-		SparseDoubleMatrix2D R=_cpcaR2.getRnMatrix();
-		SparseDoubleMatrix2D RT=_cpcaR2.getRnTMatrix();
+		_cpcaR2.computeContextLRMatrices();
 		
-		SparseDoubleMatrix2D wtl =new SparseDoubleMatrix2D(WT.rows(),L.columns());
-		SparseDoubleMatrix2D wtlr =new SparseDoubleMatrix2D(WT.rows(),(L.columns()+R.columns()));
-		SparseDoubleMatrix2D wtr =new SparseDoubleMatrix2D(WT.rows(),R.columns());
+		SparseDoubleMatrix2D wtl =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+		SparseDoubleMatrix2D wtlr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
+		SparseDoubleMatrix2D wtr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
 		
-		SparseDoubleMatrix2D wtl1 =new SparseDoubleMatrix2D(WT.rows(),L.columns());
-		SparseDoubleMatrix2D wtlr1 =new SparseDoubleMatrix2D(WT.rows(),(L.columns()+R.columns()));
-		SparseDoubleMatrix2D wtr1 =new SparseDoubleMatrix2D(WT.rows(),R.columns());
+		SparseDoubleMatrix2D wtl1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+		SparseDoubleMatrix2D wtlr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
+		SparseDoubleMatrix2D wtr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
 		
-		SparseDoubleMatrix2D ltw =new SparseDoubleMatrix2D(LT.rows(),W.columns());
-		SparseDoubleMatrix2D rtw =new SparseDoubleMatrix2D(RT.rows(),W.columns());
+		SparseDoubleMatrix2D ltw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
+		SparseDoubleMatrix2D rtw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
 		
-		SparseDoubleMatrix2D wtw =new SparseDoubleMatrix2D(WT.rows(),W.columns());
-		SparseDoubleMatrix2D lrtw =new SparseDoubleMatrix2D((LT.rows()+RT.rows()),W.columns());
+		SparseDoubleMatrix2D wtw =new SparseDoubleMatrix2D(_opt.vocabSize+1,_opt.vocabSize+1);
+		SparseDoubleMatrix2D lrtw =new SparseDoubleMatrix2D(dim2,_opt.vocabSize+1);
 		
 		SVDTemplates svdTC;
 		
 		
-		WT.zMult(L, wtl1);
-		WT.zMult(R, wtr1);
-		LT.zMult(W, ltw);
-		RT.zMult(W, rtw);
-		
-		WT.zMult(W, wtw);
-		
-		WT.zMult(_cpcaR2.concatenateLR(L, R), wtlr1);
-		_cpcaR2.concatenateLRT(LT, RT).zMult(W, lrtw);
+		wtl1=_cpcaR.getWTLMatrix();
+		wtr1=_cpcaR.getWTRMatrix();
+		ltw=_cpcaR.getLTWMatrix();
+		rtw=_cpcaR.getRTWMatrix();
+		wtw=_cpcaR.getWTWMatrix();
+		wtlr1=_cpcaR.getWTLRMatrix();
+		lrtw=_cpcaR.getLRTWMatrix();
 		
 		
 		if(_opt.normalizePCA){

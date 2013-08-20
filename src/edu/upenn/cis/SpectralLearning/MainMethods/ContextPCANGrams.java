@@ -47,21 +47,23 @@ public class ContextPCANGrams implements Serializable {
 				rin=new ReadDataFile(opt);
 				if (opt.depbigram){
 					corpusInt= rin.convertAllDocsIntNGrams();
-					all_Docs=rin.readAllDocsNGrams();
+					rin.readAllDocsNGrams();
+					all_Docs=rin.getAllDocsNGrams();
 				}
 				else{
 					corpusInt= rin.convertAllDocsIntNGramsSingleVocab();
-					all_Docs=rin.readAllDocsNGramsSingleVocab();
+					rin.readAllDocsNGramsSingleVocab();
+					all_Docs=rin.getAllDocsNGrams();
 				}
 				rin.serializeCorpusIntMapped();
 				numTokens=rin.getNumTokens();
 				rin.serializeCorpusIntMappedContext();
 				contextPCARepNGrams= new ContextPCANGramsRepresentation(opt, numTokens,rin, all_Docs);
-				contextPCARunNGrams=new ContextPCANGramsRun(opt,contextPCARepNGrams,all_Docs);
+				contextPCARunNGrams=new ContextPCANGramsRun(opt,contextPCARepNGrams);
 				contextPCARunNGrams.serializeContextPCANGramsRun();
 				matrices=deserializeContextPCANGramsRun(opt);
 
-				woutNGrams=new ContextPCANGramsWriter(opt,all_Docs,matrices,rin);
+				woutNGrams=new ContextPCANGramsWriter(opt,all_Docs.length,matrices,rin);
 				woutNGrams.writeEigenDict();
 				woutNGrams.writeEigContextVectors();
 				

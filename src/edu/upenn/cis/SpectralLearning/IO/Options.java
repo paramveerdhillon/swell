@@ -45,9 +45,10 @@ public final class Options implements Serializable {
  public int numIters = 2;
  public int numGrams=2;
  public String outfile = "out.txt";
-public int totalContextSizeLplusR=1;
-public boolean normalizePCA=false;
-public boolean depbigram=false;
+ public int totalContextSizeLplusR=1;
+ public boolean normalizePCA=false;
+ public boolean depbigram=false;
+ public boolean diagOnlyInverse=false;
 //public String pcaAlgorithm=null;
 
  
@@ -84,9 +85,13 @@ public boolean depbigram=false;
 	    
 	    
 	    
-	    if (pair[0].equals("train")) {
-		train = true;
+	    if (pair[0].equals("diagOnlyInverse")) {
+	    	diagOnlyInverse = true;
 	    }
+	    
+	    if (pair[0].equals("train")) {
+			train = true;
+		    }
 	    
 	    if (pair[0].equals("no-random")) {
 			 randomBaseline= false;

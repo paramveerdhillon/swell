@@ -13,6 +13,7 @@ import Jama.Matrix;
 import edu.upenn.cis.SpectralLearning.Data.Corpus;
 import edu.upenn.cis.SpectralLearning.Data.Document;
 import edu.upenn.cis.SpectralLearning.MathUtils.CenterScaleNormalizeUtils;
+import edu.upenn.cis.SpectralLearning.SpectralRepresentations.CCARepresentation;
 import edu.umbc.cs.maple.utils.JamaUtils;
 
 
@@ -32,8 +33,8 @@ public class CCAWriter extends WriteDataFile implements EmbeddingWriter {
 		jutils=new JamaUtils();
 	}
 	
-	public CCAWriter(Options opt, ArrayList<ArrayList<Integer>> all_Docs, Object[] matrices, ReadDataFile rin, CenterScaleNormalizeUtils utils) {
-		super(opt, all_Docs);
+	public CCAWriter(Options opt,CCARepresentation ccaRep, Object[] matrices, ReadDataFile rin, CenterScaleNormalizeUtils utils) {
+		super(opt,ccaRep);
 		_rin=rin;
 		_matrices=matrices;
 		jutils=new JamaUtils();

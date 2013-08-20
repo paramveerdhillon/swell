@@ -45,7 +45,8 @@ public class ContextPCANGramsRepresentation extends SpectralRepresentation imple
 		_vocab_size=super._opt.vocabSize;
 		_rin=rin;
 		_contextSize=opt.numGrams-1;
-		_allDocs=all_Docs;		
+		_allDocs=all_Docs;
+	
 	}
 	
 	public void computeLRContextMatrices(){
@@ -54,10 +55,10 @@ public class ContextPCANGramsRepresentation extends SpectralRepresentation imple
 		CMatrix_vTimeslv=new SparseDoubleMatrix2D(_vocab_size+1,_opt.numLabels*(_vocab_size+1));
 		CTMatrix_vTimeslv=new SparseDoubleMatrix2D(_opt.numLabels*(_vocab_size+1),_vocab_size+1);
 		WMatrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		HashMap<Double, Integer> hMap=new HashMap<Double,Integer>();
+		HashMap<Double, Double> hMap=new HashMap<Double,Double>();
 		
 				int idx_doc=0;
-				hMap=(HashMap<Double, Integer>)_allDocs[0];
+				hMap=(HashMap<Double, Double>)_allDocs[0];
 				double[] vals=new double[2];
 				CenterScaleNormalizeUtils cUtils=new CenterScaleNormalizeUtils(_opt);
 				
@@ -88,68 +89,21 @@ public void computeLRContextMatricesSingleVocab(){
 		CMatrix_vTimeslv=new SparseDoubleMatrix2D(_vocab_size+1,_contextSize*(_vocab_size+1));
 		CTMatrix_vTimeslv=new SparseDoubleMatrix2D(_contextSize*(_vocab_size+1),_vocab_size+1);
 		
-		WL_OR_WRMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		WLT_OR_WRTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
-		
-		WLMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		WLTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
-
-		WRMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		WRTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
-
-
-		WLMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
-		WLTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
-
-		WRMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
-		WRTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
-
-
-		
-		WL_OR_WRMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
-		WLT_OR_WRTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
-		
 		WMatrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		//Used for 3 as well as 5 grams
-		L1L2_OR_R1R2_L1R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L1L2_OR_R1R2_L1R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		
-		L1L3_OR_R1R3_L1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L1L4_OR_R1R4_L2R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L2L3_OR_R2R3_L2R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L2L4_OR_R2R4_L1L2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L3L4_OR_R3R4_R1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		
-		L1L3_OR_R1R3_L1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L1L4_OR_R1R4_L2R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L2L3_OR_R2R3_L2R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L2L4_OR_R2R4_L1L2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		L3L4_OR_R3R4_R1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
-		
 		
 		HashMap<Double,Double> hMCounts1=new HashMap<Double,Double>();
-		HashMap<Double,Double> hMCounts2=new HashMap<Double,Double>();
-		HashMap<Double,Double> hMCounts3=new HashMap<Double,Double>();
-		HashMap<Double,Double> hMCounts4=new HashMap<Double,Double>();
+		HashMap<Double,Double> hMap1=new HashMap<Double,Double>();
+		HashMap<Double,Double> hMCounts2,hMCounts3,hMCounts4,hMap2,hMap3,hMap4, hMap5, hMap6, hMap7, hMap8, hMap9, hMap10;
 		
-		HashMap<Double, Integer> hMap1=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap2=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap3=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap4=new HashMap<Double,Integer>();
 		
-		HashMap<Double, Integer> hMap5=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap6=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap7=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap8=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap9=new HashMap<Double,Integer>();
-		HashMap<Double, Integer> hMap10=new HashMap<Double,Integer>();
 		
 		double[] vals=new double[2];
 		CenterScaleNormalizeUtils cUtils=new CenterScaleNormalizeUtils(_opt);
 				
-		hMap1=(HashMap<Double, Integer>)_allDocs[0];
+		hMap1=(HashMap<Double, Double>)_allDocs[0];
 		hMCounts1=buildCountMaps(hMap1);
 			
+		System.out.println("+++++Entering: Populate the context matrix+++++");
 				
 		for(Double keys: hMap1.keySet()){
 			vals=cUtils.cantorPairingInverseMap(keys);
@@ -159,7 +113,8 @@ public void computeLRContextMatricesSingleVocab(){
 		}
 		
 		
-
+		System.out.println("+++++Populated the context matrix+++++");
+		
 		for(int i=0; i<_vocab_size+1;i++){
 			
 			double existingCount1=WMatrix_vTimesv.get(i, i);
@@ -170,14 +125,28 @@ public void computeLRContextMatricesSingleVocab(){
 				WMatrix_vTimesv.set(i, i, existingCount1);//Do Nothing if all the hashmaps don't contain a given word.
 			}
 			}
+		System.out.println("+++++Populated the word matrix+++++");
+		
+		
 		
 		
 		
 		
 		if(_opt.numGrams==3 && !_opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
-				hMap2=(HashMap<Double, Integer>)_allDocs[1];
-				hMap3=(HashMap<Double, Integer>)_allDocs[2];
+			
+						
+			//Used for 3 as well as 5 grams
+			L1L2_OR_R1R2_L1R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L2_OR_R1R2_L1R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			 hMCounts2=new HashMap<Double,Double>();
+			 hMap2=new HashMap<Double,Double>();
+			 hMap3=new HashMap<Double,Double>();
+			
+
+			
+				hMap2=(HashMap<Double, Double>)_allDocs[1];
+				hMap3=(HashMap<Double, Double>)_allDocs[2];
 				
 				hMCounts2=buildCountMaps(hMap2);
 				
@@ -215,8 +184,25 @@ public void computeLRContextMatricesSingleVocab(){
 		/////////
 		if(_opt.numGrams==3 && _opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
-			hMap2=(HashMap<Double, Integer>)_allDocs[1];
-			hMap3=(HashMap<Double, Integer>)_allDocs[2];
+			WL_OR_WRMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			WLT_OR_WRTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
+			
+			WLMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			WLTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
+
+			WRMatrix3gram=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			WRTMatrix3gram=new SparseDoubleMatrix2D((_vocab_size+1),_vocab_size+1);
+			
+			//Used for 3 as well as 5 grams
+			L1L2_OR_R1R2_L1R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L2_OR_R1R2_L1R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			 hMCounts2=new HashMap<Double,Double>();
+			 hMap2=new HashMap<Double,Double>();
+			 hMap3=new HashMap<Double,Double>();
+			
+			
+			hMap2=(HashMap<Double, Double>)_allDocs[1];
+			hMap3=(HashMap<Double, Double>)_allDocs[2];
 			hMCounts2=buildCountMaps(hMap2);
 		
 		for(Double keys: hMap1.keySet()){
@@ -260,26 +246,57 @@ public void computeLRContextMatricesSingleVocab(){
 		
 		if(_opt.numGrams==5 && !_opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
-				hMap2=(HashMap<Double, Integer>)_allDocs[1];
+			//Used for 3 as well as 5 grams
+			L1L2_OR_R1R2_L1R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L2_OR_R1R2_L1R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			
+			
+			L1L3_OR_R1R3_L1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L4_OR_R1R4_L2R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L3_OR_R2R3_L2R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L4_OR_R2R4_L1L2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L3L4_OR_R3R4_R1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			
+			L1L3_OR_R1R3_L1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L4_OR_R1R4_L2R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L3_OR_R2R3_L2R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L4_OR_R2R4_L1L2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L3L4_OR_R3R4_R1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+					
+			 hMCounts3=new HashMap<Double,Double>();
+			 hMCounts4=new HashMap<Double,Double>();
+			
+			hMap4=new HashMap<Double,Double>();
+			
+			hMap5=new HashMap<Double,Double>();
+			hMap6=new HashMap<Double,Double>();
+			hMap7=new HashMap<Double,Double>();
+			hMap8=new HashMap<Double,Double>();
+			hMap9=new HashMap<Double,Double>();
+			hMap10=new HashMap<Double,Double>();
+
+			
+			
+				hMap2=(HashMap<Double, Double>)_allDocs[1];
 				hMCounts2=buildCountMaps(hMap2);
 				
-				hMap3=(HashMap<Double, Integer>)_allDocs[2];
+				hMap3=(HashMap<Double, Double>)_allDocs[2];
 				hMCounts3=buildCountMaps(hMap3);
 				
-				hMap4=(HashMap<Double, Integer>)_allDocs[3];
+				hMap4=(HashMap<Double, Double>)_allDocs[3];
 				hMCounts4=buildCountMaps(hMap4);
 				
-				hMap5=(HashMap<Double, Integer>)_allDocs[4];
+				hMap5=(HashMap<Double, Double>)_allDocs[4];
 				
-				hMap6=(HashMap<Double, Integer>)_allDocs[5];
+				hMap6=(HashMap<Double, Double>)_allDocs[5];
 				
-				hMap7=(HashMap<Double, Integer>)_allDocs[6];
+				hMap7=(HashMap<Double, Double>)_allDocs[6];
 				
-				hMap8=(HashMap<Double, Integer>)_allDocs[7];
+				hMap8=(HashMap<Double, Double>)_allDocs[7];
 				
-				hMap9=(HashMap<Double, Integer>)_allDocs[8];
+				hMap9=(HashMap<Double, Double>)_allDocs[8];
 				
-				hMap10=(HashMap<Double, Integer>)_allDocs[9];
+				hMap10=(HashMap<Double, Double>)_allDocs[9];
 				
 				
 			for(Double keys: hMap2.keySet()){
@@ -375,13 +392,53 @@ public void computeLRContextMatricesSingleVocab(){
 		/////////////
 		if(_opt.numGrams==5 && _opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
-			hMap2=(HashMap<Double, Integer>)_allDocs[1];
+			//Used for 3 as well as 5 grams
+			L1L2_OR_R1R2_L1R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L2_OR_R1R2_L1R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			
+			
+			WLMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
+			WLTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
+
+			WRMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
+			WRTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
+			
+			WL_OR_WRMatrix5gram=new SparseDoubleMatrix2D(_vocab_size+1,(_contextSize/2)*(_vocab_size+1));
+			WLT_OR_WRTMatrix5gram=new SparseDoubleMatrix2D((_contextSize/2)*(_vocab_size+1),_vocab_size+1);
+					
+			
+			L1L3_OR_R1R3_L1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L4_OR_R1R4_L2R1Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L3_OR_R2R3_L2R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L4_OR_R2R4_L1L2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L3L4_OR_R3R4_R1R2Matrix_vTimesv=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			
+			L1L3_OR_R1R3_L1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L1L4_OR_R1R4_L2R1Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L3_OR_R2R3_L2R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L2L4_OR_R2R4_L1L2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+			L3L4_OR_R3R4_R1R2Matrix_vTimesvT=new SparseDoubleMatrix2D(_vocab_size+1,(_vocab_size+1));
+					
+			 hMCounts3=new HashMap<Double,Double>();
+			 hMCounts4=new HashMap<Double,Double>();
+			
+			hMap4=new HashMap<Double,Double>();
+			
+			hMap5=new HashMap<Double,Double>();
+			hMap6=new HashMap<Double,Double>();
+			hMap7=new HashMap<Double,Double>();
+			hMap8=new HashMap<Double,Double>();
+			hMap9=new HashMap<Double,Double>();
+			hMap10=new HashMap<Double,Double>();
+
+			
+			hMap2=(HashMap<Double, Double>)_allDocs[1];
 			hMCounts2=buildCountMaps(hMap2);
 			
-			hMap3=(HashMap<Double, Integer>)_allDocs[2];
+			hMap3=(HashMap<Double, Double>)_allDocs[2];
 			hMCounts3=buildCountMaps(hMap3);
 			
-			hMap4=(HashMap<Double, Integer>)_allDocs[3];
+			hMap4=(HashMap<Double, Double>)_allDocs[3];
 			hMCounts4=buildCountMaps(hMap4);
 			
 			
@@ -452,7 +509,7 @@ public void computeLRContextMatricesSingleVocab(){
 	
 
 
-HashMap<Double,Double> buildCountMaps(HashMap<Double,Integer> hMap){
+HashMap<Double,Double> buildCountMaps(HashMap<Double,Double> hMap){
 	HashMap<Double,Double> hMCounts=new HashMap<Double,Double>();
 	double[] vals=new double[2];
 	CenterScaleNormalizeUtils cUtils=new CenterScaleNormalizeUtils(_opt);
@@ -679,6 +736,11 @@ SparseDoubleMatrix2D finalProjection=new SparseDoubleMatrix2D(nrows, xtx.columns
 		}
 		return finalProjection;
 		
+	}
+
+	public Object[] getDocs() {
+		// TODO Auto-generated method stub
+		return _allDocs;
 	}
 	
 	/*

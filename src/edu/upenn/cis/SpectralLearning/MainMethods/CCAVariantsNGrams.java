@@ -53,11 +53,13 @@ public class CCAVariantsNGrams implements Serializable {
 			rin=new ReadDataFile(opt);
 			if (opt.depbigram){
 				corpusInt= rin.convertAllDocsIntNGrams();
-				all_Docs=rin.readAllDocsNGrams();
+				rin.readAllDocsNGrams();
+				all_Docs=rin.getAllDocsNGrams();
 			}
 			else{
 				corpusInt= rin.convertAllDocsIntNGramsSingleVocab();
-				all_Docs=rin.readAllDocsNGramsSingleVocab();
+				rin.readAllDocsNGramsSingleVocab();
+				all_Docs=rin.getAllDocsNGrams();
 			}
 			rin.serializeCorpusIntMapped();
 			numTokens=rin.getNumTokens();
@@ -75,7 +77,7 @@ public class CCAVariantsNGrams implements Serializable {
 			ccaVariantNGramRun.serializeCCAVariantsNGramsRun();
 			matrices=deserializeCCAVariantsNGramsRun(opt);
 
-			woutNGrams=new ContextPCANGramsWriter(opt,all_Docs,matrices,rin);
+			woutNGrams=new ContextPCANGramsWriter(opt,all_Docs.length,matrices,rin);
 			woutNGrams.writeEigenDict();
 			if(!opt.typeofDecomp.equals("TwoStepLRvsW"))
 				woutNGrams.writeEigContextVectors();

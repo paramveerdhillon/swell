@@ -53,7 +53,8 @@ public static void main(String[] args) throws Exception{
 			docSize=new ArrayList<Integer>();
 			rin=new ReadDataFile(opt);
 			corpusInt= rin.convertAllDocsInt(0);
-			all_Docs=rin.readAllDocs(0);
+			rin.readAllDocs(0);
+			all_Docs=rin.getAllDocs();
 			docSize=rin.getDocSizes();
 			numTokens=rin.getNumTokens();
 			rin.serializeCorpusIntMapped();
@@ -65,7 +66,7 @@ public static void main(String[] args) throws Exception{
 			ccaRun=new CCARun(opt,ccaRep);
 			ccaRun.serializeCCARun();
 			matrices=deserializeCCARun(opt);
-			wout=new CCAWriter(opt,all_Docs,matrices,rin,utils);
+			wout=new CCAWriter(opt,ccaRep,matrices,rin,utils);
 			wout.writeEigenDict();
 			wout.writeLREigVectors();
 			
@@ -83,7 +84,8 @@ public static void main(String[] args) throws Exception{
 			corpusIntOldMapping=deserializeCorpusIntMapped(opt);
 			rin=new ReadDataFile(opt);
 			rin.setCorpusIntMapped(corpusIntOldMapping);
-			all_Docs=rin.readAllDocs(1);
+			rin.readAllDocs(1);
+			all_Docs=rin.getAllDocs();
 			docSize=rin.getDocSizes();
 			numTokens=rin.getNumTokens();
 			//corpus=new Corpus(all_Docs,docSize,opt);
@@ -95,7 +97,7 @@ public static void main(String[] args) throws Exception{
 					(Matrix)matrices[0], (Matrix)matrices[1]);
 			contextObliviousEmbed=ccaRep.getContextOblEmbeddings((Matrix)matrices[2]);
 	
-			wout=new CCAWriter(opt,all_Docs,matrices,rin,utils);
+			wout=new CCAWriter(opt,ccaRep,matrices,rin,utils);
 			wout.writeContextSpecificEmbed(contextSpecificEmbed);
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
 			if (opt.randomBaseline){

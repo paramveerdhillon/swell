@@ -55,7 +55,7 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		
 		
 		try {
-			processInputs(_allDocs, super.eigenFeatDictMatrix);
+			processInputs(super.eigenFeatDictMatrix);
 			
 			
 				
@@ -106,7 +106,7 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		LProjectionMatrix=LTrainSmoothedAllDocsMatrix.times(eigenFeatDictL);
 		RProjectionMatrix=RTrainSmoothedAllDocsMatrix.times(eigenFeatDictR);
 		
-		WProjectionMatrix=generateWProjections(_allDocs,_rin.getSortedWordList(),eigenFeatDict);
+		WProjectionMatrix=generateWProjections(_rin.getSortedWordList(),eigenFeatDict);
 		
 		finalProjectionMatrix=concatenateProjections(LProjectionMatrix,WProjectionMatrix,RProjectionMatrix);
 		
@@ -214,7 +214,8 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		
 		try {
 			createNewEigDict();
-			processDocsParallel(_allDocs,eigenFeatDict,left_singular_vectors,right_singular_vectors);
+			processDocsParallel(eigenFeatDict,left_singular_vectors,right_singular_vectors);
+			//processDocsSerial(eigenFeatDict,left_singular_vectors,right_singular_vectors);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -243,27 +244,31 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 	
 	
 	
-	private void processDocsParallel(ArrayList<ArrayList<Integer>> _allDocs2,final Matrix eigenFeatDict, final Matrix left_singular_vectors,final Matrix right_singular_vectors)
+	private void processDocsParallel(final Matrix eigenFeatDict, final Matrix left_singular_vectors,final Matrix right_singular_vectors)
 	throws InterruptedException, ExecutionException{
 		
 			int threads = Runtime.getRuntime().availableProcessors();
-			System.out.println(threads);
+			//System.out.println(threads);
+			//threads=4;
 			ExecutorService service = Executors.newFixedThreadPool(threads);
 			List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 			final Iterator<ArrayList<Integer>> it= _allDocs.iterator();
+			int k=0;
 			while (it.hasNext()) {
 				Callable<Integer> callable = new Callable<Integer>() {
+					
+					ArrayList<Integer> _doc=it.next();
 					public Integer call() throws Exception {
-						Matrix eigDict=left_right_smooths_doc(it.next(),eigenFeatDict, left_singular_vectors,right_singular_vectors);
+						Matrix eigDict=left_right_smooths_doc(_doc,eigenFeatDict, left_singular_vectors,right_singular_vectors);
 						update_dict(eigDict);
-						System.out.println("+++Doc Thread Submitted for Smoothing++");	
 					
 						return 1;
 					}
 
-					
 				};
+				//System.out.println(k++);
 				futures.add(service.submit(callable));
+				
 			}
 
 			service.shutdown();
@@ -275,11 +280,24 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		        if(i%10==0)
 		        	System.out.println("+++Doc Num "+(i)+" Processed for Smoothing++");
 		    }
-		    System.out.println("++Doc Processing for Smoothing Finished++");
-
-		    
-		    
+		    System.out.println("++Doc Processing for Smoothing Finished++");   
 		}
+	
+	private void processDocsSerial(final Matrix eigenFeatDict, final Matrix left_singular_vectors,final Matrix right_singular_vectors)
+			throws InterruptedException, ExecutionException{
+				
+					final Iterator<ArrayList<Integer>> it= _allDocs.iterator();
+					int i=0;
+					while (it.hasNext()) {
+								Matrix eigDict=left_right_smooths_doc(it.next(),eigenFeatDict, left_singular_vectors,right_singular_vectors);
+								update_dict(eigDict);
+						        i++;
+						        if(i%1000==0)
+						        	System.out.println("+++Doc Num "+(i)+" Processed for Smoothing++");
+								}
+						//System.out.println(k++);
+									
+				    				}
 		
 		
 	public Matrix createNewEigDict(){
@@ -459,14 +477,14 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 	}
 	
 	
-	public void processInputs(ArrayList<ArrayList<Integer>> _allDocs2, final Matrix eigenFeatDict)
+	public void processInputs(final Matrix eigenFeatDict)
 	throws InterruptedException, ExecutionException {
 
 		int threads = Runtime.getRuntime().availableProcessors();
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		
-		final Iterator<ArrayList<Integer>> it =_allDocs2.iterator();
+		final Iterator<ArrayList<Integer>> it =_allDocs.iterator();
 		
 		while (it.hasNext()) {
 			Callable<Integer> callable = new Callable<Integer>() {
@@ -541,11 +559,39 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 	public Matrix getContextOblEmbeddings(Matrix eigenFeatDict) {
 		Matrix WProjectionMatrix;
 		
-		WProjectionMatrix=generateWProjections(_allDocs,_rin.getSortedWordList(),eigenFeatDict);
+		WProjectionMatrix=generateWProjections(_rin.getSortedWordList(),eigenFeatDict);
 		
 		
 		return WProjectionMatrix;
 
+	}
+	
+	protected Matrix generateWProjections(ArrayList<Integer> sortedWordList, Matrix eigenFeatDict) {
+		ArrayList<Integer> doc;
+
+			int count=0;
+			
+		double[][] wProjection=new double[(int)_num_tokens][_num_hidden];
+		int idxDoc=0;
+		
+		while (idxDoc<_allDocs.size()){
+			
+				doc=_allDocs.get(idxDoc++);
+				int idxTok=0;
+				while(idxTok<doc.size()){
+					for (int j=0;j<_num_hidden;j++){
+						wProjection[count][j]=eigenFeatDict.get(doc.get(idxTok), j);
+					}
+					count++;
+					idxTok++;
+				}
+			}
+		return new Matrix(wProjection);
+	}
+
+	public ArrayList<ArrayList<Integer>> getAllDocs() {
+		
+		return _allDocs;
 	}
 	
 }

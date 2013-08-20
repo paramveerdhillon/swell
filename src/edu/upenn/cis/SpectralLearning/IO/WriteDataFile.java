@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import edu.upenn.cis.SpectralLearning.Data.Corpus;
+import edu.upenn.cis.SpectralLearning.SpectralRepresentations.CCARepresentation;
+import edu.upenn.cis.SpectralLearning.SpectralRepresentations.ContextPCANGramsRepresentation;
 
 public class WriteDataFile {
 	
@@ -20,7 +22,7 @@ public class WriteDataFile {
 		_opt=opt;
 		_allDocs=all_Docs;
 	}
-
+	
 
 	public WriteDataFile(Options opt, HashMap<Double, Integer> all_Docs) {
 		_opt=opt;
@@ -30,6 +32,16 @@ public class WriteDataFile {
 	public WriteDataFile(Options opt, Object[] all_Docs) {
 		_opt=opt;
 		_allDocsO=all_Docs;
+	}
+
+	public WriteDataFile(Options opt, CCARepresentation ccaRep) {
+		_opt=opt;
+		_allDocs=ccaRep.getAllDocs();
+	}
+
+
+	public WriteDataFile(Options opt) {
+		_opt=opt;
 	}
 		
 	

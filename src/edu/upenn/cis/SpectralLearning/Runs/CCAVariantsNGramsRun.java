@@ -271,13 +271,15 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		SparseDoubleMatrix2D auxMat5=new SparseDoubleMatrix2D(xtx.columns(),ytx.rows());
 		SparseDoubleMatrix2D auxMat2=new SparseDoubleMatrix2D(yty.rows(),ytx.columns());
 		SparseDoubleMatrix2D auxMat3=new SparseDoubleMatrix2D(auxMat5.rows(),auxMat5.rows());
-		SparseDoubleMatrix2D topM=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L1L2_OR_R1R2_L1R1.columns());
-		SparseDoubleMatrix2D bottomM=new SparseDoubleMatrix2D(topM.rows(),topM.columns());
 		SparseDoubleMatrix2D auxMat4=new SparseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows());
-		
 				
 		
 		if(_opt.numGrams==3){
+			
+			
+			SparseDoubleMatrix2D topM=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L1L2_OR_R1R2_L1R1.columns());
+			SparseDoubleMatrix2D bottomM=new SparseDoubleMatrix2D(topM.rows(),topM.columns());
+			
 			
 			topM=_cpcaR2.concatenateLR(xtx,L1L2_OR_R1R2_L1R1);
 			bottomM=_cpcaR2.concatenateLR(L1L2_OR_R1R2_L1R1T,xtx);

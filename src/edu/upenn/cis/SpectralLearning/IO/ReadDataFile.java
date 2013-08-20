@@ -41,8 +41,9 @@ public class ReadDataFile implements Serializable {
 	private ValueComparator bvcContext=new ValueComparator(countContext);
 	private TreeMap<String,Integer> sorted_countContext = new TreeMap(bvcContext);
 	
+	static ArrayList<ArrayList<Integer>> allDocs=new ArrayList<ArrayList<Integer>>();
 	
-    
+    static Object[] wordHashMaps;
 	
 	
 	
@@ -62,7 +63,7 @@ public class ReadDataFile implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public ArrayList<ArrayList<Integer>> readAllDocs(int dataOption) throws Exception{
+	public void readAllDocs(int dataOption) throws Exception{
 		
 		if (dataOption==0)
 			in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
@@ -73,7 +74,7 @@ public class ReadDataFile implements Serializable {
 		}
 		
 		
-		ArrayList<ArrayList<Integer>> allDocs=new ArrayList<ArrayList<Integer>>();
+		
 		ArrayList<Integer> eachDoc=new ArrayList<Integer>();
 		
 		String line=in.readLine();
@@ -132,17 +133,19 @@ public class ReadDataFile implements Serializable {
 		   allDocs.add((ArrayList<Integer>) eachDoc.clone());
 		    
 		    docSizes.add(docCounter);
-		return allDocs;
+
 		
 	}
 	
 	
-	public Object[] readAllDocsNGrams() throws Exception{
+	
+	
+	public void readAllDocsNGrams() throws Exception{
 		
 		
 		in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
 		Object[] wordHashMaps =new Object[1];
-		HashMap<Double,Integer> word_contextCounts =new HashMap<Double,Integer>();
+		HashMap<Double,Double> word_contextCounts =new HashMap<Double,Double>();
 		CenterScaleNormalizeUtils utils=new CenterScaleNormalizeUtils(_opt);
 		
 		String line=in.readLine();
@@ -180,7 +183,7 @@ public class ReadDataFile implements Serializable {
 					else
 						cInt=corpusIntMappedContext.get("<OOV>");
 					numTokens++;
-					word_contextCounts.put(utils.cantorPairingMap(wInt,cInt), Integer.parseInt(itArrList.next()));
+					word_contextCounts.put(utils.cantorPairingMap(wInt,cInt), Double.parseDouble(itArrList.next()));
 				}
 				
 			line=in.readLine();
@@ -189,49 +192,48 @@ public class ReadDataFile implements Serializable {
 		   
 		    wordHashMaps[0]= word_contextCounts;
 		    
-		return wordHashMaps;
 		
 	}
 	
 	
-public Object[] readAllDocsNGramsSingleVocab() throws Exception{
+public void readAllDocsNGramsSingleVocab() throws Exception{
 		
 		
 		in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
-		HashMap<Double,Integer> word_contextCounts,word_contextCounts3WR1,word_contextCounts3WR2,
+		HashMap<Double,Double> word_contextCounts,word_contextCounts3WR1,word_contextCounts3WR2,
 		word_contextCounts3WL1,word_contextCounts3WL2,word_contextCounts3WL,word_contextCounts3WR,word_contextCounts3R1R2_OR_LR_OR_L1L2;
-		Object[] wordHashMaps;
 		
-			word_contextCounts =new HashMap<Double,Integer>();
-	
-			word_contextCounts3WR1 =new HashMap<Double,Integer>();
-			word_contextCounts3WR2 =new HashMap<Double,Integer>();
-	
-			word_contextCounts3R1R2_OR_LR_OR_L1L2 =new HashMap<Double,Integer>();
-			
-			word_contextCounts3WL1 =new HashMap<Double,Integer>();
-			word_contextCounts3WL2 =new HashMap<Double,Integer>();
 		
-			word_contextCounts3WL =new HashMap<Double,Integer>();
-			word_contextCounts3WR =new HashMap<Double,Integer>();
-			
-			
-			HashMap<Double, Integer> word_contextCounts5WR1 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5WR2 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5WR3 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5WR4 = new HashMap<Double,Integer>();
+			word_contextCounts =new HashMap<Double, Double>();
 	
-			HashMap<Double, Integer> word_contextCounts5WL1 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5WL2 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5WL3 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5WL4 = new HashMap<Double,Integer>();
+			word_contextCounts3WR1 =new HashMap<Double, Double>();
+			word_contextCounts3WR2 =new HashMap<Double, Double>();
+	
+			word_contextCounts3R1R2_OR_LR_OR_L1L2 =new HashMap<Double, Double>();
 			
-			HashMap<Double, Integer> word_contextCounts5R1R2_OR_L1L2_OR_L1R1 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5R1R3_OR_L1L3_OR_L1R2 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5R1R4_OR_L1L4_OR_L2R1 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5R2R3_OR_L2L3_OR_L2R2 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5R2R4_OR_L2L4_OR_L1L2 = new HashMap<Double,Integer>();
-			HashMap<Double, Integer> word_contextCounts5R3R4_OR_L3L4_OR_R1R2 = new HashMap<Double,Integer>();
+			word_contextCounts3WL1 =new HashMap<Double, Double>();
+			word_contextCounts3WL2 =new HashMap<Double, Double>();
+		
+			word_contextCounts3WL =new HashMap<Double, Double>();
+			word_contextCounts3WR =new HashMap<Double, Double>();
+			
+			
+			HashMap<Double, Double> word_contextCounts5WR1 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5WR2 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5WR3 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5WR4 = new HashMap<Double, Double>();
+	
+			HashMap<Double, Double> word_contextCounts5WL1 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5WL2 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5WL3 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5WL4 = new HashMap<Double, Double>();
+			
+			HashMap<Double, Double> word_contextCounts5R1R2_OR_L1L2_OR_L1R1 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5R1R3_OR_L1L3_OR_L1R2 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5R1R4_OR_L1L4_OR_L2R1 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5R2R3_OR_L2L3_OR_L2R2 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5R2R4_OR_L2L4_OR_L1L2 = new HashMap<Double, Double>();
+			HashMap<Double, Double> word_contextCounts5R3R4_OR_L3L4_OR_R1R2 = new HashMap<Double, Double>();
 				
 			
 		
@@ -278,10 +280,10 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						else
 							cInt=corpusIntMapped.get("<OOV>");
 						numTokens++;
-						int existC =0;
+						double existC =0;
 						if(word_contextCounts.get(utils.cantorPairingMap(wInt,cInt))!=null)
 							existC = word_contextCounts.get(utils.cantorPairingMap(wInt,cInt));
-						word_contextCounts.put(utils.cantorPairingMap(wInt,cInt), existC+Integer.parseInt(itArrList.next()));
+						word_contextCounts.put(utils.cantorPairingMap(wInt,cInt), existC+Double.parseDouble(itArrList.next()));
 						}
 				}
 				
@@ -307,7 +309,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						else
 							l1Int=corpusIntMapped.get("<OOV>");
 						numTokens++;
-						int l1ExistingCounts=0,l2ExistingCounts=0,l1l2ExistingCounts=0;
+						double l1ExistingCounts=0,l2ExistingCounts=0,l1l2ExistingCounts=0;
 						if(word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,l1Int))!=null)
 							l1ExistingCounts=word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,l1Int));
 						if(word_contextCounts3WR2.get(utils.cantorPairingMap(wInt,l2Int))!=null)
@@ -315,7 +317,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						if(word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(l1Int,l2Int))!=null)
 							l1l2ExistingCounts=word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(l1Int,l2Int));
 						
-						int count=Integer.parseInt(itArrList.next());
+						double count=Double.parseDouble(itArrList.next());
 						word_contextCounts3R1R2_OR_LR_OR_L1L2.put(utils.cantorPairingMap(l1Int,l2Int), l1l2ExistingCounts +count);
 						word_contextCounts3WL1.put(utils.cantorPairingMap(wInt,l1Int), l1ExistingCounts +count);
 						word_contextCounts3WL2.put(utils.cantorPairingMap(wInt,l2Int), l2ExistingCounts + count);
@@ -341,7 +343,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						else
 							r1Int=corpusIntMapped.get("<OOV>");
 						numTokens++;
-						int r1ExistingCounts=0,r2ExistingCounts=0,r1r2ExistingCounts=0;
+						double r1ExistingCounts=0,r2ExistingCounts=0,r1r2ExistingCounts=0;
 						if(word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,r1Int))!=null)
 							r1ExistingCounts=word_contextCounts3WR1.get(utils.cantorPairingMap(wInt,r1Int));
 						if(word_contextCounts3WR2.get(utils.cantorPairingMap(wInt,r2Int))!=null)
@@ -349,7 +351,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						if(word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(r1Int,r2Int))!=null)
 							r1r2ExistingCounts=word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(r1Int,r2Int));
 						
-						int count=Integer.parseInt(itArrList.next());
+						double count=Double.parseDouble(itArrList.next());
 						word_contextCounts3R1R2_OR_LR_OR_L1L2.put(utils.cantorPairingMap(r1Int,r2Int), r1r2ExistingCounts +count);
 						word_contextCounts3WR1.put(utils.cantorPairingMap(wInt,r1Int), r1ExistingCounts +count);
 						word_contextCounts3WR2.put(utils.cantorPairingMap(wInt,r2Int), r2ExistingCounts + count);
@@ -376,7 +378,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							rInt=corpusIntMapped.get("<OOV>");
 						numTokens++;
 						
-						int wrExistingCounts=0,wlExistingCounts=0,lrExistingCounts=0;
+						double wrExistingCounts=0,wlExistingCounts=0,lrExistingCounts=0;
 						
 						if(word_contextCounts3WR.get(utils.cantorPairingMap(wInt,rInt)) !=null)
 							wrExistingCounts=word_contextCounts3WR.get(utils.cantorPairingMap(wInt,rInt));
@@ -388,7 +390,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							lrExistingCounts=word_contextCounts3R1R2_OR_LR_OR_L1L2.get(utils.cantorPairingMap(lInt,rInt));
 						
 						
-						int count=Integer.parseInt(itArrList.next());
+						double count=Double.parseDouble(itArrList.next());
 						word_contextCounts3R1R2_OR_LR_OR_L1L2.put(utils.cantorPairingMap(lInt,rInt), lrExistingCounts +count);
 						word_contextCounts3WL.put(utils.cantorPairingMap(wInt,lInt), wlExistingCounts +count);
 						word_contextCounts3WR.put(utils.cantorPairingMap(wInt,rInt), wrExistingCounts + count);
@@ -429,7 +431,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 						
 						numTokens++;
 						
-						int l1ExistingCounts=0,l2ExistingCounts=0,l3ExistingCounts=0,l4ExistingCounts=0,
+						double l1ExistingCounts=0,l2ExistingCounts=0,l3ExistingCounts=0,l4ExistingCounts=0,
 								l1l2ExistingCounts=0,l1l3ExistingCounts=0,l1l4ExistingCounts=0,l2l3ExistingCounts=0,
 										l2l4ExistingCounts=0,l3l4ExistingCounts=0;
 						
@@ -466,7 +468,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							l3l4ExistingCounts=word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(l3Int,l4Int));
 						
 						
-						int count=Integer.parseInt(itArrList.next());
+						double count=Double.parseDouble(itArrList.next());
 						
 						word_contextCounts5R1R2_OR_L1L2_OR_L1R1.put(utils.cantorPairingMap(l1Int,l2Int), l1l2ExistingCounts +count);
 						word_contextCounts5R1R3_OR_L1L3_OR_L1R2.put(utils.cantorPairingMap(l1Int,l3Int), l1l3ExistingCounts +count);
@@ -515,7 +517,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							r1Int=corpusIntMapped.get("<OOV>");
 						
 						numTokens++;
-						int r1ExistingCounts=0,r2ExistingCounts=0,r3ExistingCounts=0,r4ExistingCounts=0,
+						double r1ExistingCounts=0,r2ExistingCounts=0,r3ExistingCounts=0,r4ExistingCounts=0,
 								r1r2ExistingCounts=0,r1r3ExistingCounts=0,r1r4ExistingCounts=0,r2r3ExistingCounts=0,
 										r2r4ExistingCounts=0,r3r4ExistingCounts=0;
 						
@@ -550,7 +552,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							r3r4ExistingCounts=word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(r3Int,r4Int));
 						
 						
-						int count=Integer.parseInt(itArrList.next());
+						double count=Double.parseDouble(itArrList.next());
 						
 						word_contextCounts5R1R2_OR_L1L2_OR_L1R1.put(utils.cantorPairingMap(r1Int,r2Int), r1r2ExistingCounts +count);
 						word_contextCounts5R1R3_OR_L1L3_OR_L1R2.put(utils.cantorPairingMap(r1Int,r3Int), r1r3ExistingCounts +count);
@@ -600,7 +602,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							l1Int=corpusIntMapped.get("<OOV>");
 						
 						numTokens++;
-						int l1ExistingCounts=0,l2ExistingCounts=0,r1ExistingCounts=0,r2ExistingCounts=0,
+						double l1ExistingCounts=0,l2ExistingCounts=0,r1ExistingCounts=0,r2ExistingCounts=0,
 								l1r1ExistingCounts=0,l1r2ExistingCounts=0,l2r1ExistingCounts=0,l2r2ExistingCounts=0,
 								l1l2ExistingCounts=0,r1r2ExistingCounts=0;
 						
@@ -635,7 +637,7 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 							r1r2ExistingCounts=word_contextCounts5R3R4_OR_L3L4_OR_R1R2.get(utils.cantorPairingMap(r1Int,r2Int));
 						
 						
-						int count=Integer.parseInt(itArrList.next());
+						double count=Double.parseDouble(itArrList.next());
 						
 						word_contextCounts5R1R2_OR_L1L2_OR_L1R1.put(utils.cantorPairingMap(l1Int,r1Int), l1r1ExistingCounts +count);
 						word_contextCounts5R1R3_OR_L1L3_OR_L1R2.put(utils.cantorPairingMap(l1Int,r2Int), l1r2ExistingCounts +count);
@@ -721,8 +723,6 @@ public Object[] readAllDocsNGramsSingleVocab() throws Exception{
 
 		}
 		    
-		
-		return wordHashMaps;
 		
 	}
 	
@@ -911,6 +911,14 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 		    
 		return corpusIntMapped;
 		
+	}
+	
+	public Object[] getAllDocsNGrams(){
+		return wordHashMaps;
+	}
+	
+	public ArrayList<ArrayList<Integer>> getAllDocs(){
+		return allDocs;
 	}
 	
 	public  HashMap<String,Integer> getCorpusIntMapped(){

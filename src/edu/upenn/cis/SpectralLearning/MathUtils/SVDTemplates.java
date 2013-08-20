@@ -42,7 +42,6 @@ public class SVDTemplates implements Serializable {
 		
 		SparseDoubleMatrix2D tempMat=new SparseDoubleMatrix2D(X.rows(),X.columns());
 		SparseDoubleMatrix2D auxMat=new SparseDoubleMatrix2D(X.rows(),X.columns());
-		SparseDoubleMatrix2D invMatrix=new SparseDoubleMatrix2D(X.rows(),X.columns());
 		SparseDoubleMatrix2D diagInvEntries=new SparseDoubleMatrix2D(X.rows(),X.columns());
 		SparseDoubleMatrix2D OffdiagEntries=new SparseDoubleMatrix2D(X.rows(),X.columns());
 		
@@ -51,30 +50,26 @@ public class SVDTemplates implements Serializable {
 				diagInvEntries.set(i, i, 1/X.get(i, i));
 		}
 		
-		for(int i=0; i<X.rows();i++){ 
-			for(int j=0; j<X.columns();j++){ 
-				if(i!=j){
-			OffdiagEntries.set(i, j, X.get(i, j));
-				}
-			}
-	}
+		if(!_opt.diagOnlyInverse){
+		
+			for(int i=0; i<X.rows();i++){ 
+				for(int j=0; j<X.columns();j++){ 
+					if(i!=j){
+						OffdiagEntries.set(i, j, X.get(i, j));
+							}
+												}
+								}
 			
-		diagInvEntries.zMult(OffdiagEntries, tempMat);
-		tempMat.zMult(diagInvEntries, auxMat);
+			diagInvEntries.zMult(OffdiagEntries, tempMat);
+			tempMat.zMult(diagInvEntries, auxMat);
 	
+			auxMat.assign(diagInvEntries, DoublePlusMultFirst.minusMult(1));
+			return auxMat;
+		}
+		else{
 		
-	/*	
-		for(int i=0; i<X.rows();i++){ 
-			for(int j=0; j<X.columns();j++){ 
-				invMatrix.set(i, j, diagInvEntries.get(i, j)-auxMat.get(i, j));
-				}
-			}
-			
-			*/
-			
-		
-		auxMat.assign(diagInvEntries, DoublePlusMultFirst.minusMult(1));
-		return auxMat;
+			return diagInvEntries;
+		}
 		
 	}
 	

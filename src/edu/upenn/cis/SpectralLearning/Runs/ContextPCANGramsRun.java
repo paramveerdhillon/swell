@@ -26,10 +26,10 @@ public class ContextPCANGramsRun implements Serializable {
 	static final long serialVersionUID = 42L;
 	Object[] _allDocs;
 	double[] s;
-	public ContextPCANGramsRun(Options opt, ContextPCANGramsRepresentation cpcaR,Object[] all_Docs){
+	public ContextPCANGramsRun(Options opt, ContextPCANGramsRepresentation cpcaR){
 		_opt=opt;
 		_cpcaR=cpcaR;
-		_allDocs =all_Docs;
+		_allDocs =cpcaR.getDocs();
 		System.out.println("+++Entering Context PCA n-grams Compute+++");
 		computeCPCA(_cpcaR);
 			
