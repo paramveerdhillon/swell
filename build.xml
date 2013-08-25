@@ -4,13 +4,13 @@
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="SpectralLearning">
+<project basedir="." default="build" name="swell">
     <property environment="env"/>
     <property name="ECLIPSE_HOME" value="../../../../../../Applications/eclipse"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
-    <path id="SpectralLearning.classpath">
+    <path id="swell.classpath">
         <pathelement location="bin"/>
         <pathelement location="libs/Jama-1.0.2.jar"/>
         <pathelement location="libs/parallelcolt-0.9.4.jar"/>
@@ -64,7 +64,7 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
-            <classpath refid="SpectralLearning.classpath"/>
+            <classpath refid="swell.classpath"/>
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
@@ -82,60 +82,60 @@
         <antcall target="build"/>
     </target>
     <target name="CCAVariants">
-        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.CCAVariants" failonerror="true" fork="yes">
+        <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train unlab-train-file:Input_Files/text_new.txt  train-file:Input_Files/train_demo.txt  scaleDictBySingVals vocab-size:2 hidden-state:2 algorithm:CCARunningText:2viewWvsR contextSizeEachSide:1"/>
-            <classpath refid="SpectralLearning.classpath"/>
+            <arg line="unlab-train unlab-train-file:Input_Files/train_demo1.txt  scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:CCARunningText:TwoStepLRvsW contextSizeEachSide:1"/>
+            <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.CCAVariants.bootclasspath"/>
             </bootclasspath>
         </java>
     </target>
     <target name="CCAVariantsNGrams">
-        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.CCAVariantsNGrams" failonerror="true" fork="yes">
+        <java classname="edu.upenn.cis.swell.MainMethods.CCAVariantsNGrams" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train unlab-train-file:Input_Files/5grams.txt  scaleDictBySingVals  vocab-size:40 hidden-state:15 algorithm:CCANGram:TwoStepLRvsW num-grams:5"/>
-            <classpath refid="SpectralLearning.classpath"/>
+            <arg line="unlab-train unlab-train-file:Input_Files/5grams.txt  scaleDictBySingVals  vocab-size:40 hidden-state:15 algorithm:CCANGram:2viewWvsLR num-grams:5"/>
+            <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.CCAVariantsNGrams.bootclasspath"/>
             </bootclasspath>
         </java>
     </target>
     <target name="ContextPCA">
-        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.ContextPCA" failonerror="true" fork="yes">
+        <java classname="edu.upenn.cis.swell.MainMethods.ContextPCA" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train unlab-train-file:Input_Files/train_demo1.txt  train-file:Input_Files/train_demo.txt  scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:ContextPCA:WvsLR contextSizeEachSide:2"/>
-            <classpath refid="SpectralLearning.classpath"/>
+            <arg line="unlab-train unlab-train-file:Input_Files/train_demo1.txt  train-file:Input_Files/train_demo.txt  scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:ContextPCA:WvsR contextSizeEachSide:2"/>
+            <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.ContextPCA.bootclasspath"/>
             </bootclasspath>
         </java>
     </target>
     <target name="ContextPCANGrams">
-        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.ContextPCANGrams" failonerror="true" fork="yes">
+        <java classname="edu.upenn.cis.swell.MainMethods.ContextPCANGrams" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4g"/>
             <arg line="unlab-train unlab-train-file:Input_Files/3grams1.txt num-grams:3  scaleDictBySingVals vocab-size:3 hidden-state:3  algorithm:ContextPCANGrams:WvsR"/>
-            <classpath refid="SpectralLearning.classpath"/>
+            <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.ContextPCANGrams.bootclasspath"/>
             </bootclasspath>
         </java>
     </target>
     <target name="LRMVLEmbed">
-        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.LRMVLEmbed" failonerror="true" fork="yes">
+        <java classname="edu.upenn.cis.swell.MainMethods.LRMVLEmbed" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="train unlab-train test unlab-train-file:Input_Files/all.txt train-file:Input_Files/test_demo.txt test-file:Input_Files/test_demo.txt smooths:.1,.5,.9 doc-separator:DOCSTART-X-0 scaleDictBySingVals vocab-size:20 hidden-state:10 algorithm:LRMVL:2view  scaleDictBySingVals"/>
-            <classpath refid="SpectralLearning.classpath"/>
+            <arg line="unlab-train train  test unlab-train-file:Input_Files/all.txt train-file:Input_Files/train_demo2.txt test-file:Input_Files/train_demo2.txt smooths:.1,.5,.9 doc-separator:DOCSTART-X-0 scaleDictBySingVals vocab-size:20 hidden-state:10 algorithm:LRMVL:2viewCCA  scaleDictBySingVals"/>
+            <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.LRMVLEmbed.bootclasspath"/>
             </bootclasspath>
         </java>
     </target>
     <target name="LSA">
-        <java classname="edu.upenn.cis.SpectralLearning.MainMethods.LSA" failonerror="true" fork="yes">
+        <java classname="edu.upenn.cis.swell.MainMethods.LSA" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4g"/>
-            <arg line="unlab-train train unlab-train-file:Input_Files/train_demo1.txt  train-file:Input_Files/test_demo.txt doc-separator:DOCSTART-X-0 vocab-size:100 scaleDictBySingVals serialize-run-file:Output_Files/runLSA.ser eigen-dict-name:Output_Files/eigenFeatLSA.dict hidden-state:4 context-obl-embed-name:Output_Files/contextOblEmbedForTrainLSA.txt serialize-corpus-file:Output_Files/corpusLSA.ser"/>
-            <classpath refid="SpectralLearning.classpath"/>
+            <arg line="unlab-train train unlab-train-file:Input_Files/train_demo1.txt  train-file:Input_Files/test_demo.txt doc-separator:DOCSTART-X-0 vocab-size:100 scaleDictBySingVals hidden-state:4"/>
+            <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.LSA.bootclasspath"/>
             </bootclasspath>
