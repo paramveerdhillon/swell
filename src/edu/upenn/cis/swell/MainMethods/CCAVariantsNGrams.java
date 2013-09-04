@@ -1,5 +1,14 @@
 package edu.upenn.cis.swell.MainMethods;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

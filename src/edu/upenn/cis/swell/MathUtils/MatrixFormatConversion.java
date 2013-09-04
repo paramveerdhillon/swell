@@ -1,9 +1,16 @@
 package edu.upenn.cis.swell.MathUtils;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.MatrixEntry;
-import no.uib.cipr.matrix.sparse.CompColMatrix;
-import no.uib.cipr.matrix.sparse.CompRowMatrix;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import Jama.Matrix;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;

@@ -1,5 +1,14 @@
 package edu.upenn.cis.swell.MainMethods;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Jama.Matrix;
-import edu.upenn.cis.swell.Data.Corpus;
 import edu.upenn.cis.swell.IO.LSAWriter;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.IO.ReadDataFile;
@@ -25,7 +33,6 @@ public class LSA implements Serializable {
 		ArrayList<ArrayList<Integer>> all_Docs;
 		ArrayList<Integer> docSize;
 		ReadDataFile rin;
-		//Corpus corpus;
 		LSARepresentation lsaRep;
 		LSARun lsaRun;
 		Object[] matrices=new Object[1];
@@ -51,19 +58,13 @@ public class LSA implements Serializable {
 			docSize=rin.getDocSizes();
 			numTokens=rin.getNumTokens();
 			rin.serializeCorpusIntMapped();
-			//corpus=new Corpus(all_Docs,docSize,opt);
-			//corpus.CreateIntMapping();
-			//corpus.updateDocsWithInts(corpus.getCorpusAllWords(), corpus.getCorpusIntMapped());
-			//corpus.serializeCorpus();
-
+			
 			lsaRep= new LSARepresentation(opt, numTokens,rin,all_Docs);
-			//lsaRep.serializeLSARepresentation();
 			lsaRun=new LSARun(opt,lsaRep,all_Docs);
 			lsaRun.serializeLSARun();
 			matrices=deserializeLSARun(opt);
 			wout=new LSAWriter(opt,all_Docs,(Matrix)matrices[0],rin);
 			wout.writeEigenDict();
-			//wout.writeDocDictL();
 			System.out.println("+++LSA Embedddings Induced+++\n");
 			
 			if (opt.randomBaseline){

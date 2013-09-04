@@ -1,22 +1,28 @@
 package edu.upenn.cis.swell.MainMethods;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import Jama.Matrix;
 import edu.upenn.cis.swell.IO.ContextPCANGramsWriter;
-import edu.upenn.cis.swell.IO.ContextPCAWriter;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.IO.ReadDataFile;
 import edu.upenn.cis.swell.Runs.ContextPCANGramsRun;
 import edu.upenn.cis.swell.SpectralRepresentations.ContextPCANGramsRepresentation;
-import edu.upenn.cis.swell.SpectralRepresentations.ContextPCARepresentation;
 
 public class ContextPCANGrams implements Serializable {
 			static final long serialVersionUID = 42L;
@@ -75,7 +81,6 @@ public class ContextPCANGrams implements Serializable {
 				System.out.println("+++Context PCA NGrams Embedddings Induced+++\n");
 			}
 
-		
 			
 		}
 

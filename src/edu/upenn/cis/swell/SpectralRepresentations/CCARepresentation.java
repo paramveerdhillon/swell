@@ -1,5 +1,14 @@
 package edu.upenn.cis.swell.SpectralRepresentations;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,16 +26,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import Jama.Matrix;
-import edu.upenn.cis.swell.Data.Corpus;
-import edu.upenn.cis.swell.Data.Document;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.IO.ReadDataFile;
 
 public class CCARepresentation extends SpectralRepresentation implements Serializable {
 
-	//private Corpus _corpus;
 	protected ArrayList<Double> _smooths=new ArrayList<Double>();
 	protected Matrix covLLAllDocsMatrix,covRRAllDocsMatrix,covLRAllDocsMatrix;
 	private ReadDataFile _rin;
@@ -483,12 +488,16 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		int threads = Runtime.getRuntime().availableProcessors();
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
+
 		
 		final Iterator<ArrayList<Integer>> it =_allDocs.iterator();
 		
 		while (it.hasNext()) {
 			Callable<Integer> callable = new Callable<Integer>() {
 				ArrayList<Integer> aDoc=it.next();
+				
+				
+				
 				public Integer call() throws Exception {
 					Object[] covMs=null;
 					covMs=generateCovForOneDoc(eigenFeatDict, aDoc);

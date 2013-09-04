@@ -1,5 +1,13 @@
 package edu.upenn.cis.swell.SpectralRepresentations;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,12 +17,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
-
 import Jama.Matrix;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
-import edu.upenn.cis.swell.Data.Corpus;
-import edu.upenn.cis.swell.Data.Document;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.IO.ReadDataFile;
 

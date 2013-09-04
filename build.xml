@@ -84,7 +84,7 @@
     <target name="CCAVariants">
         <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train unlab-train-file:Input_Files/train_demo1.txt  scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:CCARunningText:TwoStepLRvsW contextSizeEachSide:1"/>
+            <arg line="unlab-train unlab-train-file:Input_Files/test_demo.txt  scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:CCARunningText:2viewWvsLR contextSizeEachSide:1 kdim-decomp eigenCCA-dict-file:Output_Files/eigenDictCCARunningText2viewWvsLRDict:200:20"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.CCAVariants.bootclasspath"/>
@@ -104,7 +104,7 @@
     <target name="ContextPCA">
         <java classname="edu.upenn.cis.swell.MainMethods.ContextPCA" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train unlab-train-file:Input_Files/train_demo1.txt  train-file:Input_Files/train_demo.txt  scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:ContextPCA:WvsR contextSizeEachSide:2"/>
+            <arg line="train unlab-train-file:Input_Files/train_demo1.txt  train-file:Input_Files/train_demo.txt  scaleDictBySingVals vocab-size:30 hidden-state:3 algorithm:ContextPCA:WvsR contextSizeEachSide:2 embed-to-induce:CCARunningText"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.ContextPCA.bootclasspath"/>
@@ -114,7 +114,7 @@
     <target name="ContextPCANGrams">
         <java classname="edu.upenn.cis.swell.MainMethods.ContextPCANGrams" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4g"/>
-            <arg line="unlab-train unlab-train-file:Input_Files/3grams1.txt num-grams:3  scaleDictBySingVals vocab-size:3 hidden-state:3  algorithm:ContextPCANGrams:WvsR"/>
+            <arg line="unlab-train unlab-train-file:Input_Files/3grams.txt num-grams:3  scaleDictBySingVals vocab-size:30 hidden-state:3  algorithm:ContextPCANGrams:WvsR"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.ContextPCANGrams.bootclasspath"/>
@@ -124,7 +124,7 @@
     <target name="LRMVLEmbed">
         <java classname="edu.upenn.cis.swell.MainMethods.LRMVLEmbed" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train train  test unlab-train-file:Input_Files/all.txt train-file:Input_Files/train_demo2.txt test-file:Input_Files/train_demo2.txt smooths:.1,.5,.9 doc-separator:DOCSTART-X-0 scaleDictBySingVals vocab-size:20 hidden-state:10 algorithm:LRMVL:2viewCCA  scaleDictBySingVals"/>
+            <arg line="unlab-train train unlab-train-file:Input_Files/all.txt  train-file:Input_Files/train_demo2.txt output-dir-prefix:Output_Files_new  smooths:.1,.5,.9 doc-separator:DOCSTART-X-0 scaleDictBySingVals vocab-size:20 hidden-state:10 algorithm:LRMVL:2viewCCA  scaleDictBySingVals"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.LRMVLEmbed.bootclasspath"/>

@@ -1,5 +1,13 @@
 package edu.upenn.cis.swell.IO;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import Jama.Matrix;
-import edu.upenn.cis.swell.Data.Corpus;
-import edu.upenn.cis.swell.Data.Document;
 import edu.upenn.cis.swell.MathUtils.CenterScaleNormalizeUtils;
 import edu.upenn.cis.swell.SpectralRepresentations.CCARepresentation;
 import edu.umbc.cs.maple.utils.JamaUtils;

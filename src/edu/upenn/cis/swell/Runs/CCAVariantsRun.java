@@ -1,5 +1,14 @@
 package edu.upenn.cis.swell.Runs;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,6 +20,8 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
+import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 import Jama.Matrix;
 import edu.upenn.cis.swell.IO.Options;
@@ -33,7 +44,12 @@ public class CCAVariantsRun implements Serializable {
 		
 		
 		System.out.println("+++Entering CCA Compute+++");
-		computeCCAVariant(_cpcaR);
+		if(_opt.kdimDecomp){
+			computeCCAVariantDense(_cpcaR);
+		}
+		else{
+			computeCCAVariant(_cpcaR);
+		}
 			
 		writeStats();
 	}
@@ -77,10 +93,7 @@ public class CCAVariantsRun implements Serializable {
 
 	private void computeCCAVariant(ContextPCARepresentation _cpcaR2) {
 		
-		_cpcaR2.computeContextLRMatrices();
-		SparseDoubleMatrix2D wtl,ltw,wtw,ltl,rtr,wtr,rtw,wtlr,lrtw,ltr,rtl,lrtlr;
-		
-		
+		_cpcaR2.computeContextLRMatrices();	
 		
 		SVDTemplates svdTC;
 		
@@ -88,83 +101,172 @@ public class CCAVariantsRun implements Serializable {
 
 		System.out.println("+++Generated CCA Matrices+++");
 		
-		
-	/*	
-		if(_opt.typeofDecomp.equals("2viewLvsR")){
-			ltr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTRMatrix());
-			rtl=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTLMatrix());
-			ltl=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTLMatrix());
-			rtr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTRMatrix());
-			
-			computeCCA2(ltr,rtl,ltl,rtr,svdTC,_cpcaR2,ltr.rows(),ltr.columns());
-		}
-*/		
 		if(_opt.typeofDecomp.equals("2viewWvsL")){
-			wtl=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTLMatrix());
-			ltw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTWMatrix());
-			ltl=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTLMatrix());
-			wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix());
 			
-			
-			computeCCA2(wtl,ltw,ltl,wtw,svdTC,_cpcaR2,wtl.rows(),wtl.columns());
+			computeCCA2(MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTLMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTWMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTLMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),svdTC,_cpcaR2);
 		}
 		
 		if(_opt.typeofDecomp.equals("2viewWvsR")){
-			wtr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTRMatrix());
-			rtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTWMatrix());
-			rtr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTRMatrix());
-			wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix());
-			computeCCA2(wtr,rtw,rtr,wtw,svdTC,_cpcaR2,wtr.rows(),wtr.columns());
+			computeCCA2(MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTRMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTWMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTRMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),svdTC,_cpcaR2);
 		}
 		
 		if(_opt.typeofDecomp.equals("2viewWvsLR")){
-			wtlr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTLRMatrix());
-			lrtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLRTWMatrix());
-			lrtlr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLRTLRMatrix());
-			wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix());
-			computeCCA2(wtlr, lrtw,lrtlr,wtw,svdTC,_cpcaR2,wtlr.rows(),wtlr.columns());
+			computeCCA2(MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTLRMatrix()), MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLRTWMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLRTLRMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),svdTC,_cpcaR2);
 		}
 		
+		//3 view is not implemented as yet.
 		if(_opt.typeofDecomp.equals("3viewLvsWvsR") || _opt.typeofDecomp.equals("TwoStepLRvsW")){
-			ltr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTRMatrix());
-			rtl=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTLMatrix());
-			ltl=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTLMatrix());
-			rtr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTRMatrix());
-			wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix());
-			wtl=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTLMatrix());
-			wtr=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTRMatrix());
-			ltw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTWMatrix());
-			rtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTWMatrix());
-			
-			//if(_opt.typeofDecomp.equals("3viewLvsWvsR"))
-				//computeCCA3(View1,View1T, View2,View2T,View3,View3T,svdTC,_cpcaR2);
 		
 			if(_opt.typeofDecomp.equals("TwoStepLRvsW"))
-				computeCCATwoStepLRvsW(ltr,rtl,ltl,rtr,wtw,wtl,wtr,ltw,rtw,svdTC,_cpcaR2);
+				computeCCATwoStepLRvsW(MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTRMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTLMatrix()),
+						MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTLMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTRMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),
+						MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTLMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTRMatrix()),
+						MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getLTWMatrix()),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getRTWMatrix()),svdTC,_cpcaR2);
+		}
+	}
+	
+	private void computeCCAVariantDense(ContextPCARepresentation _cpcaR2) {
+		_cpcaR2.computeContextLRDenseMatrices();	
+		
+		SVDTemplates svdTC;
+		
+			svdTC=new SVDTemplates(_opt,dim2);
+
+		System.out.println("+++Generated Dense CCA Matrices+++");
+		
+		if(_opt.typeofDecomp.equals("2viewWvsL")){
+			
+			computeCCA2(_cpcaR2.getWTLDenseMatrix(),_cpcaR2.getLTWDenseMatrix(),_cpcaR2.getLTLDenseMatrix(),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),svdTC,_cpcaR2);
 		}
 		
+		if(_opt.typeofDecomp.equals("2viewWvsR")){
+			computeCCA2(_cpcaR2.getWTRDenseMatrix(),_cpcaR2.getRTWDenseMatrix(),_cpcaR2.getRTRDenseMatrix(),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),svdTC,_cpcaR2);
+		}
 		
+		if(_opt.typeofDecomp.equals("2viewWvsLR")){
+			computeCCA2(_cpcaR2.getWTLRDenseMatrix(),_cpcaR2.getLRTWDenseMatrix(),_cpcaR2.getLRTLRDenseMatrix(),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),svdTC,_cpcaR2);
+		}
 		
+		//3 view is not implemented as yet.
+		if(_opt.typeofDecomp.equals("3viewLvsWvsR") || _opt.typeofDecomp.equals("TwoStepLRvsW")){
 		
-		
+			if(_opt.typeofDecomp.equals("TwoStepLRvsW"))
+				computeCCATwoStepLRvsW(_cpcaR2.getLTRDenseMatrix(),_cpcaR2.getRTLDenseMatrix(),
+						_cpcaR2.getLTLDenseMatrix(),_cpcaR2.getRTRDenseMatrix(),MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getWTWMatrix()),
+						_cpcaR2.getWTLDenseMatrix(),_cpcaR2.getWTRDenseMatrix(),_cpcaR2.getLTWDenseMatrix(),_cpcaR2.getRTWDenseMatrix(),svdTC,_cpcaR2);
+		}
+
 		
 	}
+	
+	
+	
+	private void computeCCA2(DenseDoubleMatrix2D xty,
+			DenseDoubleMatrix2D ytx, DenseDoubleMatrix2D yty,
+			SparseDoubleMatrix2D xtx, SVDTemplates svdTC,ContextPCARepresentation _cpcaR2) {
+		
+		
+		System.out.println("+++Entering CCA Compute Function+++");
+		
+		DenseDoubleMatrix2D auxMat1=new DenseDoubleMatrix2D(xtx.rows(),xty.columns());
+		DenseDoubleMatrix2D auxMat2=new DenseDoubleMatrix2D(yty.rows(),ytx.columns());
+		DenseDoubleMatrix2D auxMat3=new DenseDoubleMatrix2D(auxMat1.rows(),auxMat1.rows());
+		DenseDoubleMatrix2D auxMat4=new DenseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows());
+				
+		int dim1=xty.rows();
+		int dim2=xty.columns();
+		
+		System.out.println("+++Initialized auxiliary matrices+++");
+				
+		(svdTC.computeSparseInverse(xtx)).zMult(xty, auxMat1);
+		
+		System.out.println("+++Computed 1 inverse+++");
+		
+		DenseDoubleAlgebra dalg=new DenseDoubleAlgebra();
+		
+		((DenseDoubleMatrix2D) dalg.inverse(yty)).zMult(ytx, auxMat2);
+		
+		System.out.println("+++Computed Inverses+++");
+		auxMat1.zMult(auxMat2,auxMat3);
+		
+		System.out.println("+++Entering SVD computation+++");
+		phiL=svdTC.computeSVD_Tropp(auxMat3, _cpcaR2.getOmegaMatrix(auxMat3.columns()),dim1);
+		s=svdTC.getSingularVals();
+		
+		auxMat2.zMult(auxMat1,auxMat4);
+		phiR=svdTC.computeSVD_Tropp(auxMat4, _cpcaR2.getOmegaMatrix(auxMat4.columns()),dim2);
+		
+	}
+	
+	private void computeCCA2(DenseDoubleMatrix2D xty,
+			DenseDoubleMatrix2D ytx, DenseDoubleMatrix2D yty,
+			DenseDoubleMatrix2D xtx, SVDTemplates svdTC,ContextPCARepresentation _cpcaR2) {
+		
+		
+		System.out.println("+++Entering CCA Compute Function+++");
+		
+		DenseDoubleMatrix2D auxMat1=new DenseDoubleMatrix2D(xtx.rows(),xty.columns());
+		DenseDoubleMatrix2D auxMat2=new DenseDoubleMatrix2D(yty.rows(),ytx.columns());
+		DenseDoubleMatrix2D auxMat3=new DenseDoubleMatrix2D(auxMat1.rows(),auxMat1.rows());
+		DenseDoubleMatrix2D auxMat4=new DenseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows());
+				
+		int dim1=xty.rows();
+		int dim2=xty.columns();
+		
+		DenseDoubleAlgebra dalg=new DenseDoubleAlgebra();
+		
+		System.out.println("+++Initialized auxiliary matrices+++");
+				
+		((DenseDoubleMatrix2D) dalg.inverse(xtx)).zMult(xty, auxMat1);
+		
+		System.out.println("+++Computed 1 inverse+++");
+		
+		
+		
+		((DenseDoubleMatrix2D) dalg.inverse(yty)).zMult(ytx, auxMat2);
+		
+		System.out.println("+++Computed Inverses+++");
+		auxMat1.zMult(auxMat2,auxMat3);
+		
+		System.out.println("+++Entering SVD computation+++");
+		phiL=svdTC.computeSVD_Tropp(auxMat3, _cpcaR2.getOmegaMatrix(auxMat3.columns()),dim1);
+		s=svdTC.getSingularVals();
+		
+		auxMat2.zMult(auxMat1,auxMat4);
+		phiR=svdTC.computeSVD_Tropp(auxMat4, _cpcaR2.getOmegaMatrix(auxMat4.columns()),dim2);
+		
+	}
+	
 	
 	
 
 	private void computeCCA2(SparseDoubleMatrix2D xty,
 			SparseDoubleMatrix2D ytx, SparseDoubleMatrix2D yty,
-			SparseDoubleMatrix2D xtx, SVDTemplates svdTC,ContextPCARepresentation _cpcaR2,int dim1,int dim2) {
+			SparseDoubleMatrix2D xtx, SVDTemplates svdTC,ContextPCARepresentation _cpcaR2) {
 		
-		SparseDoubleMatrix2D auxMat1=new SparseDoubleMatrix2D(xtx.rows(),xty.columns());
-		SparseDoubleMatrix2D auxMat2=new SparseDoubleMatrix2D(yty.rows(),ytx.columns());
-		SparseDoubleMatrix2D auxMat3=new SparseDoubleMatrix2D(auxMat1.rows(),auxMat1.rows());
-		SparseDoubleMatrix2D auxMat4=new SparseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows());
+		
+		System.out.println("+++Entering CCA Compute Function+++");
+		
+		SparseDoubleMatrix2D auxMat1=new SparseDoubleMatrix2D(xtx.rows(),xty.columns(),0,0.7,0.75);
+		SparseDoubleMatrix2D auxMat2=new SparseDoubleMatrix2D(yty.rows(),ytx.columns(),0,0.7,0.75);
+		SparseDoubleMatrix2D auxMat3=new SparseDoubleMatrix2D(auxMat1.rows(),auxMat1.rows(),0,0.7,0.75);
+		SparseDoubleMatrix2D auxMat4=new SparseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows(),0,0.7,0.75);
 				
+		int dim1=xty.rows();
+		int dim2=xty.columns();
+		
+		System.out.println("+++Initialized auxiliary matrices+++");
 				
 		(svdTC.computeSparseInverse(xtx)).zMult(xty, auxMat1);
+		
+		System.out.println("+++Computed 1 inverse+++");
+		
 		(svdTC.computeSparseInverse(yty)).zMult(ytx, auxMat2);
+		
+		System.out.println("+++Computed Inverses+++");
 		auxMat1.zMult(auxMat2,auxMat3);
+		
+		System.out.println("+++Entering SVD computation+++");
 		phiL=svdTC.computeSVD_Tropp(auxMat3, _cpcaR2.getOmegaMatrix(auxMat3.columns()),dim1);
 		s=svdTC.getSingularVals();
 		
@@ -200,7 +302,7 @@ public class CCAVariantsRun implements Serializable {
 		SparseDoubleMatrix2D  rtr_phiR=new SparseDoubleMatrix2D(rtr.rows(),_opt.hiddenStateSize);
 		
 		
-		computeCCA2(ltr,rtl, rtr,ltl,svdTC,_cpcaR2,ltr.rows(),ltr.columns());
+		computeCCA2(ltr,rtl, rtr,ltl,svdTC,_cpcaR2);
 		
 		wtl.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), WTLphiL);
 		wtr.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), WTRphiR);
@@ -226,10 +328,66 @@ public class CCAVariantsRun implements Serializable {
 		
 		LRTLRphiLphiR=_cpcaR2.concatenateLRT(_cpcaR2.concatenateLR(phiLT_LTL_phiL,phiLT_LTR_phiR),_cpcaR2.concatenateLR(phiRT_RTL_phiL,phiRT_RTR_phiR));
 		
-		computeCCA2(WTLphiLWTRphiR,phiLTLTWphiRTRTW, LRTLRphiLphiR,wtw,svdTC,_cpcaR2,WTLphiLWTRphiR.rows(),WTLphiLWTRphiR.columns());
+		computeCCA2(WTLphiLWTRphiR,phiLTLTWphiRTRTW, LRTLRphiLphiR,wtw,svdTC,_cpcaR2);
 		
 	}
 
+	private void computeCCATwoStepLRvsW(DenseDoubleMatrix2D ltr,
+			DenseDoubleMatrix2D rtl, DenseDoubleMatrix2D ltl,
+			DenseDoubleMatrix2D rtr, SparseDoubleMatrix2D wtw,
+			DenseDoubleMatrix2D wtl, DenseDoubleMatrix2D wtr, DenseDoubleMatrix2D ltw, DenseDoubleMatrix2D rtw, SVDTemplates svdTC,ContextPCARepresentation _cpcaR2) {
+		
+		
+		
+		DenseDoubleMatrix2D WTLphiL=new DenseDoubleMatrix2D(wtl.rows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D WTRphiR=new DenseDoubleMatrix2D(wtr.rows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D LTWphiL=new DenseDoubleMatrix2D(_opt.hiddenStateSize,wtl.rows());
+		DenseDoubleMatrix2D RTWphiR=new DenseDoubleMatrix2D(_opt.hiddenStateSize,wtr.rows());
+		DenseDoubleMatrix2D WTLphiLWTRphiR=new DenseDoubleMatrix2D(wtl.rows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiLTLTWphiRTRTW=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtl.rows());
+		
+		DenseDoubleMatrix2D LRTLRphiLphiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
+				
+		DenseDoubleMatrix2D phiLT_LTL_phiL=new DenseDoubleMatrix2D(_opt.hiddenStateSize,_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiLT_LTR_phiR=new DenseDoubleMatrix2D(_opt.hiddenStateSize,_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRT_RTL_phiL=new DenseDoubleMatrix2D(_opt.hiddenStateSize,_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRT_RTR_phiR=new DenseDoubleMatrix2D(_opt.hiddenStateSize,_opt.hiddenStateSize);
+		
+		DenseDoubleMatrix2D  ltl_phiL=new DenseDoubleMatrix2D(ltl.rows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D  ltr_phiR=new DenseDoubleMatrix2D(ltr.rows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D  rtl_phiL=new DenseDoubleMatrix2D(rtl.rows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D  rtr_phiR=new DenseDoubleMatrix2D(rtr.rows(),_opt.hiddenStateSize);
+		
+		
+		computeCCA2(ltr,rtl, rtr,ltl,svdTC,_cpcaR2);
+		
+		wtl.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), WTLphiL);
+		wtr.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), WTRphiR);
+		
+		phiLT=phiL.transpose();
+		phiRT=phiR.transpose();
+		
+		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltw, LTWphiL);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(rtw, RTWphiR);
+		
+		WTLphiLWTRphiR=_cpcaR2.concatenateLR(WTLphiL,WTRphiR);
+		phiLTLTWphiRTRTW=_cpcaR2.concatenateLRT(LTWphiL,RTWphiR);
+		
+		ltl.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), ltl_phiL);
+		ltr.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), ltr_phiR);
+		rtl.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), rtl_phiL);
+		rtr.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), rtr_phiR);
+		
+		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltl_phiL, phiLT_LTL_phiL);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltr_phiR, phiLT_LTR_phiR);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(rtl_phiL, phiRT_RTL_phiL);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(rtr_phiR, phiRT_RTR_phiR);
+		
+		LRTLRphiLphiR=_cpcaR2.concatenateLRT(_cpcaR2.concatenateLR(phiLT_LTL_phiL,phiLT_LTR_phiR),_cpcaR2.concatenateLR(phiRT_RTL_phiL,phiRT_RTR_phiR));
+		
+		computeCCA2(WTLphiLWTRphiR,phiLTLTWphiRTRTW, LRTLRphiLphiR,wtw,svdTC,_cpcaR2);
+		
+	}
 
 
 	private void computeCCA3(SparseDoubleMatrix2D view1,

@@ -1,5 +1,13 @@
 package edu.upenn.cis.swell.IO;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -11,8 +19,6 @@ import java.util.Random;
 
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import Jama.Matrix;
-import edu.upenn.cis.swell.Data.Corpus;
-import edu.upenn.cis.swell.Data.Document;
 
 public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 
@@ -45,6 +51,44 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		
 		try {
 			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.contextOblEmbed),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+	
+	while(idxDoc<_allDocs.size()){	
+			int tok_idx=0;	
+			ArrayList<Integer> doc=_allDocs.get(idxDoc++);
+			
+			while(tok_idx<doc.size()){
+				writer.write(_rin.getTokForIntTrain(idx++));
+				writer.write(' ');
+				for (int j=0;j<_opt.hiddenStateSize;j++){
+					
+					if ( j != (_opt.hiddenStateSize)-1){
+						writer.write(Double.toString(contextObliviousEmbed.get(i, j)));
+						writer.write(' ');
+					}
+					else{
+						writer.write(Double.toString(contextObliviousEmbed.get(i, j)));
+						writer.write('\n');
+					}
+				}
+				i++;
+				tok_idx++;
+			}
+	}
+		writer.close();	
+	}
+	
+	
+	public void writeContextObliviousEmbedContext(Matrix contextObliviousEmbed) throws IOException {
+		int i=0,idxDoc=0,idx=0;
+		
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.contextOblEmbedContext),"UTF8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {

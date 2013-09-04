@@ -1,7 +1,18 @@
 package edu.upenn.cis.swell.MainMethods;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
@@ -19,14 +30,13 @@ import edu.upenn.cis.swell.SpectralRepresentations.ContextPCARepresentation;
 public class CCAVariants implements Serializable {
  
 	static final long serialVersionUID = 42L;
-	
+	static HashMap<Integer,Integer> words_Dict;
 	
 	public static void main(String[] args) throws Exception{
 		
 		ArrayList<ArrayList<Integer>> all_Docs;
 		ArrayList<Integer> docSize;
 		ReadDataFile rin;
-		//Corpus corpus;
 		ContextPCARepresentation contextPCARep;
 		HashMap<String,Integer> corpusInt=new HashMap<String,Integer>();
 		HashMap<String,Integer> corpusIntOldMapping=new HashMap<String,Integer>();
@@ -63,20 +73,28 @@ public class CCAVariants implements Serializable {
 			rin.serializeCorpusIntMapped();
 			//corpus=new Corpus(all_Docs,docSize,opt);
 			
-			contextPCARep= new ContextPCARepresentation(opt, numTokens,rin,all_Docs);
+			
 			
 		    /* Total memory currently in use by the JVM */
 		    System.out.println("Total memory (bytes): " + 
 		        Runtime.getRuntime().totalMemory());
 			
-			
-			ccaVariantRun=new CCAVariantsRun(opt,contextPCARep);
+		    
+		    
+			if(opt.kdimDecomp){
+				contextPCARep= new ContextPCARepresentation(opt, numTokens,rin,all_Docs,(Matrix)getkDimCCADict(opt,corpusInt),getwordDict());
+			}
+			else{
+				contextPCARep= new ContextPCARepresentation(opt, numTokens,rin,all_Docs);
+			}
+		    
+		    ccaVariantRun=new CCAVariantsRun(opt,contextPCARep);
 			ccaVariantRun.serializeCCAVariantsRun();
 			matrices=deserializeCCAVariantsRun(opt);
 
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
 			wout.writeEigenDict();
-			if(!opt.typeofDecomp.equals("TwoStepLRvsW"))
+			if(!opt.typeofDecomp.equals("TwoStepLRvsW") && !opt.kdimDecomp)
 				wout.writeEigContextVectors();
 			
 			
@@ -138,6 +156,63 @@ public class CCAVariants implements Serializable {
 		return corpus_intM;
 		
 	} 
+	
+public static Matrix getkDimCCADict(Options opt, HashMap<String, Integer> corpusInt) throws ClassNotFoundException{
+		
+		
+		
+		//String eigDict=opt.eigenWordCCAFile;
+		File fEig= new File(opt.eigenWordCCAFile);
+		
+		
+		Matrix eigDictMat=new Matrix(opt.n+1,opt.p);
+		HashMap<Integer,Integer> wordsDict=new HashMap<Integer,Integer>();
+		
+		try{
+			
+			BufferedReader reader = new BufferedReader(new FileReader(fEig));
+			String line = null;
+			int i=0;
+			while ((line = reader.readLine()) != null) {
+			
+			String[] words= line.split("\\s");
+			
+			if(corpusInt.get(words[0])!=null)
+				wordsDict.put(corpusInt.get(words[0]),i);
+			
+			for(int j=0;j<words.length-1;j++){
+				eigDictMat.set(i, j, Double.parseDouble(words[j+1]));
+			}
+			i++;	
+			}
+			
+			System.out.println("=======Loaded the k-dim CCA Dictionary=======");
+			//For words not in dict use OOV
+			for(int l=0; l <opt.vocabSize;l++)
+			{
+				if(wordsDict.get(l)==null){
+					wordsDict.put(l,0);
+				}
+			}
+			
+			setwordDict(wordsDict);
+		}
+		catch (IOException ioe){
+			System.out.println(ioe.getMessage());
+		}
+		
+		return eigDictMat;
+		
+	}
+
+public static HashMap<Integer,Integer> getwordDict(){
+	return words_Dict;
+}
+
+public static HashMap<Integer,Integer> setwordDict(HashMap<Integer,Integer> wDict){
+	return words_Dict=wDict;
+}
+	
 
 	public static Object[] deserializeCCAVariantsRun(Options opt) throws ClassNotFoundException{
 		
@@ -169,6 +244,7 @@ public class CCAVariants implements Serializable {
 		matrixObj[0]=(Object)eigDictMat;
 		matrixObj[1]=(Object)contextDictMat;
 		
+	
 		return matrixObj;
 		
 	}

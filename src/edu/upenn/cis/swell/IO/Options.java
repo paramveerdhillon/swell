@@ -1,14 +1,18 @@
 package edu.upenn.cis.swell.IO;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public final class Options implements Serializable {
-	
-	
-	
-	    	
-	
 	
  static final long serialVersionUID = 42L;
  public String unlabDataTrainfile = null;
@@ -22,6 +26,7 @@ public final class Options implements Serializable {
  public String testfile = null;
  public String contextSpecificEmbed=null;
  public String contextOblEmbed=null;
+ public String contextOblEmbedContext=null;
  public boolean train = false;
  public boolean trainUnlab = false;
  public boolean eval = false;
@@ -49,10 +54,15 @@ public final class Options implements Serializable {
  public boolean normalizePCA=false;
  public boolean depbigram=false;
  public boolean diagOnlyInverse=false;
-//public String pcaAlgorithm=null;
-
+ public boolean contextSensitive=false;
+ public String outputDir="Output_Files/";
+ public String embedToInduce=null;
+ public String eigenWordCCAFile=null;
+ public boolean kdimDecomp=false;
+ public int n=0,p=0;
  
-  
+ 
+ 
  public Options (String[] args) {
 
 	for(int i = 0; i < args.length; i++) {
@@ -66,24 +76,56 @@ public final class Options implements Serializable {
 	    
 	 //Default file names; if you need to change them uncomment later in this file and make these command line parameters.
 	   
-	    serializeRun = "Output_Files/run"+algorithm;
+	    if(pair[0].equals("output-dir-prefix")){
+	    	outputDir=pair[1]+"/";
+	    	
+	    }
+	    
+	    
+	    if(pair[0].equals("eigenCCA-dict-file")){
+	    	eigenWordCCAFile=pair[1];
+	    	n=Integer.parseInt(pair[2]);
+	    	p=Integer.parseInt(pair[3]);
+	    }
+	    
+	    
+	    if(pair[0].equals("embed-to-induce")){
+	    	embedToInduce=pair[1];
+	    	
+	    }
+	    
+	    File folder = new File(outputDir);
+    	folder.mkdirs();
+	    
+	    serializeRun = outputDir+"run."+algorithm;
 		
-	    serializeRep = "Output_Files/rep"+algorithm;
+	    serializeRep = outputDir+"rep."+algorithm;
 	 
-	    serializeCorpus = "Output_Files/corpus"+algorithm;
+	    serializeCorpus = outputDir+"corpus."+algorithm;
 	
-	    contextSpecificEmbed = "Output_Files/contextSpecificEmbed"+algorithm;
+	    contextSpecificEmbed = outputDir+"contextSpecificEmbed."+algorithm;
 	
-	    contextOblEmbed = "Output_Files/contextObliviousEmbed"+algorithm;
+	    contextOblEmbed = outputDir+"contextObliviousEmbed."+algorithm;
+	    
+	    contextOblEmbedContext = outputDir+"contextObliviousEmbedContext."+algorithm;
 	
-		eigendictName = "Output_Files/eigenDict"+algorithm;
+		eigendictName = outputDir+"eigenDict."+algorithm;
 		
-		lSVecName = "Output_Files/PhiLSingVect"+algorithm;
+		lSVecName = outputDir+"PhiLSingVect."+algorithm;
 		
-		rSVecName = "Output_Files/PhiLSingVect"+algorithm;
+		rSVecName = outputDir+"PhiLSingVect."+algorithm;
 		
 	    
-	    
+		if (pair[0].equals("context-sensitive"))
+		{
+			contextSensitive=true;
+		}
+		
+		if (pair[0].equals("kdim-decomp"))
+		{
+			kdimDecomp=true;
+		}
+		
 	    
 	    if (pair[0].equals("diagOnlyInverse")) {
 	    	diagOnlyInverse = true;

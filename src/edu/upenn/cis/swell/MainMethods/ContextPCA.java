@@ -1,5 +1,14 @@
 package edu.upenn.cis.swell.MainMethods;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +35,6 @@ public class ContextPCA implements Serializable {
 		ArrayList<ArrayList<Integer>> all_Docs;
 		ArrayList<Integer> docSize;
 		ReadDataFile rin;
-		//Corpus corpus;
 		ContextPCARepresentation contextPCARep;
 		HashMap<String,Integer> corpusInt=new HashMap<String,Integer>();
 		HashMap<String,Integer> corpusIntOldMapping=new HashMap<String,Integer>();
@@ -102,26 +110,37 @@ public class ContextPCA implements Serializable {
 			//corpus=new Corpus(all_Docs,docSize,opt);
 			matrices=deserializeContextPCARun(opt);
 			contextPCARep= new ContextPCARepresentation(opt, numTokens,rin,all_Docs);
-			
-			Matrix contextSpecificEmbed=contextPCARep.generateProjections((Matrix)matrices[0], 
-					(Matrix)matrices[1], (Matrix)matrices[2]);
-			
-			Matrix contextObliviousEmbed=contextPCARep.getContextOblEmbeddings((Matrix)matrices[0]);
-	
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
-			wout.writeContextSpecificEmbed(contextSpecificEmbed);
+			
+			//Matrix contextSpecificEmbed=contextPCARep.generateProjections((Matrix)matrices[0], 
+				//	(Matrix)matrices[1], (Matrix)matrices[2]);
+			//wout.writeContextSpecificEmbed(contextSpecificEmbed);
+			
+			Matrix contextObliviousEmbed=contextPCARep.getContextOblEmbeddings((Matrix)matrices[1]);
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
+			
+			Matrix contextObliviousEmbedContext=contextPCARep.getContextOblEmbeddings((Matrix)matrices[0]);
+			wout.writeContextObliviousEmbedContext(contextObliviousEmbedContext);
 			
 			if (opt.randomBaseline){
 				wout.writeContextObliviousEmbedRandom();
 			}
 			
-			System.out.println("+++Generated Context PCA Embedddings for training data+++\n");
+			System.out.println("+++Generated Context PCA Embeddings for training data+++\n");
 		}
 	}
 
 	public static HashMap<String,Integer> deserializeCorpusIntMapped(Options opt) throws ClassNotFoundException{
-		File f= new File(opt.serializeCorpus);
+		
+		String serCorpus =opt.serializeCorpus;
+		
+		if (opt.embedToInduce !=null){
+			String[] serCorpus1= serCorpus.split("\\.");
+			serCorpus= serCorpus1[0]+"."+opt.embedToInduce;
+		}
+		
+		
+		File f= new File(serCorpus);
 		HashMap<String,Integer> corpus_intM=null;
 		
 		try{
@@ -139,14 +158,21 @@ public class ContextPCA implements Serializable {
 		
 	} 
 
+	
 public static Object[] deserializeContextPCARun(Options opt) throws ClassNotFoundException{
 	
 	Object[] matrixObj =new Object[2];
+	String serRun =opt.serializeRun;
 	
-	String contextDict=opt.serializeRun+"Context";
+	if (opt.embedToInduce !=null){
+		String[] serRun1= serRun.split("\\.");
+		serRun= serRun1[0]+"."+opt.embedToInduce;
+	}
+	
+	String contextDict=serRun+"Context";
 	File fContext= new File(contextDict);
 	
-	String eigDict=opt.serializeRun+"Eig";
+	String eigDict=serRun+"Eig";
 	File fEig= new File(eigDict);
 	
 	

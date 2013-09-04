@@ -1,5 +1,14 @@
 package edu.upenn.cis.swell.Runs;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -186,7 +195,7 @@ public class CCARun implements Serializable {
 		BufferedWriter writer=null;
 		double sSum=0;
 		try {
-			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Output_Files/Stats"),"UTF8"));
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.outputDir+"Stats"),"UTF8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {

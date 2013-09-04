@@ -1,5 +1,15 @@
 package edu.upenn.cis.swell.MainMethods;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Jama.Matrix;
-import edu.upenn.cis.swell.Data.Corpus;
 import edu.upenn.cis.swell.IO.CCAWriter;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.IO.ReadDataFile;
@@ -29,7 +38,6 @@ public static void main(String[] args) throws Exception{
 		ArrayList<Integer> docSize;
 		long numTokens=0;
 		ReadDataFile rin;
-		Corpus corpus;
 		CCARepresentation ccaRep;
 		CCARun ccaRun;
 		CCAWriter wout;
@@ -92,13 +100,16 @@ public static void main(String[] args) throws Exception{
 			matrices=deserializeCCARun(opt);
 			ccaRep= new CCARepresentation(opt, numTokens,rin,all_Docs);
 			
-			
-			contextSpecificEmbed=ccaRep.generateProjectionsBySmoothing((Matrix)matrices[2], 
-					(Matrix)matrices[0], (Matrix)matrices[1]);
-			contextObliviousEmbed=ccaRep.getContextOblEmbeddings((Matrix)matrices[2]);
-	
 			wout=new CCAWriter(opt,ccaRep,matrices,rin,utils);
-			wout.writeContextSpecificEmbed(contextSpecificEmbed);
+			
+			if(opt.contextSensitive)
+			{
+				contextSpecificEmbed=ccaRep.generateProjectionsBySmoothing((Matrix)matrices[2], 
+					(Matrix)matrices[0], (Matrix)matrices[1]);
+				wout.writeContextSpecificEmbed(contextSpecificEmbed);
+			}
+			
+			contextObliviousEmbed=ccaRep.getContextOblEmbeddings((Matrix)matrices[2]);
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
 			if (opt.randomBaseline){
 				wout.writeContextObliviousEmbedRandom();

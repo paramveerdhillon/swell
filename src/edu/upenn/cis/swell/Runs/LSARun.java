@@ -1,5 +1,14 @@
 package edu.upenn.cis.swell.Runs;
 
+/**
+ * ver: 1.0
+ * @author paramveer dhillon.
+ *
+ * last modified: 09/04/13
+ * please send bug reports and suggestions to: dhillon@cis.upenn.edu
+ */
+
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,9 +16,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-
 import Jama.Matrix;
-import edu.upenn.cis.swell.Data.Corpus;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.MathUtils.SVDTemplates;
 import edu.upenn.cis.swell.SpectralRepresentations.LSARepresentation;
