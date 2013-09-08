@@ -11,11 +11,14 @@ package edu.upenn.cis.swell.IO;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -75,10 +78,11 @@ public class ReadDataFile implements Serializable {
 	public void readAllDocs(int dataOption) throws Exception{
 		
 		if (dataOption==0)
-			in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
+			in= new BufferedReader(new InputStreamReader(new FileInputStream(_opt.unlabDataTrainfile), "UTF8"));
+	
 		
 		if (dataOption==1){
-			in= new BufferedReader(new FileReader(_opt.trainfile));
+			in=new BufferedReader(new InputStreamReader(new FileInputStream(_opt.trainfile), "UTF8"));			
 			strMap=new HashMap<Integer,String>();
 		}
 		
@@ -208,7 +212,9 @@ public class ReadDataFile implements Serializable {
 public void readAllDocsNGramsSingleVocab() throws Exception{
 		
 		
-		in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
+		in= new BufferedReader(new InputStreamReader(new FileInputStream(_opt.unlabDataTrainfile), "UTF8"));
+		
+		
 		HashMap<Double,Double> word_contextCounts,word_contextCounts3WR1,word_contextCounts3WR2,
 		word_contextCounts3WL1,word_contextCounts3WL2,word_contextCounts3WL,word_contextCounts3WR,word_contextCounts3R1R2_OR_LR_OR_L1L2;
 		
@@ -741,7 +747,8 @@ public void readAllDocsNGramsSingleVocab() throws Exception{
 	
 	public HashMap<String, Integer> convertAllDocsIntNGrams() throws Exception {
 		
-		in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
+		in= new BufferedReader(new InputStreamReader(new FileInputStream(_opt.unlabDataTrainfile), "UTF8"));
+		
 		
 		
 		String line=in.readLine();
@@ -812,9 +819,9 @@ public void readAllDocsNGramsSingleVocab() throws Exception{
 	
 public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exception {
 		
-		in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
+		in= new BufferedReader(new InputStreamReader(new FileInputStream(_opt.unlabDataTrainfile), "UTF8"));
 		
-		
+			
 		String line=in.readLine();
 		int docCounter=0,numDocs=0;
 		while (line != null ) {
@@ -872,10 +879,14 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 	public HashMap<String,Integer> convertAllDocsInt(int dataOption) throws Exception{
 		
 		if (dataOption==0)
-			in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
+			in= new BufferedReader(new InputStreamReader(new FileInputStream(_opt.unlabDataTrainfile), "UTF8"));
+	
 		
-		if (dataOption==1)
-			in= new BufferedReader(new FileReader(_opt.trainfile));
+		if (dataOption==1){
+			in=new BufferedReader(new InputStreamReader(new FileInputStream(_opt.trainfile), "UTF8"));			
+			
+		}
+		
 		
 		
 		String line=in.readLine();
@@ -1079,6 +1090,7 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 		File f= new File(_opt.serializeCorpus);
 		
 		try{
+			
 			ObjectOutput corpus=new ObjectOutputStream(new FileOutputStream(f));
 			corpus.writeObject((Object)this.corpusIntMapped);
 			corpus.flush( );
