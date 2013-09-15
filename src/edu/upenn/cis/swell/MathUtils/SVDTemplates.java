@@ -58,11 +58,11 @@ public class SVDTemplates implements Serializable {
 		
 		for(int i=0; i<X.rows();i++){ 
 			
-			//if(X.get(i, i)!=0){
+			if(X.get(i, i)!=0){
 				diagInvEntries.set(i, i, 1/X.get(i, i));
-			//}else{
-				//diagInvEntries.set(i, i, 1);
-			//}
+			}else{
+				diagInvEntries.set(i, i, 1);
+			}
 		}
 		System.out.println("++Finished Sparse Inverse++");
 		
