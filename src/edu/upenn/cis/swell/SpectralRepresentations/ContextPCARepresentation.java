@@ -593,6 +593,7 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 								WTLRMatrix_vTimes2hk.setQuick(tok,((_opt.contextSizeOneSide)*(k_dim))+(i-1)*(k_dim)+j, kdimEigDict.get(_wordMap.get(doc.get(idx_tok+i)), j));	
 							}
 								
+							
 								//RTR
 								//LRTLRMatrix_2hvTimes2hv.add(((_opt.contextSizeOneSide)*(_vocab_size+1))+(i-1)*(_vocab_size+1)+doc.get(idx_tok+i), ((_opt.contextSizeOneSide)*(_vocab_size+1))+(i-1)*(_vocab_size+1)+doc.get(idx_tok+i), 1);
 								

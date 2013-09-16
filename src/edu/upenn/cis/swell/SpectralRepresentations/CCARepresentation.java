@@ -26,9 +26,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import Jama.Matrix;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.IO.ReadDataFile;
+import edu.upenn.cis.swell.MathUtils.CenterScaleNormalizeUtils;
 
 public class CCARepresentation extends SpectralRepresentation implements Serializable {
 
@@ -145,12 +147,15 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		double[][] covLR=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
 		Object[] covMatrices= new Object[3];
 		
+		mathUtils=new CenterScaleNormalizeUtils(_opt);
+		
+		
 		Matrix covLLMatrix= new Matrix(covLL); 
 		Matrix covRRMatrix= new Matrix(covRR);
 		Matrix covLRMatrix= new Matrix(covLR);
 		
-		Matrix LMatrix=left_smooth(eigenFeatDict, doc);
-		Matrix RMatrix=right_smooth(eigenFeatDict, doc);
+		Matrix LMatrix=mathUtils.center(left_smooth(eigenFeatDict, doc));
+		Matrix RMatrix=mathUtils.center(right_smooth(eigenFeatDict, doc));
 		
 		
 		
@@ -397,8 +402,9 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 				covArr[i][j]/=_numTokens;
 		}
 		
-		
-		 Matrix covNew= new Matrix(covArr);
+			
+		Matrix covNew= new Matrix(covArr);
+		 
 		return covNew;
 	}
 	

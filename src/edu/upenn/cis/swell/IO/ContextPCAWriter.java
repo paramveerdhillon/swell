@@ -163,7 +163,7 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		Matrix eigenDictContext=(Matrix)_matrices[1];
 		double[][] eigenDictArrContext=eigenDictContext.getArray();
 		ArrayList<String> vocab=_rin.getSortedWordListString();
-		String contextFile ="Output_Files/contextDict"+_opt.algorithm+_opt.typeofDecomp;
+		String contextFile =_opt.outputDir+"contextDict"+_opt.algorithm+_opt.typeofDecomp;
 		int counter=0;
 		
 		try {
@@ -227,7 +227,7 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		Matrix eigenDictContext=(Matrix)_matrices[1];
 		double[][] eigenDictArrContext=eigenDictContext.getArray();
 		ArrayList<String> vocab=_rin.getSortedWordListString();
-		String contextFile ="Output_Files/contextDictRandom";
+		String contextFile =_opt.outputDir+"contextDictRandom";
 		
 		Random r= new Random();
 		int counter=0;
@@ -324,7 +324,7 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		DenseDoubleMatrix2D dictLMatrix=createDenseMatrixCOLT((Matrix)_matrices[0]);
 		double[][] dictL=dictLMatrix.toArray();
 		ArrayList<String> vocab=_rin.getSortedWordListString();
-		String eigenDict="Output_Files/eigenDict"+_opt.algorithm+_opt.typeofDecomp;
+		String eigenDict=_opt.outputDir+"eigenDict"+_opt.algorithm+_opt.typeofDecomp;
 		try {
 			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigenDict),"UTF8"));
 		} catch (UnsupportedEncodingException e) {
@@ -366,7 +366,7 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		DenseDoubleMatrix2D dictLMatrix=createDenseMatrixCOLT((Matrix)_matrices[0]);
 		double[][] dictL=dictLMatrix.toArray();
 		ArrayList<String> vocab=_rin.getSortedWordListString();
-		String eigenDict="Output_Files/eigenDictRandom";
+		String eigenDict=_opt.outputDir+"eigenDictRandom";
 		try {
 			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigenDict),"UTF8"));
 		} catch (UnsupportedEncodingException e) {

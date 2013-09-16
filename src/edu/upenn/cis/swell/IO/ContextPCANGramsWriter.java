@@ -95,7 +95,7 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 		DenseDoubleMatrix2D dictLMatrix=createDenseMatrixCOLT((Matrix)_matrices[0]);
 		double[][] dictL=dictLMatrix.toArray();
 		ArrayList<String> vocab=_rin.getSortedWordListString();
-		String eigDict ="Output_Files/EigDict"+_opt.algorithm+ _opt.typeofDecomp;
+		String eigDict =_opt.outputDir+"EigDict"+_opt.algorithm+ _opt.typeofDecomp;
 		try {
 			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigDict),"UTF8"));
 		} catch (UnsupportedEncodingException e) {
@@ -136,7 +136,7 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 		
 		Random r=new Random();
 		ArrayList<String> vocab=_rin.getSortedWordListString();
-		String eigDict ="Output_Files/EigDictRandom";
+		String eigDict =_opt.outputDir+"EigDictRandom";
 		try {
 			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigDict),"UTF8"));
 		} catch (UnsupportedEncodingException e) {
@@ -183,7 +183,7 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 		else{
 			vocab=_rin.getSortedWordListString();
 		}
-		String contextFile ="Output_Files/contextDict"+_opt.algorithm+_opt.typeofDecomp;
+		String contextFile =_opt.outputDir+"contextDict"+_opt.algorithm+_opt.typeofDecomp;
 		int counter=0;
 		
 		try {
@@ -258,7 +258,7 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 		else{
 			vocab=_rin.getSortedWordListString();
 		}
-		String contextFile ="Output_Files/contextDictRandom";
+		String contextFile =_opt.outputDir+"contextDictRandom";
 		int counter=0;
 		
 		try {

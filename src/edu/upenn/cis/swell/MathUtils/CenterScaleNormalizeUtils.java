@@ -52,6 +52,31 @@ public Matrix center_and_scale(Matrix eigen_dict){
 		}
 
 
+public Matrix center(Matrix eigen_dict){
+	
+	double[][] eigenFeatDict=new double[_opt.vocabSize+1][_opt.hiddenStateSize];
+	Object[] mean_sd;
+	double[] _means=new double[eigen_dict.getColumnDimension()];
+	
+	
+	mean_sd=compute_mean_std(eigen_dict);
+	_means=(double[])mean_sd[0];
+	
+	eigenFeatDict=eigen_dict.getArray();
+	
+	for (int i=0; i<eigen_dict.getColumnDimension();i++){
+		for(int j=0;j<eigen_dict.getRowDimension();j++){
+		eigenFeatDict[j][i]-=_means[i];
+	}
+	}
+		Matrix new_eigen_dict=new Matrix(eigenFeatDict);
+		
+		
+		
+		return new_eigen_dict;
+	
+	}
+
    public double cantorPairingMap (int i, int j){ //See the wiki article
 	
 	   double num=(0.5*(i+j)*(i+j+1)) + j;
