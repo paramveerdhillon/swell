@@ -84,7 +84,7 @@
     <target name="CCAVariants">
         <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train unlab-train-file:Input_Files/test_demo.txt  scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:CCARunningText:2viewWvsLR contextSizeEachSide:1 kdim-decomp eigenCCA-dict-file:Output_Files/eigenDictCCARunningText2viewWvsLRDict:200:20"/>
+            <arg line="unlab-train unlab-train-file:Input_Files/test_demo.txt  scaleDictBySingVals output-dir-prefix:Output_Files_new vocab-size:50 hidden-state:10 algorithm:CCARunningText:2viewWvsLR contextSizeEachSide:1 kdim-decomp eigenCCA-dict-file:Output_Files/eigenDictCCARunningText2viewWvsLRDict:200:20"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.CCAVariants.bootclasspath"/>
@@ -124,7 +124,7 @@
     <target name="LRMVLEmbed">
         <java classname="edu.upenn.cis.swell.MainMethods.LRMVLEmbed" failonerror="true" fork="yes">
             <jvmarg line="-Xmx4G"/>
-            <arg line="unlab-train train unlab-train-file:Input_Files/all.txt  train-file:Input_Files/train_demo2.txt output-dir-prefix:Output_Files_new  smooths:.1,.5,.9 doc-separator:DOCSTART-X-0 scaleDictBySingVals vocab-size:20 hidden-state:10 algorithm:LRMVL:2viewCCA  scaleDictBySingVals"/>
+            <arg line="unlab-train train unlab-train-file:Input_Files/test_demo.txt train-file:Input_Files/train_demo2.txt output-dir-prefix:Output_Files_new  smooths:.1,.5,.9 doc-separator:DOCSTART-X-0 scaleDictBySingVals vocab-size:50 hidden-state:20 algorithm:LRMVL:2viewCCA"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.LRMVLEmbed.bootclasspath"/>
