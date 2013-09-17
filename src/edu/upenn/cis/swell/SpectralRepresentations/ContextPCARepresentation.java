@@ -280,6 +280,7 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 								}
 						}
 						if (idx_tok+i <doc.size()){
+							
 								WTLRMatrix_vTimes2hv.add(tok, ((_opt.contextSizeOneSide)*(_vocab_size+1))+(i-1)*(_vocab_size+1)+doc.get(idx_tok+i), 1);
 								
 								LRTWMatrix_2hvTimesv.add(((_opt.contextSizeOneSide)*(_vocab_size+1))+(i-1)*(_vocab_size+1)+doc.get(idx_tok+i),tok, 1);

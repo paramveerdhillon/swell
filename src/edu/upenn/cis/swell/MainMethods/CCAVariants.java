@@ -188,7 +188,7 @@ public static Matrix getkDimCCADict(Options opt, HashMap<String, Integer> corpus
 			
 			System.out.println("=======Loaded the k-dim CCA Dictionary=======");
 			//For words not in dict use OOV
-			for(int l=0; l <opt.vocabSize;l++)
+			for(int l=0; l <opt.vocabSize+1;l++)
 			{
 				if(wordsDict.get(l)==null){
 					wordsDict.put(l,0);

@@ -94,7 +94,7 @@ public class ContextPCARun implements Serializable {
 		
 		
 		SVDTemplates svdTC;
-		
+		svdTC=new SVDTemplates(_opt,dim2);
 		
 		wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTWMatrix());
 		
@@ -102,11 +102,13 @@ public class ContextPCARun implements Serializable {
 			 wtl =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
 			 wtl1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
 			 ltw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
-			
+						 
 			wtl1=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTLMatrix());
 			ltw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getLTWMatrix());
 			if(_opt.normalizePCA){
-				wtw.zMult(wtl1, wtl);
+				
+				
+				svdTC.computeSparseInverse(wtw).zMult(wtl1, wtl);
 			}
 			else{
 				wtl=wtl1;
@@ -122,7 +124,7 @@ public class ContextPCARun implements Serializable {
 			wtr1=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTRMatrix());
 			rtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getRTWMatrix());
 			if(_opt.normalizePCA){
-				wtw.zMult(wtr1, wtr);
+				svdTC.computeSparseInverse(wtw).zMult(wtr1, wtr);
 			}
 			else{
 				wtr=wtr1;
@@ -142,7 +144,7 @@ public class ContextPCARun implements Serializable {
 			
 			wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTWMatrix());
 			if(_opt.normalizePCA){
-				wtw1.zMult(wtlr1, wtlr);
+				svdTC.computeSparseInverse(wtw).zMult(wtlr1, wtlr);
 			}
 			else{
 				wtlr=wtlr1;
