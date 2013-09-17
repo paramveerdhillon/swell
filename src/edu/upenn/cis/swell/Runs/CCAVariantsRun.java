@@ -59,7 +59,7 @@ public class CCAVariantsRun implements Serializable {
 		BufferedWriter writer=null;
 		double sSum=0;
 		try {
-			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Output_Files/CCAVariantStats"),"UTF8"));
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.outputDir+"CCAVariantStats"),"UTF8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {

@@ -764,9 +764,9 @@ int idx_toksAllDocs=0;
 					}
 				}
 			}
+		}
 			idx_tok++;
 			idx_toksAllDocs++;
-		}
 		}
 }		
 

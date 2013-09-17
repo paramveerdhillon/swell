@@ -19,6 +19,9 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+
+import no.uib.cipr.matrix.MatrixEntry;
+import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 import Jama.Matrix;
 import edu.upenn.cis.swell.IO.Options;
@@ -86,10 +89,11 @@ public class ContextPCARun implements Serializable {
 	private void computeCPCA(ContextPCARepresentation _cpcaR2) {
 		_cpcaR2.computeContextLRMatrices();
 		
-		SparseDoubleMatrix2D wtl=null,wtl1=null,wtr=null,wtr1=null,rtw=null,ltw=null;
+		SparseDoubleMatrix2D wtl=null,wtr=null,rtw=null,ltw=null;
+		FlexCompRowMatrix wtl1=null,wtr1=null,wtlr1=null;
+		
 		SparseDoubleMatrix2D wtlr=null;
 		SparseDoubleMatrix2D lrtw=null;
-		SparseDoubleMatrix2D wtlr1=null,wtw1=null;
 		SparseDoubleMatrix2D wtw =new SparseDoubleMatrix2D(_opt.vocabSize+1,_opt.vocabSize+1);
 		
 		
@@ -100,34 +104,40 @@ public class ContextPCARun implements Serializable {
 		
 		if(_opt.typeofDecomp.equals("WvsL")){
 			 wtl =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
-			 wtl1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+			  wtl1 =new FlexCompRowMatrix(_opt.vocabSize+1,dim2/2);
 			 ltw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
-						 
-			wtl1=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTLMatrix());
+			
+			 
+			wtl1=_cpcaR.getWTLMatrix();
 			ltw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getLTWMatrix());
 			if(_opt.normalizePCA){
+				//Scaling rows by the word counts.
+				for (MatrixEntry e : wtl1){
+					wtl.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+				}
 				
-				
-				svdTC.computeSparseInverse(wtw).zMult(wtl1, wtl);
 			}
 			else{
-				wtl=wtl1;
+				wtl=MatrixFormatConversion.createSparseMatrixCOLT(wtl1);
 			}
 		}
 		
 		if(_opt.typeofDecomp.equals("WvsR")){
 			 wtr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
-			 wtr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2/2);
+			 wtr1 =new FlexCompRowMatrix(_opt.vocabSize+1,dim2/2);
 			 rtw =new SparseDoubleMatrix2D(dim2/2,_opt.vocabSize+1);
 			
 			
-			wtr1=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTRMatrix());
+			wtr1=_cpcaR.getWTRMatrix();
 			rtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getRTWMatrix());
 			if(_opt.normalizePCA){
-				svdTC.computeSparseInverse(wtw).zMult(wtr1, wtr);
+				for (MatrixEntry e : wtr1){
+					wtr.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+				}
+				
 			}
 			else{
-				wtr=wtr1;
+				wtr=MatrixFormatConversion.createSparseMatrixCOLT(wtr1);
 			}
 			
 		}
@@ -135,19 +145,22 @@ public class ContextPCARun implements Serializable {
 		if(_opt.typeofDecomp.equals("WvsLR")){
 			
 			 lrtw =new SparseDoubleMatrix2D(dim2,_opt.vocabSize+1);
-			 wtlr1 =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
+			 wtlr1 =new FlexCompRowMatrix(_opt.vocabSize+1,dim2);
 			 wtlr =new SparseDoubleMatrix2D(_opt.vocabSize+1,dim2);
 			
 			
-			wtlr1=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTLRMatrix());
+			wtlr1=_cpcaR.getWTLRMatrix();
 			lrtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getLRTWMatrix());
 			
 			wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTWMatrix());
 			if(_opt.normalizePCA){
-				svdTC.computeSparseInverse(wtw).zMult(wtlr1, wtlr);
+				for (MatrixEntry e : wtlr1){
+					wtlr.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+					
+							}
 			}
 			else{
-				wtlr=wtlr1;
+				wtlr=MatrixFormatConversion.createSparseMatrixCOLT(wtlr1);
 			}
 			
 		}
