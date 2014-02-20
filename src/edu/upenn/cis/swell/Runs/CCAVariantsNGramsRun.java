@@ -19,8 +19,10 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.Iterator;
 
-import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
+import no.uib.cipr.matrix.MatrixEntry;
+import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import Jama.Matrix;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.MathUtils.MatrixFormatConversion;
@@ -89,7 +91,7 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 			_cpcaR2.computeLRContextMatrices();
 		else
 			_cpcaR2.computeLRContextMatricesSingleVocab();
-		SparseDoubleMatrix2D xtx,xty,ytx,wtr,rtw,ltw,wtl,wtw,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T
+		FlexCompRowMatrix xtx,xty,ytx,wtr,rtw,ltw,wtl,wtw,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T
 		,L1L3_OR_R1R3_L1R2,L1L3_OR_R1R3_L1R2T,L1L4_OR_R1R4_L2R1,L1L4_OR_R1R4_L2R1T,L2L3_OR_R2R3_L2R2,L2L3_OR_R2R3_L2R2T,
 		L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T;
 		
@@ -104,35 +106,36 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		
 		
 		if(_opt.typeofDecomp.equals("2viewWvsL")){
-			xty=_cpcaR2.getContextMatrix();
-			ytx=_cpcaR2.getContextMatrixT();
-			xtx=_cpcaR2.getWTWMatrix();
-			L1L2_OR_R1R2_L1R1=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv();
-			L1L2_OR_R1R2_L1R1T=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT();
+			
+			xty=transform(_cpcaR2.getContextMatrix());
+			ytx=transform(_cpcaR2.getContextMatrixT());
+			xtx=transform(_cpcaR2.getWTWMatrix());
+			L1L2_OR_R1R2_L1R1=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv());
+			L1L2_OR_R1R2_L1R1T=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT());
 			
 			if(_opt.numGrams==3){
-			computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,svdTC,_cpcaR2,xtx.columns(),xty.columns());
+			computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,svdTC,_cpcaR2,xtx.numColumns(),xty.numColumns());
 			}
 			
 			if(_opt.numGrams==5){
-				L1L3_OR_R1R3_L1R2= _cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv();
-				L1L3_OR_R1R3_L1R2T =_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT();
+				L1L3_OR_R1R3_L1R2= transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv());
+				L1L3_OR_R1R3_L1R2T =transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT());
 				
-				L1L4_OR_R1R4_L2R1= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv();
-				L1L4_OR_R1R4_L2R1T= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT();
+				L1L4_OR_R1R4_L2R1= transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv());
+				L1L4_OR_R1R4_L2R1T= transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT());
 				
-				L2L3_OR_R2R3_L2R2= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv();
-				L2L3_OR_R2R3_L2R2T= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT();
+				L2L3_OR_R2R3_L2R2= transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv());
+				L2L3_OR_R2R3_L2R2T= transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT());
 				
-				L2L4_OR_R2R4_L1L2= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv();
-				L2L4_OR_R2R4_L1L2T= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT();
+				L2L4_OR_R2R4_L1L2= transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv());
+				L2L4_OR_R2R4_L1L2T= transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT());
 				
-				L3L4_OR_R3R4_R1R2= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv();
-				L3L4_OR_R3R4_R1R2T= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT();
+				L3L4_OR_R3R4_R1R2= transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv());
+				L3L4_OR_R3R4_R1R2T= transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT());
 				
 				computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T
 						,L1L3_OR_R1R3_L1R2,L1L3_OR_R1R3_L1R2T,L1L4_OR_R1R4_L2R1,L1L4_OR_R1R4_L2R1T,L2L3_OR_R2R3_L2R2,L2L3_OR_R2R3_L2R2T,
-						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,xtx.columns(),xty.columns());
+						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,xtx.numColumns(),xty.numColumns());
 				
 			}
 			
@@ -140,35 +143,41 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		}
 		
 		if(_opt.typeofDecomp.equals("2viewWvsR")){
-			xty=_cpcaR2.getContextMatrix();
-			ytx=_cpcaR2.getContextMatrixT();
-			xtx=_cpcaR2.getWTWMatrix();
-			L1L2_OR_R1R2_L1R1=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv();
-			L1L2_OR_R1R2_L1R1T=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT();
+			xty=transform(_cpcaR2.getContextMatrix());
+			ytx=transform(_cpcaR2.getContextMatrixT());
+			xtx=transform(_cpcaR2.getWTWMatrix());
+			if(!_opt.depbigram){
+				L1L2_OR_R1R2_L1R1=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv());
+				L1L2_OR_R1R2_L1R1T=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT());
+			}
+			else{
+				L1L2_OR_R1R2_L1R1=xtx;
+				L1L2_OR_R1R2_L1R1T=xtx;
+			}
 			
 			if(_opt.numGrams==3 || _opt.numGrams==2){
-				computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,svdTC,_cpcaR2,xtx.columns(),xty.columns());
+				computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,svdTC,_cpcaR2,xtx.numColumns(),xty.numColumns());
 				}
 			
 			if(_opt.numGrams==5){
-				L1L3_OR_R1R3_L1R2= _cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv();
-				L1L3_OR_R1R3_L1R2T =_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT();
+				L1L3_OR_R1R3_L1R2= transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv());
+				L1L3_OR_R1R3_L1R2T =transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT());
 				
-				L1L4_OR_R1R4_L2R1= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv();
-				L1L4_OR_R1R4_L2R1T= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT();
+				L1L4_OR_R1R4_L2R1=transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv());
+				L1L4_OR_R1R4_L2R1T=transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT());
 				
-				L2L3_OR_R2R3_L2R2= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv();
-				L2L3_OR_R2R3_L2R2T= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT();
+				L2L3_OR_R2R3_L2R2=transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv());
+				L2L3_OR_R2R3_L2R2T=transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT());
 				
-				L2L4_OR_R2R4_L1L2= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv();
-				L2L4_OR_R2R4_L1L2T= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT();
+				L2L4_OR_R2R4_L1L2=transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv());
+				L2L4_OR_R2R4_L1L2T=transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT());
 				
-				L3L4_OR_R3R4_R1R2= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv();
-				L3L4_OR_R3R4_R1R2T= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT();
+				L3L4_OR_R3R4_R1R2=transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv());
+				L3L4_OR_R3R4_R1R2T=transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT());
 				
 				computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T
 						,L1L3_OR_R1R3_L1R2,L1L3_OR_R1R3_L1R2T,L1L4_OR_R1R4_L2R1,L1L4_OR_R1R4_L2R1T,L2L3_OR_R2R3_L2R2,L2L3_OR_R2R3_L2R2T,
-						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,xtx.columns(),xty.columns());
+						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,xtx.numColumns(),xty.numColumns());
 				
 			}
 			
@@ -177,35 +186,40 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		}
 		
 		if(_opt.typeofDecomp.equals("2viewWvsLR")){
-			xty=_cpcaR2.getContextMatrix();
-			ytx=_cpcaR2.getContextMatrixT();
-			xtx=_cpcaR2.getWTWMatrix();
-			L1L2_OR_R1R2_L1R1=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv();
-			L1L2_OR_R1R2_L1R1T=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT();
+			xty=transform(_cpcaR2.getContextMatrix());
+			ytx=transform(_cpcaR2.getContextMatrixT());
+			xtx=transform(_cpcaR2.getWTWMatrix());
+			
+			System.out.println("++Got the C & W matrices++");
+			
+			L1L2_OR_R1R2_L1R1=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv());
+			L1L2_OR_R1R2_L1R1T=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT());
+			
+			System.out.println("++Got the matrices++");
 			
 			if(_opt.numGrams==3){
-				computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,svdTC,_cpcaR2,xtx.columns(),xty.columns());
+				computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,svdTC,_cpcaR2,xtx.numColumns(),xty.numColumns());
 				}
 			
 			if(_opt.numGrams==5){
-				L1L3_OR_R1R3_L1R2= _cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv();
-				L1L3_OR_R1R3_L1R2T =_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT();
+				L1L3_OR_R1R3_L1R2= transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv());
+				L1L3_OR_R1R3_L1R2T =transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT());
 				
-				L1L4_OR_R1R4_L2R1= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv();
-				L1L4_OR_R1R4_L2R1T= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT();
+				L1L4_OR_R1R4_L2R1= transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv());
+				L1L4_OR_R1R4_L2R1T= transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT());
 				
-				L2L3_OR_R2R3_L2R2= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv();
-				L2L3_OR_R2R3_L2R2T= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT();
+				L2L3_OR_R2R3_L2R2= transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv());
+				L2L3_OR_R2R3_L2R2T= transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT());
 				
-				L2L4_OR_R2R4_L1L2= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv();
-				L2L4_OR_R2R4_L1L2T= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT();
+				L2L4_OR_R2R4_L1L2= transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv());
+				L2L4_OR_R2R4_L1L2T= transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT());
 				
-				L3L4_OR_R3R4_R1R2= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv();
-				L3L4_OR_R3R4_R1R2T= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT();
+				L3L4_OR_R3R4_R1R2= transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv());
+				L3L4_OR_R3R4_R1R2T= transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT());
 				
 				computeCCA2NGrams(xtx,xty,ytx,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T
 						,L1L3_OR_R1R3_L1R2,L1L3_OR_R1R3_L1R2T,L1L4_OR_R1R4_L2R1,L1L4_OR_R1R4_L2R1T,L2L3_OR_R2R3_L2R2,L2L3_OR_R2R3_L2R2T,
-						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,xtx.columns(),xty.columns());
+						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,xtx.numColumns(),xty.numColumns());
 				
 			}
 			
@@ -215,44 +229,44 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		if(_opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
 			
-			wtl=_cpcaR2.getWL3gramMatrix();
-			wtr=_cpcaR2.getWR3gramMatrix();
-			ltw=_cpcaR2.getWLT3gramMatrix();
-			rtw=_cpcaR2.getWRT3gramMatrix();
-			L1L2_OR_R1R2_L1R1=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv();
-			L1L2_OR_R1R2_L1R1T=_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT();
-			wtw=_cpcaR2.getWTWMatrix();
+			wtl=transform(_cpcaR2.getWL3gramMatrix());
+			wtr=transform(_cpcaR2.getWR3gramMatrix());
+			ltw=transform(_cpcaR2.getWLT3gramMatrix());
+			rtw=transform(_cpcaR2.getWRT3gramMatrix());
+			L1L2_OR_R1R2_L1R1=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv());
+			L1L2_OR_R1R2_L1R1T=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT());
+			wtw=transform(_cpcaR2.getWTWMatrix());
 			
 			
 			if(_opt.numGrams==3){
-				computeCCATwoStepLRvsWNGrams(wtl,wtr,ltw,rtw,wtw,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,null,null,null,null,null,null,null,null,null,null,svdTC,_cpcaR2,wtl.rows(),wtl.columns());
+				computeCCATwoStepLRvsWNGrams(wtl,wtr,ltw,rtw,wtw,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,null,null,null,null,null,null,null,null,null,null,svdTC,_cpcaR2,wtl.numRows(),wtl.numColumns());
 			}
 			
 			if(_opt.numGrams==5){
-				wtl=_cpcaR2.getWL5gramMatrix();
-				wtr=_cpcaR2.getWR5gramMatrix();
-				ltw=_cpcaR2.getWLT5gramMatrix();
-				rtw=_cpcaR2.getWRT5gramMatrix();
+				wtl=transform(_cpcaR2.getWL5gramMatrix());
+				wtr=transform(_cpcaR2.getWR5gramMatrix());
+				ltw=transform(_cpcaR2.getWLT5gramMatrix());
+				rtw=transform(_cpcaR2.getWRT5gramMatrix());
 				
 				
-				L1L3_OR_R1R3_L1R2= _cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv();
-				L1L3_OR_R1R3_L1R2T =_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT();
+				L1L3_OR_R1R3_L1R2= transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesv());
+				L1L3_OR_R1R3_L1R2T =transform(_cpcaR2.getL1L3_OR_R1R3_L1R2Matrix_vTimesvT());
 				
-				L1L4_OR_R1R4_L2R1= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv();
-				L1L4_OR_R1R4_L2R1T= _cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT();
+				L1L4_OR_R1R4_L2R1= transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesv());
+				L1L4_OR_R1R4_L2R1T=transform(_cpcaR2.getL1L4_OR_R1R4_L2R1Matrix_vTimesvT());
 				
-				L2L3_OR_R2R3_L2R2= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv();
-				L2L3_OR_R2R3_L2R2T= _cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT();
+				L2L3_OR_R2R3_L2R2= transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesv());
+				L2L3_OR_R2R3_L2R2T= transform(_cpcaR2.getL2L3_OR_R2R3_L2R2Matrix_vTimesvT());
 				
-				L2L4_OR_R2R4_L1L2= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv();
-				L2L4_OR_R2R4_L1L2T= _cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT();
+				L2L4_OR_R2R4_L1L2= transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesv());
+				L2L4_OR_R2R4_L1L2T= transform(_cpcaR2.getL2L4_OR_R2R4_L1L2Matrix_vTimesvT());
 				
-				L3L4_OR_R3R4_R1R2= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv();
-				L3L4_OR_R3R4_R1R2T= _cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT();
+				L3L4_OR_R3R4_R1R2= transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesv());
+				L3L4_OR_R3R4_R1R2T= transform(_cpcaR2.getL3L4_OR_R3R4_R1R2Matrix_vTimesvT());
 				
 				computeCCATwoStepLRvsWNGrams(wtl,wtr,ltw,rtw,wtw,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T
 						,L1L3_OR_R1R3_L1R2,L1L3_OR_R1R3_L1R2T,L1L4_OR_R1R4_L2R1,L1L4_OR_R1R4_L2R1T,L2L3_OR_R2R3_L2R2,L2L3_OR_R2R3_L2R2T,
-						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,wtl.rows(),wtl.columns());
+						L2L4_OR_R2R4_L1L2,L2L4_OR_R2R4_L1L2T,L3L4_OR_R3R4_R1R2,L3L4_OR_R3R4_R1R2T,svdTC,_cpcaR2,wtl.numRows(),wtl.numColumns());
 				
 				
 			}
@@ -260,51 +274,90 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		}
 	}
 	
+
+public FlexCompRowMatrix transform(FlexCompRowMatrix a){
+	
+	Iterator<MatrixEntry> aIt = a.iterator();
+	double ent=0;
+	
+	while(aIt.hasNext())
+		{
+		MatrixEntry ment = aIt.next();
+		ent =ment.get();
+		if(_opt.logTrans)
+			ent = Math.log(ent);
+		if(_opt.sqRootTrans)
+			ent = Math.sqrt(ent);
+		
+		a.set(ment.row(), ment.column(), ent);		
+		}
+	
+	
+return a;	
+	
+}
+
+
 	
 
-	private void computeCCA2NGrams(SparseDoubleMatrix2D xtx,
-			SparseDoubleMatrix2D xty, SparseDoubleMatrix2D ytx,SparseDoubleMatrix2D L1L2_OR_R1R2_L1R1,SparseDoubleMatrix2D L1L2_OR_R1R2_L1R1T,
+	private void computeCCA2NGrams(FlexCompRowMatrix xtx,
+			FlexCompRowMatrix xty, FlexCompRowMatrix ytx,FlexCompRowMatrix L1L2_OR_R1R2_L1R1,FlexCompRowMatrix L1L2_OR_R1R2_L1R1T,
 			SVDTemplates svdTC,ContextPCANGramsRepresentation _cpcaR2,int dim1,int dim2) {
 		
-		SparseDoubleMatrix2D yty=new SparseDoubleMatrix2D(ytx.rows(),xty.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat5=new SparseDoubleMatrix2D(xtx.columns(),ytx.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat2=new SparseDoubleMatrix2D(yty.rows(),ytx.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat3=new SparseDoubleMatrix2D(auxMat5.rows(),auxMat5.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat4=new SparseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows(),0,0.7,0.75);
+		FlexCompRowMatrix yty=new FlexCompRowMatrix(ytx.numRows(),xty.numColumns());
+		FlexCompRowMatrix auxMat5=new FlexCompRowMatrix(xtx.numColumns(),ytx.numRows());
+		FlexCompRowMatrix auxMat2=new FlexCompRowMatrix(yty.numRows(),ytx.numColumns());
+		FlexCompRowMatrix auxMat3=new FlexCompRowMatrix(auxMat5.numRows(),auxMat5.numRows());
+		FlexCompRowMatrix auxMat4=new FlexCompRowMatrix(auxMat2.numRows(),auxMat2.numRows());
 				
 		
 		if(_opt.numGrams==3){
 			
 			
-			SparseDoubleMatrix2D topM=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L1L2_OR_R1R2_L1R1.columns());
-			SparseDoubleMatrix2D bottomM=new SparseDoubleMatrix2D(topM.rows(),topM.columns());
+			FlexCompRowMatrix topM=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns());
+			FlexCompRowMatrix bottomM=new FlexCompRowMatrix(topM.numRows(),topM.numColumns());
 			
+			System.out.println("++Before Concatenating matrices++");
 			
 			topM=_cpcaR2.concatenateLR(xtx,L1L2_OR_R1R2_L1R1);
 			bottomM=_cpcaR2.concatenateLR(L1L2_OR_R1R2_L1R1T,xtx);
 			yty=_cpcaR2.concatenateLRT(topM,bottomM);
+			
+			System.out.println("++ Concatenated matrices++");
+			
 			if(_opt.typeofDecomp.equals("TwoStepLRvsW"))
 					{
-						SparseDoubleMatrix2D topM1=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
-						SparseDoubleMatrix2D bottomM1=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
+						FlexCompRowMatrix topM1=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
+						FlexCompRowMatrix bottomM1=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
 				
-						SparseDoubleMatrix2D phiLTxtx=new SparseDoubleMatrix2D(phiLT.getRowDimension(),xtx.columns(),0,0.7,0.75);
-						SparseDoubleMatrix2D phiLTxtxphiL=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
-						SparseDoubleMatrix2D phiLTLR=new SparseDoubleMatrix2D(phiLT.getRowDimension(),xtx.columns(),0,0.7,0.75);
-						SparseDoubleMatrix2D phiLTLRphiR=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
-						SparseDoubleMatrix2D phiRTLR=new SparseDoubleMatrix2D(phiLT.getRowDimension(),xtx.columns(),0,0.7,0.75);
-						SparseDoubleMatrix2D phiRTLRphiL=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
+						FlexCompRowMatrix phiLTxtx=new FlexCompRowMatrix(phiLT.getRowDimension(),xtx.numColumns());
+						FlexCompRowMatrix phiLTxtxphiL=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
+						FlexCompRowMatrix phiLTLR=new FlexCompRowMatrix(phiLT.getRowDimension(),xtx.numColumns());
+						FlexCompRowMatrix phiLTLRphiR=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
+						FlexCompRowMatrix phiRTLR=new FlexCompRowMatrix(phiLT.getRowDimension(),xtx.numColumns());
+						FlexCompRowMatrix phiRTLRphiL=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
 				
 						phiLT=phiL.transpose();
 						phiRT=phiR.transpose();
-						MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(xtx, phiLTxtx);
-						phiLTxtx.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), phiLTxtxphiL);
 						
-						MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(L1L2_OR_R1R2_L1R1, phiLTLR);
-						phiLTLR.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), phiLTLRphiR);
+						MatrixFormatConversion.createDenseMatrixMTJ(phiLT).mult(xtx, phiLTxtx);
+						phiLTxtx.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiL),phiLTxtxphiL);
 						
-						MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(L1L2_OR_R1R2_L1R1T, phiRTLR);
-						phiRTLR.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), phiRTLRphiL);
+						MatrixFormatConversion.createDenseMatrixMTJ(phiLT).mult(L1L2_OR_R1R2_L1R1, phiLTLR);
+						phiLTLR.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiR),phiLTLRphiR);
+						
+						MatrixFormatConversion.createDenseMatrixMTJ(phiRT).mult(L1L2_OR_R1R2_L1R1T, phiRTLR);
+						phiRTLR.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiL),phiRTLRphiL);
+						
+						
+						//MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(xtx, phiLTxtx);
+						//phiLTxtx.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), phiLTxtxphiL);
+						
+						//MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(L1L2_OR_R1R2_L1R1, phiLTLR);
+						//phiLTLR.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), phiLTLRphiR);
+						
+						//MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(L1L2_OR_R1R2_L1R1T, phiRTLR);
+						//phiRTLR.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), phiRTLRphiL);
 				
 				
 						topM1=_cpcaR2.concatenateLR(phiLTxtxphiL,phiLTLRphiR);
@@ -320,38 +373,41 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		}
 		
 		
-		(svdTC.computeSparseInverse(xtx)).zMult(xty, auxMat5);
-		(svdTC.computeSparseInverse(yty)).zMult(ytx, auxMat2);
-		auxMat5.zMult(auxMat2,auxMat3);
-		phiL=svdTC.computeSVD_Tropp(auxMat3, _cpcaR2.getOmegaMatrix(auxMat3.columns()),dim1);
+		auxMat5=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(xtx),xty);
+		auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(yty));
+		
+		
+		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat2), _cpcaR2.getOmegaMatrix(auxMat2.numColumns()),dim2);
 		s=svdTC.getSingularVals();
 		if(!_opt.typeofDecomp.equals("TwoStepLRvsW")){
-			auxMat2.zMult(auxMat5,auxMat4);
-			phiR=svdTC.computeSVD_Tropp(auxMat4, _cpcaR2.getOmegaMatrix(auxMat4.columns()),dim2);
+			auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(yty),ytx);
+			auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat4,svdTC.computeSparseInverseSqRoot(xtx));
+			
+			phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat2), _cpcaR2.getOmegaMatrix(auxMat2.numColumns()),dim1);
 		}
 		
 	}
 	
 	
-	private void computeCCA2NGrams(SparseDoubleMatrix2D xtx,
-			SparseDoubleMatrix2D xty, SparseDoubleMatrix2D ytx,SparseDoubleMatrix2D L1L2_OR_R1R2_L1R1,
-			SparseDoubleMatrix2D L1L2_OR_R1R2_L1R1T, SparseDoubleMatrix2D L1L3_OR_R1R3_L1R2,SparseDoubleMatrix2D L1L3_OR_R1R3_L1R2T,
-			SparseDoubleMatrix2D L1L4_OR_R1R4_L2R1, SparseDoubleMatrix2D L1L4_OR_R1R4_L2R1T,SparseDoubleMatrix2D L2L3_OR_R2R3_L2R2,
-			SparseDoubleMatrix2D L2L3_OR_R2R3_L2R2T, SparseDoubleMatrix2D L2L4_OR_R2R4_L1L2,SparseDoubleMatrix2D L2L4_OR_R2R4_L1L2T,
-			SparseDoubleMatrix2D L3L4_OR_R3R4_R1R2, SparseDoubleMatrix2D L3L4_OR_R3R4_R1R2T,
+	private void computeCCA2NGrams(FlexCompRowMatrix xtx,
+			FlexCompRowMatrix xty, FlexCompRowMatrix ytx,FlexCompRowMatrix L1L2_OR_R1R2_L1R1,
+			FlexCompRowMatrix L1L2_OR_R1R2_L1R1T, FlexCompRowMatrix L1L3_OR_R1R3_L1R2,FlexCompRowMatrix L1L3_OR_R1R3_L1R2T,
+			FlexCompRowMatrix L1L4_OR_R1R4_L2R1, FlexCompRowMatrix L1L4_OR_R1R4_L2R1T,FlexCompRowMatrix L2L3_OR_R2R3_L2R2,
+			FlexCompRowMatrix L2L3_OR_R2R3_L2R2T, FlexCompRowMatrix L2L4_OR_R2R4_L1L2,FlexCompRowMatrix L2L4_OR_R2R4_L1L2T,
+			FlexCompRowMatrix L3L4_OR_R3R4_R1R2, FlexCompRowMatrix L3L4_OR_R3R4_R1R2T,
 			SVDTemplates svdTC,ContextPCANGramsRepresentation _cpcaR2,int dim1,int dim2) {
 			
-		SparseDoubleMatrix2D yty=new SparseDoubleMatrix2D(ytx.rows(),xty.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat5=new SparseDoubleMatrix2D(xtx.columns(),ytx.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat2=new SparseDoubleMatrix2D(yty.rows(),ytx.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat3=new SparseDoubleMatrix2D(auxMat5.rows(),auxMat5.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat4=new SparseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows(),0,0.7,0.75);
+		FlexCompRowMatrix yty=new FlexCompRowMatrix(ytx.numRows(),xty.numColumns());
+		FlexCompRowMatrix auxMat5=new FlexCompRowMatrix(xtx.numColumns(),ytx.numRows());
+		FlexCompRowMatrix auxMat2=new FlexCompRowMatrix(yty.numRows(),ytx.numColumns());
+		FlexCompRowMatrix auxMat3=new FlexCompRowMatrix(auxMat5.numRows(),auxMat5.numRows());
+		FlexCompRowMatrix auxMat4=new FlexCompRowMatrix(auxMat2.numRows(),auxMat2.numRows());
 				
 		
-		SparseDoubleMatrix2D row1=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L1L2_OR_R1R2_L1R1.columns()+ L1L3_OR_R1R3_L1R2.columns()+ L1L4_OR_R1R4_L2R1.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D row2=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L1L2_OR_R1R2_L1R1.columns()+ L1L3_OR_R1R3_L1R2.columns()+ L1L4_OR_R1R4_L2R1.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D row3=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L1L2_OR_R1R2_L1R1.columns()+ L1L3_OR_R1R3_L1R2.columns()+ L1L4_OR_R1R4_L2R1.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D row4=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L1L2_OR_R1R2_L1R1.columns()+ L1L3_OR_R1R3_L1R2.columns()+ L1L4_OR_R1R4_L2R1.columns(),0,0.7,0.75);
+		FlexCompRowMatrix row1=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns()+ L1L3_OR_R1R3_L1R2.numColumns()+ L1L4_OR_R1R4_L2R1.numColumns());
+		FlexCompRowMatrix row2=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns()+ L1L3_OR_R1R3_L1R2.numColumns()+ L1L4_OR_R1R4_L2R1.numColumns());
+		FlexCompRowMatrix row3=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns()+ L1L3_OR_R1R3_L1R2.numColumns()+ L1L4_OR_R1R4_L2R1.numColumns());
+		FlexCompRowMatrix row4=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns()+ L1L3_OR_R1R3_L1R2.numColumns()+ L1L4_OR_R1R4_L2R1.numColumns());
 		
 		
 		row1=_cpcaR2.concatenateMultiRow(xtx,L1L2_OR_R1R2_L1R1, L1L3_OR_R1R3_L1R2, L1L4_OR_R1R4_L2R1);
@@ -364,23 +420,23 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		if(_opt.typeofDecomp.equals("TwoStepLRvsW"))
 		{
 			
-			SparseDoubleMatrix2D row11=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
-			SparseDoubleMatrix2D row21=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
+			FlexCompRowMatrix row11=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
+			FlexCompRowMatrix row21=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
 			
 			
-			SparseDoubleMatrix2D aux=new SparseDoubleMatrix2D(phiLT.getRowDimension(),xtx.columns()+L2L4_OR_R2R4_L1L2.columns(),0,0.7,0.75);
+			FlexCompRowMatrix aux=new FlexCompRowMatrix(phiLT.getRowDimension(),xtx.numColumns()+L2L4_OR_R2R4_L1L2.numColumns());
 			
-			SparseDoubleMatrix2D aux1=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L2L4_OR_R2R4_L1L2.columns(),0,0.7,0.75);
-			SparseDoubleMatrix2D aux2=new SparseDoubleMatrix2D(xtx.rows(),xtx.columns()+L2L4_OR_R2R4_L1L2.columns(),0,0.7,0.75);
+			FlexCompRowMatrix aux1=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L2L4_OR_R2R4_L1L2.numColumns());
+			FlexCompRowMatrix aux2=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L2L4_OR_R2R4_L1L2.numColumns());
 			
-			SparseDoubleMatrix2D blockRow12Col12=new SparseDoubleMatrix2D(xtx.rows()+L2L4_OR_R2R4_L1L2.rows(),xtx.columns()+L2L4_OR_R2R4_L1L2.columns(),0,0.7,0.75);
-			SparseDoubleMatrix2D blockRow12Col34=new SparseDoubleMatrix2D(xtx.rows()+L2L4_OR_R2R4_L1L2.rows(),xtx.columns()+L2L4_OR_R2R4_L1L2.columns(),0,0.7,0.75);
-			SparseDoubleMatrix2D blockRow34Col12=new SparseDoubleMatrix2D(xtx.rows()+L2L4_OR_R2R4_L1L2.rows(),xtx.columns()+L2L4_OR_R2R4_L1L2.columns(),0,0.7,0.75);
-			SparseDoubleMatrix2D blockRow34Col34=new SparseDoubleMatrix2D(xtx.rows()+L2L4_OR_R2R4_L1L2.rows(),xtx.columns()+L2L4_OR_R2R4_L1L2.columns(),0,0.7,0.75);
-			SparseDoubleMatrix2D blockRow12Col12Phi=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
-			SparseDoubleMatrix2D blockRow12Col34Phi=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
-			SparseDoubleMatrix2D blockRow34Col12Phi=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
-			SparseDoubleMatrix2D  blockRow34Col34Phi=new SparseDoubleMatrix2D(phiLT.getRowDimension(),phiLT.getRowDimension(),0,0.7,0.75);
+			FlexCompRowMatrix blockRow12Col12=new FlexCompRowMatrix(xtx.numRows()+L2L4_OR_R2R4_L1L2.numRows(),xtx.numColumns()+L2L4_OR_R2R4_L1L2.numColumns());
+			FlexCompRowMatrix blockRow12Col34=new FlexCompRowMatrix(xtx.numRows()+L2L4_OR_R2R4_L1L2.numRows(),xtx.numColumns()+L2L4_OR_R2R4_L1L2.numColumns());
+			FlexCompRowMatrix blockRow34Col12=new FlexCompRowMatrix(xtx.numRows()+L2L4_OR_R2R4_L1L2.numRows(),xtx.numColumns()+L2L4_OR_R2R4_L1L2.numColumns());
+			FlexCompRowMatrix blockRow34Col34=new FlexCompRowMatrix(xtx.numRows()+L2L4_OR_R2R4_L1L2.numRows(),xtx.numColumns()+L2L4_OR_R2R4_L1L2.numColumns());
+			FlexCompRowMatrix blockRow12Col12Phi=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
+			FlexCompRowMatrix blockRow12Col34Phi=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
+			FlexCompRowMatrix blockRow34Col12Phi=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
+			FlexCompRowMatrix  blockRow34Col34Phi=new FlexCompRowMatrix(phiLT.getRowDimension(),phiLT.getRowDimension());
 		
 			
 			aux1=_cpcaR2.concatenateLR(xtx,L2L4_OR_R2R4_L1L2);
@@ -406,6 +462,8 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 			
 			phiLT=phiL.transpose();
 			phiRT=phiR.transpose();
+			
+			/*
 			MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(blockRow12Col12, aux);
 			aux.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), blockRow12Col12Phi);
 			
@@ -417,6 +475,20 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 			
 			MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(blockRow12Col34, aux);
 			aux.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), blockRow12Col34Phi);
+			*/
+			
+			
+			MatrixFormatConversion.createDenseMatrixMTJ(phiLT).mult(blockRow12Col12, aux);
+			aux.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiL), blockRow12Col12Phi);
+			
+			MatrixFormatConversion.createDenseMatrixMTJ(phiRT).mult(blockRow34Col34, aux);
+			aux.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiR), blockRow34Col34Phi);
+			
+			MatrixFormatConversion.createDenseMatrixMTJ(phiRT).mult(blockRow34Col12, aux);
+			aux.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiL), blockRow34Col12Phi);
+			
+			MatrixFormatConversion.createDenseMatrixMTJ(phiLT).mult(blockRow12Col34, aux);
+			aux.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiR), blockRow12Col34Phi);
 			
 			
 	
@@ -428,54 +500,65 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 
 		}
 		
-
 		
-		(svdTC.computeSparseInverse(xtx)).zMult(xty, auxMat5);
-		(svdTC.computeSparseInverse(yty)).zMult(ytx, auxMat2);
-		auxMat5.zMult(auxMat2,auxMat3);
-		phiL=svdTC.computeSVD_Tropp(auxMat3, _cpcaR2.getOmegaMatrix(auxMat3.columns()),dim1);
+		
+		
+		auxMat5=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(xtx),xty);
+		auxMat3=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(yty));
+		
+		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),dim2);
 		s=svdTC.getSingularVals();
 		
 		if(!_opt.typeofDecomp.equals("TwoStepLRvsW")){
-			auxMat2.zMult(auxMat5,auxMat4);
-			phiR=svdTC.computeSVD_Tropp(auxMat4, _cpcaR2.getOmegaMatrix(auxMat4.columns()),dim2);
+		
+			auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(yty),ytx);
+			auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat2, svdTC.computeSparseInverseSqRoot(xtx));
+			
+			
+			phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),dim1);
 		}
 		
 	}
 	
-	private void computeCCA2NGramsLR(SparseDoubleMatrix2D ltr,
-			SparseDoubleMatrix2D rtl, SparseDoubleMatrix2D wtw,
+	private void computeCCA2NGramsLR(FlexCompRowMatrix ltr,
+			FlexCompRowMatrix rtl, FlexCompRowMatrix wtw,
 			 SVDTemplates svdTC,ContextPCANGramsRepresentation _cpcaR2) {
 		
 		
-		SparseDoubleMatrix2D auxMat5=new SparseDoubleMatrix2D(wtw.rows(),ltr.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat2=new SparseDoubleMatrix2D(wtw.rows(),rtl.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat3=new SparseDoubleMatrix2D(auxMat5.rows(),auxMat5.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat4=new SparseDoubleMatrix2D(auxMat2.rows(),auxMat2.rows(),0,0.7,0.75);
+		FlexCompRowMatrix auxMat5=new FlexCompRowMatrix(wtw.numRows(),ltr.numColumns());
+		FlexCompRowMatrix auxMat2=new FlexCompRowMatrix(wtw.numRows(),rtl.numColumns());
+		FlexCompRowMatrix auxMat3=new FlexCompRowMatrix(auxMat5.numRows(),auxMat5.numRows());
+		FlexCompRowMatrix auxMat4=new FlexCompRowMatrix(auxMat2.numRows(),auxMat2.numRows());
 				
-				
-		(svdTC.computeSparseInverse(wtw)).zMult(ltr, auxMat5);
-		(svdTC.computeSparseInverse(wtw)).zMult(rtl, auxMat2);
-		auxMat5.zMult(auxMat2,auxMat3);
-		phiL=svdTC.computeSVD_Tropp(auxMat3, _cpcaR2.getOmegaMatrix(auxMat3.columns()),auxMat3.columns());
 		
-		auxMat2.zMult(auxMat5,auxMat4);
-		phiR=svdTC.computeSVD_Tropp(auxMat4, _cpcaR2.getOmegaMatrix(auxMat4.columns()),auxMat4.columns());
+		auxMat5=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(wtw),ltr);
+		auxMat3=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(wtw));
+		
+		//(svdTC.computeSparseInverse(wtw)).zMult(ltr, auxMat5);
+		//(svdTC.computeSparseInverse(wtw)).zMult(rtl, auxMat2);
+		//auxMat5.zMult(auxMat2,auxMat3);
+		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),auxMat3.numColumns());
+		
+		auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(wtw),rtl);
+		auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat2, svdTC.computeSparseInverseSqRoot(wtw));
+		
+	
+		phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),auxMat4.numColumns());
 		
 	}
 	
-	private void computeCCATwoStepLRvsWNGrams(SparseDoubleMatrix2D wtl,
-			SparseDoubleMatrix2D wtr, SparseDoubleMatrix2D ltw,
-			SparseDoubleMatrix2D rtw,SparseDoubleMatrix2D wtw,
-			SparseDoubleMatrix2D l1l2_OR_R1R2_L1R1, SparseDoubleMatrix2D l1l2_OR_R1R2_L1R1T, SparseDoubleMatrix2D l1l3_OR_R1R3_L1R2, SparseDoubleMatrix2D l1l3_OR_R1R3_L1R2T, SparseDoubleMatrix2D l1l4_OR_R1R4_L2R1, SparseDoubleMatrix2D l1l4_OR_R1R4_L2R1T, SparseDoubleMatrix2D l2l3_OR_R2R3_L2R2, SparseDoubleMatrix2D l2l3_OR_R2R3_L2R2T, SparseDoubleMatrix2D l2l4_OR_R2R4_L1L2, SparseDoubleMatrix2D l2l4_OR_R2R4_L1L2T, SparseDoubleMatrix2D l3l4_OR_R3R4_R1R2, SparseDoubleMatrix2D l3l4_OR_R3R4_R1R2T, SVDTemplates svdTC,ContextPCANGramsRepresentation _cpcaR2,int dim1,int dim2) {
+	private void computeCCATwoStepLRvsWNGrams(FlexCompRowMatrix wtl,
+			FlexCompRowMatrix wtr, FlexCompRowMatrix ltw,
+			FlexCompRowMatrix rtw,FlexCompRowMatrix wtw,
+			FlexCompRowMatrix l1l2_OR_R1R2_L1R1, FlexCompRowMatrix l1l2_OR_R1R2_L1R1T, FlexCompRowMatrix l1l3_OR_R1R3_L1R2, FlexCompRowMatrix l1l3_OR_R1R3_L1R2T, FlexCompRowMatrix l1l4_OR_R1R4_L2R1, FlexCompRowMatrix l1l4_OR_R1R4_L2R1T, FlexCompRowMatrix l2l3_OR_R2R3_L2R2, FlexCompRowMatrix l2l3_OR_R2R3_L2R2T, FlexCompRowMatrix l2l4_OR_R2R4_L1L2, FlexCompRowMatrix l2l4_OR_R2R4_L1L2T, FlexCompRowMatrix l3l4_OR_R3R4_R1R2, FlexCompRowMatrix l3l4_OR_R3R4_R1R2T, SVDTemplates svdTC,ContextPCANGramsRepresentation _cpcaR2,int dim1,int dim2) {
 		
 		
-		SparseDoubleMatrix2D wtlphiL=new SparseDoubleMatrix2D(wtl.rows(),_opt.hiddenStateSize,0,0.7,0.75);
-		SparseDoubleMatrix2D wtrphiR=new SparseDoubleMatrix2D(wtr.rows(),_opt.hiddenStateSize,0,0.7,0.75);
-		SparseDoubleMatrix2D ltwphiLT=new SparseDoubleMatrix2D(_opt.hiddenStateSize,wtl.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D rtwphiRT=new SparseDoubleMatrix2D(_opt.hiddenStateSize,wtr.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D wtLphiLRphiR=new SparseDoubleMatrix2D(wtl.rows(),wtlphiL.columns()+wtrphiR.columns(),0,0.7,0.75);
-		SparseDoubleMatrix2D wtLphiLRphiRT=new SparseDoubleMatrix2D(wtlphiL.columns()+wtrphiR.columns(),wtl.rows(),0,0.7,0.75);
+		FlexCompRowMatrix wtlphiL=new FlexCompRowMatrix(wtl.numRows(),_opt.hiddenStateSize);
+		FlexCompRowMatrix wtrphiR=new FlexCompRowMatrix(wtr.numRows(),_opt.hiddenStateSize);
+		FlexCompRowMatrix ltwphiLT=new FlexCompRowMatrix(_opt.hiddenStateSize,wtl.numRows());
+		FlexCompRowMatrix rtwphiRT=new FlexCompRowMatrix(_opt.hiddenStateSize,wtr.numRows());
+		FlexCompRowMatrix wtLphiLRphiR=new FlexCompRowMatrix(wtl.numRows(),wtlphiL.numColumns()+wtrphiR.numColumns());
+		FlexCompRowMatrix wtLphiLRphiRT=new FlexCompRowMatrix(wtlphiL.numColumns()+wtrphiR.numColumns(),wtl.numRows());
 				
 		
 		if(_opt.numGrams==3){
@@ -489,35 +572,35 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 					l2l4_OR_R2R4_L1L2,l2l4_OR_R2R4_L1L2T,l3l4_OR_R3R4_R1R2,l3l4_OR_R3R4_R1R2T,wtw,svdTC,_cpcaR2);
 		}
 		
-		wtl.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), wtlphiL);
-		wtr.zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), wtrphiR);
+		wtl.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiL), wtlphiL);
+		wtr.mult(MatrixFormatConversion.createDenseMatrixMTJ(phiR), wtrphiR);
 		
 		phiLT=phiL.transpose();
 		phiRT=phiR.transpose();
 		
-		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltw, ltwphiLT);
-		MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(rtw, rtwphiRT);
+		MatrixFormatConversion.createDenseMatrixMTJ(phiLT).mult(ltw, ltwphiLT);
+		MatrixFormatConversion.createDenseMatrixMTJ(phiRT).mult(rtw, rtwphiRT);
 		
 		wtLphiLRphiR=_cpcaR2.concatenateLR(wtlphiL,wtrphiR);
 		wtLphiLRphiRT=_cpcaR2.concatenateLRT(ltwphiLT,rtwphiRT);
 		
 		if(_opt.numGrams==3){
-			computeCCA2NGrams( wtw,wtLphiLRphiR,wtLphiLRphiRT,l1l2_OR_R1R2_L1R1, l1l2_OR_R1R2_L1R1T,svdTC,_cpcaR2,wtLphiLRphiR.rows(),wtLphiLRphiRT.rows());
+			computeCCA2NGrams( wtw,wtLphiLRphiR,wtLphiLRphiRT,l1l2_OR_R1R2_L1R1, l1l2_OR_R1R2_L1R1T,svdTC,_cpcaR2,wtLphiLRphiR.numRows(),wtLphiLRphiRT.numRows());
 		}
 		if(_opt.numGrams==5){
 			computeCCA2NGrams(wtw,wtLphiLRphiR,wtLphiLRphiRT,l1l2_OR_R1R2_L1R1,l1l2_OR_R1R2_L1R1T
 					,l1l3_OR_R1R3_L1R2,l1l3_OR_R1R3_L1R2T,l1l4_OR_R1R4_L2R1,l1l4_OR_R1R4_L2R1T,l2l3_OR_R2R3_L2R2,l2l3_OR_R2R3_L2R2T,
-					l2l4_OR_R2R4_L1L2,l2l4_OR_R2R4_L1L2T,l3l4_OR_R3R4_R1R2,l3l4_OR_R3R4_R1R2T,svdTC,_cpcaR2,wtLphiLRphiR.rows(),wtLphiLRphiRT.rows());
+					l2l4_OR_R2R4_L1L2,l2l4_OR_R2R4_L1L2T,l3l4_OR_R3R4_R1R2,l3l4_OR_R3R4_R1R2T,svdTC,_cpcaR2,wtLphiLRphiR.numRows(),wtLphiLRphiRT.numRows());
 			
 		}
 	}
 
 
 /*
-	private void computeCCA3NGrams(SparseDoubleMatrix2D view1,
-			SparseDoubleMatrix2D view1t, SparseDoubleMatrix2D view2,
-			SparseDoubleMatrix2D view2t, SparseDoubleMatrix2D view3,
-			SparseDoubleMatrix2D view3t, SVDTemplates svdTC,ContextPCANGramsRepresentation _cpcaR2) {
+	private void computeCCA3NGrams(FlexCompRowMatrix view1,
+			FlexCompRowMatrix view1t, FlexCompRowMatrix view2,
+			FlexCompRowMatrix view2t, FlexCompRowMatrix view3,
+			FlexCompRowMatrix view3t, SVDTemplates svdTC,ContextPCANGramsRepresentation _cpcaR2) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -525,37 +608,37 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 
 	
 
-	private void computeCCA2NGramsLR(SparseDoubleMatrix2D l1l2_OR_R1R2_L1R1,
-			SparseDoubleMatrix2D l1l2_OR_R1R2_L1R1T,
-			SparseDoubleMatrix2D l1l3_OR_R1R3_L1R2,
-			SparseDoubleMatrix2D l1l3_OR_R1R3_L1R2T,
-			SparseDoubleMatrix2D l1l4_OR_R1R4_L2R1,
-			SparseDoubleMatrix2D l1l4_OR_R1R4_L2R1T,
-			SparseDoubleMatrix2D l2l3_OR_R2R3_L2R2,
-			SparseDoubleMatrix2D l2l3_OR_R2R3_L2R2T,
-			SparseDoubleMatrix2D l2l4_OR_R2R4_L1L2,
-			SparseDoubleMatrix2D l2l4_OR_R2R4_L1L2T,
-			SparseDoubleMatrix2D l3l4_OR_R3R4_R1R2,
-			SparseDoubleMatrix2D l3l4_OR_R3R4_R1R2T, SparseDoubleMatrix2D wtw,
+	private void computeCCA2NGramsLR(FlexCompRowMatrix l1l2_OR_R1R2_L1R1,
+			FlexCompRowMatrix l1l2_OR_R1R2_L1R1T,
+			FlexCompRowMatrix l1l3_OR_R1R3_L1R2,
+			FlexCompRowMatrix l1l3_OR_R1R3_L1R2T,
+			FlexCompRowMatrix l1l4_OR_R1R4_L2R1,
+			FlexCompRowMatrix l1l4_OR_R1R4_L2R1T,
+			FlexCompRowMatrix l2l3_OR_R2R3_L2R2,
+			FlexCompRowMatrix l2l3_OR_R2R3_L2R2T,
+			FlexCompRowMatrix l2l4_OR_R2R4_L1L2,
+			FlexCompRowMatrix l2l4_OR_R2R4_L1L2T,
+			FlexCompRowMatrix l3l4_OR_R3R4_R1R2,
+			FlexCompRowMatrix l3l4_OR_R3R4_R1R2T, FlexCompRowMatrix wtw,
 			SVDTemplates svdTC, ContextPCANGramsRepresentation _cpcaR2) {
 		
 
 		
-		SparseDoubleMatrix2D rtr=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D ltl=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D ltr=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D rtl=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
+		FlexCompRowMatrix rtr=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
+		FlexCompRowMatrix ltl=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
+		FlexCompRowMatrix ltr=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
+		FlexCompRowMatrix rtl=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
 		
 		
 		
-		SparseDoubleMatrix2D auxMat5=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat2=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat3=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D auxMat4=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
+		FlexCompRowMatrix auxMat5=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
+		FlexCompRowMatrix auxMat2=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
+		FlexCompRowMatrix auxMat3=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
+		FlexCompRowMatrix auxMat4=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
 				
 		
-		SparseDoubleMatrix2D row1=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
-		SparseDoubleMatrix2D row2=new SparseDoubleMatrix2D(l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),l1l2_OR_R1R2_L1R1.rows()+l1l3_OR_R1R3_L1R2.rows(),0,0.7,0.75);
+		FlexCompRowMatrix row1=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
+		FlexCompRowMatrix row2=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
 		
 		row1=_cpcaR2.concatenateLR(wtw,l2l4_OR_R2R4_L1L2);
 		row2=_cpcaR2.concatenateLR(l2l4_OR_R2R4_L1L2T,wtw);
@@ -573,17 +656,18 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		row2=_cpcaR2.concatenateLR(l1l4_OR_R1R4_L2R1T,l2l3_OR_R2R3_L2R2T);
 		rtl=_cpcaR2.concatenateLRT(row1,row2);
 		
-				
-		(svdTC.computeSparseInverse(ltl)).zMult(ltr, auxMat5);
-		(svdTC.computeSparseInverse(rtr)).zMult(rtl, auxMat2);
-		auxMat5.zMult(auxMat2,auxMat3);
-		phiL=svdTC.computeSVD_Tropp(auxMat3, _cpcaR2.getOmegaMatrix(auxMat3.columns()),auxMat3.columns());
 		
-		auxMat2.zMult(auxMat5,auxMat4);
-		phiR=svdTC.computeSVD_Tropp(auxMat4, _cpcaR2.getOmegaMatrix(auxMat4.columns()),auxMat4.columns());
+		auxMat5=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(ltl),ltr);
+		auxMat3=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(rtr));
 		
 		
+		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),auxMat3.numColumns());
 		
+		auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(rtr),rtl);
+		auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat2, svdTC.computeSparseInverseSqRoot(ltl));
+		
+		
+		phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),auxMat4.numColumns());
 		
 	}
 

@@ -69,6 +69,7 @@ public class CCAWriter extends WriteDataFile implements EmbeddingWriter {
 				writer.write(vocab.get(i-1));
 				writer.write(' ');
 			}
+			/*
 			for (int j=0; j<_opt.hiddenStateSize;j++){
 				
 				if ( j != _opt.hiddenStateSize-1){
@@ -80,6 +81,41 @@ public class CCAWriter extends WriteDataFile implements EmbeddingWriter {
 					writer.write('\n');
 				}
 			}
+			*/
+			
+			///
+			double entry=0;
+			for (int j=0; j<_opt.hiddenStateSize;j++){
+				entry =eigenDictArr[i][j];
+				if (_opt.logTrans){
+					System.out.println("In Log Transform");
+					if (eigenDictArr[i][j] >0)
+						entry = Math.log(eigenDictArr[i][j]);
+					else
+						entry = -1*Math.log(Math.abs(eigenDictArr[i][j]));
+				}
+				if (_opt.sqRootTrans){
+					System.out.println("In Square Root Transform");
+					if (eigenDictArr[i][j] >0)
+						entry = Math.sqrt(eigenDictArr[i][j]);
+					else
+						entry = -1*Math.log(Math.sqrt(Math.abs(eigenDictArr[i][j])));
+				}
+				
+				
+				if ( j != _opt.hiddenStateSize-1){
+					
+					
+					writer.write(Double.toString(entry));
+					writer.write(' ');
+				}
+				else{
+					writer.write(Double.toString(entry));
+					writer.write('\n');
+				}
+			}
+			
+			
 			
 		}
 		

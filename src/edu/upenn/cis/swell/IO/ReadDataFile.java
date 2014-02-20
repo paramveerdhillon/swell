@@ -157,7 +157,7 @@ public class ReadDataFile implements Serializable {
 		
 		
 		in= new BufferedReader(new FileReader(_opt.unlabDataTrainfile));
-		Object[] wordHashMaps =new Object[1];
+		//Object[] wordHashMaps =new Object[1];
 		HashMap<Double,Double> word_contextCounts =new HashMap<Double,Double>();
 		CenterScaleNormalizeUtils utils=new CenterScaleNormalizeUtils(_opt);
 		
@@ -203,6 +203,7 @@ public class ReadDataFile implements Serializable {
 		}
 		    in.close();
 		   
+		    wordHashMaps=new Object[1];
 		    wordHashMaps[0]= word_contextCounts;
 		    
 		
@@ -936,6 +937,8 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 	public Object[] getAllDocsNGrams(){
 		return wordHashMaps;
 	}
+	
+	
 	
 	public ArrayList<ArrayList<Integer>> getAllDocs(){
 		return allDocs;

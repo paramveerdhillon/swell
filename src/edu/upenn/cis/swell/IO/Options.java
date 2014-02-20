@@ -27,6 +27,7 @@ public final class Options implements Serializable {
  public String contextSpecificEmbed=null;
  public String contextOblEmbed=null;
  public String contextOblEmbedContext=null;
+ public String eigenEmbedFile=null;
  public boolean train = false;
  public boolean trainUnlab = false;
  public boolean eval = false;
@@ -34,6 +35,7 @@ public final class Options implements Serializable {
  public boolean lowercase = false;
  public boolean bagofWordsSVD = false;
  public boolean scaleBySingVals=false;
+ public boolean induceEmbeds=false;
  public boolean ngrams = false;
  public int numLabels = 1;
  public boolean normalize = false;
@@ -58,7 +60,8 @@ public final class Options implements Serializable {
  public String outputDir="Output_Files/";
  public String embedToInduce=null;
  public String eigenWordCCAFile=null;
- public boolean kdimDecomp=false;
+ public boolean kdimDecomp=false,logTrans=false,sqRootTrans=false;
+ public boolean sqRootNorm=false;
  public int n=0,p=0;
  
  
@@ -87,6 +90,13 @@ public final class Options implements Serializable {
 	    	n=Integer.parseInt(pair[2]);
 	    	p=Integer.parseInt(pair[3]);
 	    }
+	    if(pair[0].equals("eigen-embed-file")){
+	    	eigenEmbedFile=pair[1];
+	    	n=Integer.parseInt(pair[2]);
+	    	p=Integer.parseInt(pair[3]);
+	    }
+	    
+	    
 	    
 	    
 	    if(pair[0].equals("embed-to-induce")){
@@ -126,6 +136,19 @@ public final class Options implements Serializable {
 			kdimDecomp=true;
 		}
 		
+		if (pair[0].equals("sqroot-norm"))
+		{
+			sqRootNorm=true;
+		}
+		if (pair[0].equals("log-trans"))
+		{
+			logTrans=true;
+		}
+		if (pair[0].equals("sqrt-trans"))
+		{
+			sqRootTrans=true;
+		}
+	
 	    
 	    if (pair[0].equals("diagOnlyInverse")) {
 	    	diagOnlyInverse = true;
@@ -170,6 +193,10 @@ public final class Options implements Serializable {
 		    }
 	    if (pair[0].equals("scaleDictBySingVals")) {
 	    	scaleBySingVals = true;
+		    }
+	    
+	    if (pair[0].equals("induce-embeds")) {
+	    	induceEmbeds = true;
 		    }
 	    
 	    if (pair[0].equals("contextSizeEachSide")) {

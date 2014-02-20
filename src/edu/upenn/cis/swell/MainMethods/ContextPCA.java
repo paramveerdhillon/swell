@@ -9,8 +9,10 @@ package edu.upenn.cis.swell.MainMethods;
  */
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
@@ -28,8 +30,8 @@ import edu.upenn.cis.swell.SpectralRepresentations.ContextPCARepresentation;
 public class ContextPCA implements Serializable {
  
 	static final long serialVersionUID = 42L;
-	
-	
+	static HashMap<String,Integer> words_Dict;
+	static Matrix eigDict=null;
 	public static void main(String[] args) throws Exception{
 		
 		ArrayList<ArrayList<Integer>> all_Docs;
@@ -41,6 +43,8 @@ public class ContextPCA implements Serializable {
 		ContextPCARun contextPCARun;
 		ContextPCAWriter wout;
 		Object[] matrices=new Object[3];
+		
+		
 		long numTokens;
 		
 		Options opt=new Options(args);
@@ -128,7 +132,16 @@ public class ContextPCA implements Serializable {
 			
 			System.out.println("+++Generated Context PCA Embeddings for training data+++\n");
 		}
+		if(opt.induceEmbeds){
+			embedMatrixProcess(opt);
+			wout=new ContextPCAWriter(opt);
+			wout.writeContextObliviousEmbedNewData(getEmbedMatrix(),getwordDict());
+		}
+		
+		
 	}
+	
+
 
 	public static HashMap<String,Integer> deserializeCorpusIntMapped(Options opt) throws ClassNotFoundException{
 		
@@ -158,6 +171,75 @@ public class ContextPCA implements Serializable {
 		
 	} 
 
+	
+public static Matrix embedMatrixProcess(Options opt) throws ClassNotFoundException{
+		
+		
+		
+		//String eigDict=opt.eigenWordCCAFile;
+		File fEig= new File(opt.eigenEmbedFile);
+		
+		
+		Matrix eigDictMat=new Matrix(opt.n+1,opt.p);
+		HashMap<String,Integer> wordsDict=new HashMap<String,Integer>();
+		
+		try{
+			
+			BufferedReader reader = new BufferedReader(new FileReader(fEig));
+			String line = null;
+			int i=0;
+			while ((line = reader.readLine()) != null) {
+			
+			String[] words= line.split("\\s");
+			
+			wordsDict.put(words[0],i);
+			
+			for(int j=0;j<words.length-1;j++){
+				eigDictMat.set(i, j, Double.parseDouble(words[j+1]));
+			}
+			i++;	
+			}
+			
+			System.out.println("=======Loaded the k-dim CCA Dictionary=======");
+			//For words not in dict use OOV
+			/*
+			for(int l=0; l <opt.vocabSize+1;l++)
+			{
+				if(wordsDict.get(l)==null){
+					wordsDict.put(l,0);
+				}
+			}
+			*/
+			setwordDict(wordsDict);
+			setEmbedMatrix(eigDictMat);
+		}
+		
+		catch (IOException ioe){
+			System.out.println(ioe.getMessage());
+		}
+		
+		
+		return eigDictMat;
+		
+	}	
+	
+public static Matrix setEmbedMatrix(Matrix m){
+	return eigDict=m;
+}
+
+public static HashMap<String,Integer> setwordDict(HashMap<String,Integer> wDict){
+	return words_Dict=wDict;
+}
+
+public static Matrix getEmbedMatrix(){
+	return eigDict;
+}
+
+public static HashMap<String,Integer> getwordDict(){
+	return words_Dict;
+}
+
+	
 	
 public static Object[] deserializeContextPCARun(Options opt) throws ClassNotFoundException{
 	

@@ -17,7 +17,10 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
+
+import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import Jama.Matrix;
 import cern.colt.matrix.tdouble.DoubleFactory2D;
@@ -36,14 +39,13 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 	LTLMatrix_hvTimeshv,RTRMatrix_hvTimeshv,WTLMatrix_vTimeshv,LTWMatrix_hvTimesv,WTRMatrix_vTimeshv,RTWMatrix_hvTimesv,
 	 WTLRMatrix_vTimes2hv,LRTWMatrix_2hvTimesv,LRTLRMatrix_2hvTimes2hv;
 	
-	DenseDoubleMatrix2D LTRMatrix_hkTimeshk,RTLMatrix_hkTimeshk,
-	LTLMatrix_hkTimeshk,RTRMatrix_hkTimeshk,WTLMatrix_vTimeshk,LTWMatrix_hkTimesv,WTRMatrix_vTimeshk,RTWMatrix_hkTimesv,
-	 WTLRMatrix_vTimes2hk,LRTWMatrix_2hkTimesv,LRTLRMatrix_2hkTimes2hk;
+	DenseDoubleMatrix2D WTLMatrix_vTimeshk,LTWMatrix_hkTimesv,WTRMatrix_vTimeshk,RTWMatrix_hkTimesv,
+	 WTLRMatrix_vTimes2hk,LRTWMatrix_2hkTimesv,LRMatrix_nTimes2hk,LRTMatrix_2hkTimesn;
 	
 	Matrix kdimEigDict=null;
 	
-	DenseDoubleMatrix2D LMatrix_nTimeshk,RMatrix_nTimeshk,
-	LTMatrix_nTimeshk,RTMatrix_nTimeshk,LRMatrix_nTimes2hk,LRTMatrix_2hkTimesn;
+	Matrix LMatrix_nTimeshk,RMatrix_nTimeshk,LTMatrix_nTimeshk,RTMatrix_nTimeshk,
+	LTRMatrix_hkTimeshk,RTLMatrix_hkTimeshk,LTLMatrix_hkTimeshk,RTRMatrix_hkTimeshk,LRTLRMatrix_2hkTimes2hk;
 	
 	
 	
@@ -180,6 +182,72 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 	}
 	
 	
+	public void transformMatrices(){
+		
+		//We can not have n*hv sparse matrices due to limits on max. matrix sizes so we will have to perform the multiplication here only.
+		
+	 
+		if( _opt.typeofDecomp.equals("TwoStepLRvsW") ){
+		
+			LTRMatrix_hvTimeshv=transform(LTRMatrix_hvTimeshv);
+			RTLMatrix_hvTimeshv=transform(RTLMatrix_hvTimeshv);
+			LTLMatrix_hvTimeshv=transform(LTLMatrix_hvTimeshv);
+			RTRMatrix_hvTimeshv=transform(RTRMatrix_hvTimeshv);
+			WTLMatrix_vTimeshv=transform(WTLMatrix_vTimeshv);
+			LTWMatrix_hvTimesv=transform(LTWMatrix_hvTimesv);
+			WMatrix_vTimesv=transform(WMatrix_vTimesv);
+			WTRMatrix_vTimeshv=transform(WTRMatrix_vTimeshv);
+			RTWMatrix_hvTimesv=transform(RTWMatrix_hvTimesv);
+						
+	}
+		
+		if(_opt.typeofDecomp.equals("2viewWvsL")|| _opt.typeofDecomp.equals("WvsL")){
+			
+			WTLMatrix_vTimeshv=transform(WTLMatrix_vTimeshv);
+			LTWMatrix_hvTimesv= transform(LTWMatrix_hvTimesv);
+			LTLMatrix_hvTimeshv= transform(LTLMatrix_hvTimeshv);
+			WMatrix_vTimesv= transform(WMatrix_vTimesv);
+		}
+		
+		if(_opt.typeofDecomp.equals("2viewWvsR")|| _opt.typeofDecomp.equals("WvsR") ){
+			
+			WTRMatrix_vTimeshv=transform(WTRMatrix_vTimeshv);
+			RTWMatrix_hvTimesv= transform(RTWMatrix_hvTimesv);
+			RTRMatrix_hvTimeshv= transform(RTRMatrix_hvTimeshv);
+			WMatrix_vTimesv= transform(WMatrix_vTimesv);
+		}
+		
+		if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){
+			
+			WTLRMatrix_vTimes2hv=transform(WTLRMatrix_vTimes2hv);
+			LRTWMatrix_2hvTimesv=transform(LRTWMatrix_2hvTimesv);
+			LRTLRMatrix_2hvTimes2hv=transform(LRTLRMatrix_2hvTimes2hv);
+			WMatrix_vTimesv=transform(WMatrix_vTimesv);
+		}
+				
+	}	
+	
+	public FlexCompRowMatrix transform(FlexCompRowMatrix a){
+		
+		Iterator<MatrixEntry> aIt = a.iterator();
+		double ent=0;
+		
+		while(aIt.hasNext())
+			{
+			MatrixEntry ment = aIt.next();
+			ent =ment.get();
+			if(_opt.logTrans)
+				ent = Math.log(ent);
+			if(_opt.sqRootTrans)
+				ent = Math.sqrt(ent);
+			
+			a.set(ment.row(), ment.column(), ent);		
+			}
+		
+		
+	return a;	
+		
+	}
 	
 	private void populateMatricesTwoStepLRvsW(
 			FlexCompRowMatrix LTR,
@@ -263,7 +331,7 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 				while(idx_tok<doc.size()){
 					int tok=doc.get(idx_tok);
 					WMatrix_vTimesv.add(tok, tok, 1);
-					
+				
 					
 					for(int i=1;i<=_contextSize;i++){
 						if (idx_tok-i>=0){
@@ -698,50 +766,65 @@ public void populateMatricesWvsL(DenseDoubleMatrix2D WTL,DenseDoubleMatrix2D LTW
 public void computeCovMatrices(){
 	
 	//This is required as we can not compute LTL, RTR, RTL, LTR, LRTLR from v*hk matrices
+
+	if(_opt.typeofDecomp.equals("2viewWvsL")|| _opt.typeofDecomp.equals("WvsL")){	
+		LTLMatrix_hkTimeshk=new Matrix(_contextSize*(k_dim),_contextSize*(k_dim));
+	}
+
+	if(_opt.typeofDecomp.equals("2viewWvsR")|| _opt.typeofDecomp.equals("WvsR")){
+		RTRMatrix_hkTimeshk=new Matrix(_contextSize*(k_dim),_contextSize*(k_dim));
+	}	
+		
+	if( _opt.typeofDecomp.equals("TwoStepLRvsW") ){	
+		LTLMatrix_hkTimeshk=new Matrix(_contextSize*(k_dim),_contextSize*(k_dim));
+		RTRMatrix_hkTimeshk=new Matrix(_contextSize*(k_dim),_contextSize*(k_dim));
+		LTRMatrix_hkTimeshk=new Matrix(_contextSize*(k_dim),_contextSize*(k_dim));
+		RTLMatrix_hkTimeshk=new Matrix(_contextSize*(k_dim),_contextSize*(k_dim));
+	}	
+
+	if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){		
+		
+		LRTLRMatrix_2hkTimes2hk=new Matrix(2*_contextSize*(k_dim),2*_contextSize*(k_dim));
+
+	}		
 	
-if(_opt.typeofDecomp.equals("2viewWvsL")|| _opt.typeofDecomp.equals("WvsL")){	
-	LMatrix_nTimeshk=new DenseDoubleMatrix2D((int) _numTok,_contextSize*(k_dim));
-	LTMatrix_nTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),(int) _numTok);
-	LTLMatrix_hkTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),_contextSize*(k_dim));
-}
-
-if(_opt.typeofDecomp.equals("2viewWvsR")|| _opt.typeofDecomp.equals("WvsR")){
-	RMatrix_nTimeshk=new DenseDoubleMatrix2D((int) _numTok,_contextSize*(k_dim));
-	RTMatrix_nTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),(int) _numTok);
-	RTRMatrix_hkTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),_contextSize*(k_dim));
-}	
 	
-
-if( _opt.typeofDecomp.equals("TwoStepLRvsW") ){	
-	LMatrix_nTimeshk=new DenseDoubleMatrix2D((int) _numTok,_contextSize*(k_dim));
-	LTMatrix_nTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),(int) _numTok);
-	LTLMatrix_hkTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),_contextSize*(k_dim));
-	RMatrix_nTimeshk=new DenseDoubleMatrix2D((int) _numTok,_contextSize*(k_dim));
-	RTMatrix_nTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),(int) _numTok);
-	RTRMatrix_hkTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),_contextSize*(k_dim));
-
-	LTRMatrix_hkTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),_contextSize*(k_dim));
-	RTLMatrix_hkTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),_contextSize*(k_dim));
-}	
-
-
-if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){
-	LMatrix_nTimeshk=new DenseDoubleMatrix2D((int) _numTok,_contextSize*(k_dim));
-	LTMatrix_nTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),(int) _numTok);
-	
-	RMatrix_nTimeshk=new DenseDoubleMatrix2D((int) _numTok,_contextSize*(k_dim));
-	RTMatrix_nTimeshk=new DenseDoubleMatrix2D(_contextSize*(k_dim),(int) _numTok);
-	
-	LRTLRMatrix_2hkTimes2hk=new DenseDoubleMatrix2D(2*_contextSize*(k_dim),2*_contextSize*(k_dim));
-
-}	
-
-
 int idx_doc=0;
-int idx_toksAllDocs=0;
 	while (idx_doc<_allDocs.size()){
 		ArrayList<Integer> doc=_allDocs.get(idx_doc++);
 		int idx_tok=0;
+		int tokSize=doc.size();
+		////////////////////////
+		
+
+		if(_opt.typeofDecomp.equals("2viewWvsL")|| _opt.typeofDecomp.equals("WvsL")){	
+			LMatrix_nTimeshk=new Matrix(tokSize,_contextSize*(k_dim));
+			LTMatrix_nTimeshk=new Matrix(_contextSize*(k_dim),tokSize);
+		}
+
+		if(_opt.typeofDecomp.equals("2viewWvsR")|| _opt.typeofDecomp.equals("WvsR")){
+			RMatrix_nTimeshk=new Matrix(tokSize,_contextSize*(k_dim));
+			RTMatrix_nTimeshk=new Matrix(_contextSize*(k_dim),tokSize);
+		}	
+			
+
+		if( _opt.typeofDecomp.equals("TwoStepLRvsW") ){	
+			LMatrix_nTimeshk=new Matrix(tokSize,_contextSize*(k_dim));
+			LTMatrix_nTimeshk=new Matrix(_contextSize*(k_dim),tokSize);
+			RMatrix_nTimeshk=new Matrix(tokSize,_contextSize*(k_dim));
+			RTMatrix_nTimeshk=new Matrix(_contextSize*(k_dim),tokSize);
+		}	
+
+
+		if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){
+			LMatrix_nTimeshk=new Matrix(tokSize,_contextSize*(k_dim));
+			LTMatrix_nTimeshk=new Matrix(_contextSize*(k_dim),tokSize);
+			
+			RMatrix_nTimeshk=new Matrix(tokSize,_contextSize*(k_dim));
+			RTMatrix_nTimeshk=new Matrix(_contextSize*(k_dim),tokSize);
+		}	
+
+		///////////////////////
 		while(idx_tok<doc.size()){
 			int tok=doc.get(idx_tok);
 			for(int i=1;i<=_contextSize;i++){
@@ -750,46 +833,50 @@ int idx_toksAllDocs=0;
 				if (idx_tok-i>=0){
 					for (int j=0;j<k_dim;j++){	
 						
-						LMatrix_nTimeshk.set(idx_toksAllDocs, (i-1)*(k_dim)+j, kdimEigDict.get(doc.get(idx_tok-i), j));
-						LTMatrix_nTimeshk.set((i-1)*(k_dim)+j,idx_toksAllDocs, kdimEigDict.get(doc.get(idx_tok-i), j));
+						LMatrix_nTimeshk.set(idx_tok, (i-1)*(k_dim)+j, kdimEigDict.get(doc.get(idx_tok-i), j));
+						LTMatrix_nTimeshk.set((i-1)*(k_dim)+j,idx_tok, kdimEigDict.get(doc.get(idx_tok-i), j));
 					}
 				}
 			}
 			if(!_opt.typeofDecomp.equals("2viewWvsL")&& !_opt.typeofDecomp.equals("WvsL")){	
 				if (idx_tok+i <doc.size()){
 						for (int j=0;j<k_dim;j++){	
-						
-						RMatrix_nTimeshk.set(idx_toksAllDocs, (i-1)*(k_dim)+j, kdimEigDict.get(doc.get(idx_tok+i), j));
-						RTMatrix_nTimeshk.set((i-1)*(k_dim)+j,idx_toksAllDocs, kdimEigDict.get(doc.get(idx_tok+i), j));
+							
+						RMatrix_nTimeshk.set(idx_tok, (i-1)*(k_dim)+j, kdimEigDict.get(doc.get(idx_tok+i), j));
+						RTMatrix_nTimeshk.set((i-1)*(k_dim)+j,idx_tok, kdimEigDict.get(doc.get(idx_tok+i), j));
 					}
 				}
 			}
 		}
 			idx_tok++;
-			idx_toksAllDocs++;
+			
 		}
 }		
 
 if(_opt.typeofDecomp.equals("2viewWvsL")|| _opt.typeofDecomp.equals("WvsL") || _opt.typeofDecomp.equals("TwoStepLRvsW")){		
-	LTMatrix_nTimeshk.zMult(LMatrix_nTimeshk,LTLMatrix_hkTimeshk);	
+	LTLMatrix_hkTimeshk.plusEquals(LTMatrix_nTimeshk.times(LMatrix_nTimeshk));
+	
 }	
 	
 if(_opt.typeofDecomp.equals("2viewWvsR")|| _opt.typeofDecomp.equals("WvsR") || _opt.typeofDecomp.equals("TwoStepLRvsW")){
-	RTMatrix_nTimeshk.zMult(RMatrix_nTimeshk,RTRMatrix_hkTimeshk);
+	RTRMatrix_hkTimeshk.plusEquals(RTMatrix_nTimeshk.times(RMatrix_nTimeshk));
 }
 	
 if(_opt.typeofDecomp.equals("TwoStepLRvsW")){
-	LTMatrix_nTimeshk.zMult(RMatrix_nTimeshk,LTRMatrix_hkTimeshk);	
-	RTMatrix_nTimeshk.zMult(LMatrix_nTimeshk,RTLMatrix_hkTimeshk);
+	LTLMatrix_hkTimeshk.plusEquals(LTMatrix_nTimeshk.times(LMatrix_nTimeshk));
+	RTRMatrix_hkTimeshk.plusEquals(RTMatrix_nTimeshk.times(RMatrix_nTimeshk));
+	
+	
 }
 
 if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){
 	
-	LRMatrix_nTimes2hk=concatenateLR(LMatrix_nTimeshk,RMatrix_nTimeshk);
+	LRMatrix_nTimes2hk=concatenateLR(MatrixFormatConversion.createDenseMatrixCOLT(LMatrix_nTimeshk),MatrixFormatConversion.createDenseMatrixCOLT(RMatrix_nTimeshk));
 	
-	LRTMatrix_2hkTimesn=concatenateLRT(LTMatrix_nTimeshk,RTMatrix_nTimeshk);
+	LRTMatrix_2hkTimesn=concatenateLRT(MatrixFormatConversion.createDenseMatrixCOLT(LTMatrix_nTimeshk),MatrixFormatConversion.createDenseMatrixCOLT(RTMatrix_nTimeshk));
 	
-	LRTMatrix_2hkTimesn.zMult(LRMatrix_nTimes2hk,LRTLRMatrix_2hkTimes2hk);
+	
+	LRTLRMatrix_2hkTimes2hk.plusEquals(MatrixFormatConversion.createDenseMatrixJAMA(LRTMatrix_2hkTimesn).times(MatrixFormatConversion.createDenseMatrixJAMA(LRMatrix_nTimes2hk)));
 }
 
 }
@@ -852,19 +939,20 @@ if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){
 	
 	/////
 	public DenseDoubleMatrix2D getLTRDenseMatrix(){
-		return LTRMatrix_hkTimeshk;
+		
+		return MatrixFormatConversion.createDenseMatrixCOLT(LTRMatrix_hkTimeshk); 
 	}
 	
 	public DenseDoubleMatrix2D getRTLDenseMatrix(){
-		return RTLMatrix_hkTimeshk;
+		return MatrixFormatConversion.createDenseMatrixCOLT(RTLMatrix_hkTimeshk); 				
 	}
 	
 	public DenseDoubleMatrix2D getLTLDenseMatrix(){
-		return LTLMatrix_hkTimeshk;
+		return MatrixFormatConversion.createDenseMatrixCOLT(LTLMatrix_hkTimeshk);
 	}
 	
 	public DenseDoubleMatrix2D getRTRDenseMatrix(){
-		return RTRMatrix_hkTimeshk;
+		return MatrixFormatConversion.createDenseMatrixCOLT(RTRMatrix_hkTimeshk);
 	}
 	
 	public DenseDoubleMatrix2D getWTLDenseMatrix(){
@@ -892,7 +980,7 @@ if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){
 	}
 	
 	public DenseDoubleMatrix2D  getLRTLRDenseMatrix(){
-		return LRTLRMatrix_2hkTimes2hk;
+		return MatrixFormatConversion.createDenseMatrixCOLT(LRTLRMatrix_2hkTimes2hk);
 	}
 	
 	
@@ -940,6 +1028,8 @@ public SparseDoubleMatrix2D getWnTMatrix(){
 		}
 		return finalProjection;
 	}
+	
+	
 	
 	
 	public DenseDoubleMatrix2D concatenateLR(DenseDoubleMatrix2D lProjectionMatrix,

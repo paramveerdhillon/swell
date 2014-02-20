@@ -113,7 +113,10 @@ public class ContextPCARun implements Serializable {
 			if(_opt.normalizePCA){
 				//Scaling rows by the word counts.
 				for (MatrixEntry e : wtl1){
-					wtl.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+					if(!_opt.sqRootNorm)
+						wtl.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+					else
+						wtl.set(e.row(), e.column(), e.get()/Math.sqrt(wtw.get(e.row(),e.row())));
 				}
 				
 			}
@@ -132,7 +135,11 @@ public class ContextPCARun implements Serializable {
 			rtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getRTWMatrix());
 			if(_opt.normalizePCA){
 				for (MatrixEntry e : wtr1){
-					wtr.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+					if(!_opt.sqRootNorm)
+						wtr.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+					else
+						wtr.set(e.row(), e.column(), e.get()/Math.sqrt(wtw.get(e.row(),e.row())));
+
 				}
 				
 			}
@@ -155,7 +162,11 @@ public class ContextPCARun implements Serializable {
 			wtw=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR.getWTWMatrix());
 			if(_opt.normalizePCA){
 				for (MatrixEntry e : wtlr1){
-					wtlr.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+					if(!_opt.sqRootNorm)
+						wtlr.set(e.row(), e.column(), e.get()/wtw.get(e.row(),e.row()));
+					else
+						wtlr.set(e.row(), e.column(), e.get()/Math.sqrt(wtw.get(e.row(),e.row())));
+
 					
 							}
 			}

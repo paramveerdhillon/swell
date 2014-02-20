@@ -35,7 +35,7 @@ import edu.upenn.cis.swell.MathUtils.CenterScaleNormalizeUtils;
 public class CCARepresentation extends SpectralRepresentation implements Serializable {
 
 	protected ArrayList<Double> _smooths=new ArrayList<Double>();
-	protected Matrix covLLAllDocsMatrix,covRRAllDocsMatrix,covLRAllDocsMatrix;
+	protected Matrix covLLAllDocsMatrix,covRRAllDocsMatrix,covLRAllDocsMatrix,covRLAllDocsMatrix;
 	private ReadDataFile _rin;
 	Matrix newEigenDict=null;
 	long _numTokens=0;
@@ -51,10 +51,12 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		double[][] covLLAllDocs=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
 		double[][] covRRAllDocs=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
 		double[][] covLRAllDocs=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
+		double[][] covRLAllDocs=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
 		
 		covLLAllDocsMatrix= new Matrix(covLLAllDocs); 
 		covRRAllDocsMatrix= new Matrix(covRRAllDocs);
 		covLRAllDocsMatrix= new Matrix(covLRAllDocs);
+		covRLAllDocsMatrix= new Matrix(covRLAllDocs);
 		
 	}
 
@@ -75,8 +77,8 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		} 
 			
 		
-		setCovLLAllDocsMatrix(addRegularizationAndNormalize(getCovLLAllDocsMatrix()));
-		setCovRRAllDocsMatrix(addRegularizationAndNormalize(getCovRRAllDocsMatrix()));
+		setCovLLAllDocsMatrix(addRegularization(getCovLLAllDocsMatrix()));
+		setCovRRAllDocsMatrix(addRegularization(getCovRRAllDocsMatrix()));
 		
 			
 	}	
@@ -145,7 +147,8 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		double[][] covLL=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
 		double[][] covRR=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
 		double[][] covLR=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
-		Object[] covMatrices= new Object[3];
+		double[][] covRL=new double[_smooths.size()*_num_hidden][_smooths.size()*_num_hidden];
+		Object[] covMatrices= new Object[4];
 		
 		mathUtils=new CenterScaleNormalizeUtils(_opt);
 		
@@ -153,19 +156,28 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		Matrix covLLMatrix= new Matrix(covLL); 
 		Matrix covRRMatrix= new Matrix(covRR);
 		Matrix covLRMatrix= new Matrix(covLR);
+		Matrix covRLMatrix= new Matrix(covRL);
 		
 		Matrix LMatrix=mathUtils.center(left_smooth(eigenFeatDict, doc));
 		Matrix RMatrix=mathUtils.center(right_smooth(eigenFeatDict, doc));
 		
+		//Matrix LMatrix=mathUtils.center_and_scale(left_smooth(eigenFeatDict, doc));
+		//Matrix RMatrix=mathUtils.center_and_scale(right_smooth(eigenFeatDict, doc));
 		
 		
-		covLLMatrix=LMatrix.transpose().times(LMatrix);
-		covRRMatrix=RMatrix.transpose().times(RMatrix);
-		covLRMatrix=LMatrix.transpose().times(RMatrix);
+		//Matrix LMatrix=left_smooth(eigenFeatDict, doc);
+		//Matrix RMatrix=right_smooth(eigenFeatDict, doc);
+		
+		
+		covLLMatrix=addNormalize(LMatrix.transpose().times(LMatrix),LMatrix.getRowDimension());
+		covRRMatrix=addNormalize(RMatrix.transpose().times(RMatrix),RMatrix.getRowDimension());
+		covLRMatrix=addNormalize(LMatrix.transpose().times(RMatrix),LMatrix.getRowDimension());
+		covRLMatrix=addNormalize(RMatrix.transpose().times(LMatrix),RMatrix.getRowDimension());
 		
 		covMatrices[0]=(Object)covLLMatrix;
 		covMatrices[1]=(Object)covRRMatrix;
 		covMatrices[2]=(Object)covLRMatrix;
+		covMatrices[3]=(Object)covRLMatrix;
 		
 		return covMatrices;
 		
@@ -293,6 +305,7 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		    System.out.println("++Doc Processing for Smoothing Finished++");   
 		}
 	
+/*	
 	private void processDocsSerial(final Matrix eigenFeatDict, final Matrix left_singular_vectors,final Matrix right_singular_vectors)
 			throws InterruptedException, ExecutionException{
 				
@@ -308,7 +321,7 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 						//System.out.println(k++);
 									
 				    				}
-		
+*/		
 		
 	public Matrix createNewEigDict(){
 		newEigenDict=new Matrix(new double[_opt.vocabSize+1][_num_hidden]);
@@ -385,28 +398,46 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 
 	}
 
-		return new Matrix(newEigenDict);
+		Matrix m = new Matrix(newEigenDict);
+		//addNormalize(m,_num_hidden)
+		
+		return m;
 		
 	}
 
-	public Matrix addRegularizationAndNormalize(Matrix cov){
+	public Matrix addRegularization(Matrix cov){
 		
 		double epsilon=0.05;
 		double[][] covArr=cov.getArray();
 		
 		for (int i=0;i<cov.getRowDimension();i++)
 			covArr[i][i]+=epsilon;
-		
+		/*
 		for (int i=0;i<cov.getRowDimension();i++){
 			for (int j=0;j<cov.getColumnDimension();j++)
 				covArr[i][j]/=_numTokens;
 		}
-		
+		*/
 			
 		Matrix covNew= new Matrix(covArr);
 		 
 		return covNew;
 	}
+	
+public Matrix addNormalize(Matrix cov,int numRows){
+		
+		double[][] covArr=cov.getArray();
+		
+		for (int i=0;i<cov.getRowDimension();i++){
+			for (int j=0;j<cov.getColumnDimension();j++)
+				covArr[i][j]/=numRows;
+		}
+			
+		Matrix covNew= new Matrix(covArr);
+		 
+		return covNew;
+	}
+	
 	
 	public Matrix right_smooth(Matrix eigenFeatDict, ArrayList<Integer> doc){
 		double[][] R=new double[doc.size()][_smooths.size()*_num_hidden];
@@ -487,6 +518,14 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 		return covLRAllDocsMatrix;
 	}
 	
+	public void setCovRLAllDocsMatrix(Matrix covRLAllDocsMatrix) {
+		this.covRLAllDocsMatrix = covRLAllDocsMatrix;
+	}
+
+	public Matrix getCovRLAllDocsMatrix() {
+		return covRLAllDocsMatrix;
+	}
+	
 	
 	public void processInputs(final Matrix eigenFeatDict)
 	throws InterruptedException, ExecutionException {
@@ -529,9 +568,10 @@ public class CCARepresentation extends SpectralRepresentation implements Seriali
 	}
 
 	private synchronized void updateCovs(Object[] covMs) {
-		getCovLLAllDocsMatrix().plusEquals((Matrix)covMs[0]);
-		getCovRRAllDocsMatrix().plusEquals((Matrix)covMs[1]);
-		getCovLRAllDocsMatrix().plusEquals((Matrix)covMs[2]);
+		setCovLLAllDocsMatrix(getCovLLAllDocsMatrix().plusEquals((Matrix)covMs[0]));
+		setCovRRAllDocsMatrix(getCovRRAllDocsMatrix().plusEquals((Matrix)covMs[1]));
+		setCovLRAllDocsMatrix(getCovLRAllDocsMatrix().plusEquals((Matrix)covMs[2]));
+		setCovRLAllDocsMatrix(getCovRLAllDocsMatrix().plusEquals((Matrix)covMs[3]));
 		
 	}
 	

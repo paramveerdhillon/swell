@@ -31,6 +31,8 @@ public class WriteDataFile {
 		_allDocs=all_Docs;
 	}
 	
+	
+
 
 	public WriteDataFile(Options opt, HashMap<Double, Integer> all_Docs) {
 		_opt=opt;

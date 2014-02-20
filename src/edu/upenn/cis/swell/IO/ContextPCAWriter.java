@@ -8,14 +8,19 @@ package edu.upenn.cis.swell.IO;
  * please send bug reports and suggestions to: dhillon@cis.upenn.edu
  */
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import Jama.Matrix;
@@ -34,6 +39,10 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		_rin=rin;
 		
 	}
+	public ContextPCAWriter(Options opt) {
+		super(opt);
+}
+	
 	
 	private DenseDoubleMatrix2D createDenseMatrixCOLT(Matrix xJama) {
 		DenseDoubleMatrix2D x_omega=new DenseDoubleMatrix2D(xJama.getRowDimension(),xJama.getColumnDimension());
@@ -400,6 +409,123 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		}
 		writer.close();
 	}
+
+	
+	public void writeContextObliviousEmbedNewData(Matrix embedMatrix,
+			HashMap<String, Integer> wordDict) throws IOException {
+		
+		BufferedWriter writer1=null;
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.contextOblEmbed),"UTF8"));
+			writer1=new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Output_Files/newembeds"),"UTF8"));
+			
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	ArrayList<ArrayList<String>> _allDocs=new ArrayList<ArrayList<String>>();
+	int idxDoc=0;
+	_allDocs = readTrainData();
+	Random r =new Random();
+			for(String keys: wordDict.keySet()){
+				int val=wordDict.get(keys);
+				writer1.write(keys);
+				writer1.write(' ');
+				for (int j=embedMatrix.getColumnDimension()-1;j>=0;j--){
+					
+					double newVal =embedMatrix.get(val, j)+ r.nextGaussian()*0.01;
+					if ( j != 0){
+						writer1.write(Double.toString(newVal));
+						writer1.write(' ');
+					}
+					else{
+						writer1.write(Double.toString(newVal));
+						writer1.write('\n');
+						}
+				}
+			}
+	writer1.close();
+	
+	while(idxDoc<_allDocs.size()){	
+			int tok_idx=0;	
+			ArrayList<String> doc=_allDocs.get(idxDoc++);
+			
+			while(tok_idx<doc.size()){
+				writer.write(doc.get(tok_idx));
+				writer.write(' ');
+				for (int j=0;j<embedMatrix.getColumnDimension();j++){
+					
+					if ( j != (embedMatrix.getColumnDimension())-1){
+						if(wordDict.get(doc.get(tok_idx))!=null)
+							writer.write(Double.toString(embedMatrix.get(wordDict.get(doc.get(tok_idx)), j)));
+						else
+							writer.write(Double.toString(embedMatrix.get(wordDict.get(("<OOV>")), j)));
+						writer.write(' ');
+					}
+					else{
+						if(wordDict.get(doc.get(tok_idx))!=null)
+							writer.write(Double.toString(embedMatrix.get(wordDict.get(doc.get(tok_idx)), j)));
+						else
+							writer.write(Double.toString(embedMatrix.get(wordDict.get(("<OOV>")), j)));
+						writer.write('\n');
+					}
+				}
+			
+				tok_idx++;
+			}
+	}
+		writer.close();	
+		
+	}
+	
+	public ArrayList<ArrayList<String>> readTrainData() throws IOException{
+	
+	BufferedReader	in=new BufferedReader(new InputStreamReader(new FileInputStream(_opt.trainfile), "UTF8"));			
+	 String docEndSymbol="DOCSTART-X-0";
+	ArrayList<ArrayList<String>> allDocs=new ArrayList<ArrayList<String>>();	
+	ArrayList<String> eachDoc=new ArrayList<String>();
+	
+	String line=in.readLine();
+	while (line != null ) {
+		
+		
+		if(line.equals("")){
+			line=in.readLine();
+			continue;
+		}
+			
+		if (!line.equals(docEndSymbol)){
+			ArrayList<String> norm1=new ArrayList<String>();
+			
+			norm1=tokenize(line);
+			for(String w:norm1){
+				eachDoc.add(w);
+			}
+			
+		}
+		else{
+			allDocs.add((ArrayList<String>) eachDoc.clone());
+			
+			eachDoc.clear();
+		}
+		line=in.readLine();
+	}
+	    in.close();
+	   allDocs.add((ArrayList<String>) eachDoc.clone());
+	   
+	   return allDocs;
+}
+	
+	public static ArrayList<String> tokenize(String s){
+		if(s==null)
+			return null;
+		ArrayList<String> res=new ArrayList<String>();
+		StringTokenizer st=new StringTokenizer(s," ");
+		while(st.hasMoreTokens())
+			res.add(st.nextToken());
+		return res;
+	}	
 	
 	
 }

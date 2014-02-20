@@ -9,10 +9,19 @@ package edu.upenn.cis.swell.MathUtils;
  */
 
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+
 import Jama.Matrix;
 import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.QR;
+import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
 import cern.colt.matrix.tdouble.algo.decomposition.DenseDoubleSingularValueDecomposition;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
@@ -59,11 +68,128 @@ public class SVDTemplates implements Serializable {
 		for(int i=0; i<X.rows();i++){ 
 			
 			if(X.get(i, i)!=0){
-				diagInvEntries.set(i, i, 1/X.get(i, i));
+				if(!_opt.sqRootNorm)
+					diagInvEntries.set(i, i, 1/X.get(i, i));
+				else
+					diagInvEntries.set(i, i, 1/Math.sqrt(X.get(i, i)));
 			}else{
-				diagInvEntries.set(i, i, 1);
+				diagInvEntries.set(i, i, 10000);//Some large value
 			}
 		}
+		System.out.println("++Finished Sparse Inverse++");
+		
+		/*
+		if(!_opt.diagOnlyInverse){
+		
+			for(int i=0; i<X.rows();i++){ 
+				for(int j=0; j<X.columns();j++){ 
+					if(i!=j){
+						OffdiagEntries.set(i, j, X.get(i, j));
+							}
+												}
+								}
+			
+			diagInvEntries.zMult(OffdiagEntries, tempMat);
+			tempMat.zMult(diagInvEntries, auxMat);
+	
+			auxMat.assign(diagInvEntries, DoublePlusMultFirst.minusMult(1));
+			return auxMat;
+		}
+		else{
+		*/
+		
+			return diagInvEntries;
+		//}
+		
+	}
+	
+	
+public SparseDoubleMatrix2D computeSparseInverseSqRoot(SparseDoubleMatrix2D X){
+		
+		SparseDoubleMatrix2D diagInvEntries=new SparseDoubleMatrix2D(X.rows(),X.columns(),0,0.7,0.75);
+		
+		
+		System.out.println("++Beginning Sparse Inverse++");
+		
+		
+		for(int i=0; i<X.rows();i++){ 
+			
+			if(X.get(i, i)!=0){
+				diagInvEntries.set(i, i, 1/Math.sqrt(X.get(i, i)));
+			}else{
+				diagInvEntries.set(i, i, 10000);//Some large value
+			}
+		}
+		System.out.println("++Finished Sparse Inverse Sq. Root++");
+		
+			return diagInvEntries;
+		
+	}
+	
+	
+public FlexCompRowMatrix computeSparseInverseSqRoot(FlexCompRowMatrix X){
+		
+		FlexCompRowMatrix diagInvEntries=new FlexCompRowMatrix(X.numRows(),X.numColumns());
+		
+		
+		System.out.println("++Beginning Sparse Inverse Sq. Root++");
+		
+		
+		for(MatrixEntry e: X){
+			if(e.row()==e.column() && e.get()!=0){
+					diagInvEntries.set(e.row(),e.column() , 1/Math.sqrt(e.get()));
+				
+			}
+			if(e.row()==e.column() && e.get()==0){
+				diagInvEntries.set(e.row(),e.column() , 10000); //Some large value 
+				
+			}
+			
+		}
+		
+		
+		System.out.println("++Finished Sparse Inverse Sq. Root++");
+		
+			return diagInvEntries;
+
+		
+	}
+	
+	
+	
+public FlexCompRowMatrix computeSparseInverse(FlexCompRowMatrix X){
+		
+		//Computes inverse of diagonally dominant sparse matrices by power series expansion as
+		// (A+ eB)^-1 = A^-1 - e. A^-1.B.A^-1 + e^2.A^-1.B.A^-1.B.A^-1...Below we only use the first two terms.
+		//In our case A is a diagonal matrix so its inverse is easy and B is the remainder. 
+		
+		
+		
+		//SparseDoubleMatrix2D tempMat=new SparseDoubleMatrix2D(X.rows(),X.columns(),0,0.7,0.75);
+		//SparseDoubleMatrix2D auxMat=new SparseDoubleMatrix2D(X.rows(),X.columns(),0,0.7,0.75);
+		FlexCompRowMatrix diagInvEntries=new FlexCompRowMatrix(X.numRows(),X.numColumns());
+		//SparseDoubleMatrix2D OffdiagEntries=new SparseDoubleMatrix2D(X.rows(),X.columns(),0,0.7,0.75);
+		
+		
+		System.out.println("++Beginning Sparse Inverse++");
+		
+		
+		for(MatrixEntry e: X){
+			if(e.row()==e.column() && e.get()!=0){
+				if(!_opt.sqRootNorm)
+					diagInvEntries.set(e.row(),e.column() , 1/e.get());
+				else
+					diagInvEntries.set(e.row(),e.column() , 1/Math.sqrt(e.get()));
+				
+			}
+			if(e.row()==e.column() && e.get()==0){
+				diagInvEntries.set(e.row(),e.column() , 10000); //Some large value 
+				
+			}
+			
+		}
+		
+		
 		System.out.println("++Finished Sparse Inverse++");
 		
 		/*
@@ -169,6 +295,36 @@ public class SVDTemplates implements Serializable {
 	
 	public Matrix computeSVD_Tropp(SparseDoubleMatrix2D X, DenseDoubleMatrix2D omega, int _dim2)
 	{
+		
+/*		
+		BufferedWriter writer=null;
+		try {
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Output_Files_new/Xmatrix"),"UTF8"));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+		for(int i=0; i < X.rows();i++ ){
+			for(int j=0; j < X.columns();j++ ){
+				
+					writer.write(Double.toString(X.get(i, j)));
+					writer.write(' ');
+						
+			}
+			writer.write('\n');
+		}
+		writer.close();	
+	}
+	catch (IOException e) {
+		e.printStackTrace();
+		}	
+		
+*/		
+		
 		dictMatrixCOLT=new DenseDoubleMatrix2D(X.rows(),_opt.hiddenStateSize);
 		DenseDoubleMatrix2D Xomega=new DenseDoubleMatrix2D(X.rows(),_opt.hiddenStateSize+20);//Oversample the required rank.
 		DenseDoubleMatrix2D UhatTemp=new DenseDoubleMatrix2D(_opt.hiddenStateSize+20,_opt.hiddenStateSize+20);
@@ -248,6 +404,8 @@ public class SVDTemplates implements Serializable {
 	
 	public Matrix computeSVD_Tropp(DenseDoubleMatrix2D X, DenseDoubleMatrix2D omega, int _dim2)
 	{
+		
+	
 		dictMatrixCOLT=new DenseDoubleMatrix2D(X.rows(),_opt.hiddenStateSize);
 		DenseDoubleMatrix2D Xomega=new DenseDoubleMatrix2D(X.rows(),_opt.hiddenStateSize+20);//Oversample the required rank.
 		DenseDoubleMatrix2D UhatTemp=new DenseDoubleMatrix2D(_opt.hiddenStateSize+20,_opt.hiddenStateSize+20);
@@ -332,6 +490,44 @@ public class SVDTemplates implements Serializable {
 
 	public double[] getSingularVals(){
 		return sVals;
+	}
+
+	public DenseDoubleMatrix2D computeDenseInverseSqRoot(DenseDoubleMatrix2D yty) {
+			
+		DenseDoubleSingularValueDecomposition svd= new DenseDoubleSingularValueDecomposition(yty,true,true);
+		DenseDoubleMatrix2D u=(DenseDoubleMatrix2D)svd.getU();
+		SparseDoubleMatrix2D s =(SparseDoubleMatrix2D)svd.getS();
+		SparseDoubleMatrix2D sinvSqRoot=new SparseDoubleMatrix2D(s.rows(),s.columns());
+		DenseDoubleMatrix2D v=(DenseDoubleMatrix2D)svd.getV();
+		DenseDoubleMatrix2D us =new DenseDoubleMatrix2D(u.rows(),s.columns());
+		DenseDoubleMatrix2D x =new DenseDoubleMatrix2D(yty.rows(),yty.columns());
+		
+		for(int i=0; i< s.columns();i++){
+			 sinvSqRoot.set(i, i,1/Math.sqrt(s.get(i, i)));
+		}
+		
+		u.zMult(sinvSqRoot, us);
+		us.zMult(v, x);
+		return x;
+	}
+	
+	public DenseDoubleMatrix2D computeDenseInverse(DenseDoubleMatrix2D yty) {
+		
+		DenseDoubleSingularValueDecomposition svd= new DenseDoubleSingularValueDecomposition(yty,true,true);
+		DenseDoubleMatrix2D u=(DenseDoubleMatrix2D)svd.getU();
+		SparseDoubleMatrix2D s =(SparseDoubleMatrix2D)svd.getS();
+		SparseDoubleMatrix2D sinvSqRoot=new SparseDoubleMatrix2D(s.rows(),s.columns());
+		DenseDoubleMatrix2D v=(DenseDoubleMatrix2D)svd.getV();
+		DenseDoubleMatrix2D us =new DenseDoubleMatrix2D(u.rows(),s.columns());
+		DenseDoubleMatrix2D x =new DenseDoubleMatrix2D(yty.rows(),yty.columns());
+		
+		for(int i=0; i< s.columns();i++){
+			 sinvSqRoot.set(i, i,1/(s.get(i, i)));
+		}
+		
+		u.zMult(sinvSqRoot, us);
+		us.zMult(v, x);
+		return x;
 	}
 
 

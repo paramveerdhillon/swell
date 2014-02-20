@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 import Jama.Matrix;
 import edu.upenn.cis.swell.IO.Options;
+import edu.upenn.cis.swell.MathUtils.MatrixFormatConversion;
 import edu.upenn.cis.swell.MathUtils.SVDTemplates;
 import edu.upenn.cis.swell.SpectralRepresentations.ContextPCANGramsRepresentation;
 
@@ -55,8 +56,8 @@ public class ContextPCANGramsRun implements Serializable {
 		else
 			_cpcaR2.computeLRContextMatricesSingleVocab();
 		
-		SparseDoubleMatrix2D C=_cpcaR2.getContextMatrix();
-		SparseDoubleMatrix2D CT=_cpcaR2.getContextMatrixT();
+		SparseDoubleMatrix2D C=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getContextMatrix());
+		SparseDoubleMatrix2D CT=MatrixFormatConversion.createSparseMatrixCOLT(_cpcaR2.getContextMatrixT());
 		SVDTemplates svdTC;
 		
 		svdTC=new SVDTemplates(_opt,dim2);

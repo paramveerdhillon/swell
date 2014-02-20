@@ -1,0 +1,32 @@
+Detecting C compiler ABI info failed to compile with the following output:
+Change Dir: /Users/paramveerdhillon/Desktop/NLPStuff/Code/jeigen/build/linux-64/native/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec3330583196/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3330583196.dir/build.make CMakeFiles/cmTryCompileExec3330583196.dir/build
+"/Applications/CMake 2.8-10.app/Contents/bin/cmake" -E cmake_progress_report /Users/paramveerdhillon/Desktop/NLPStuff/Code/jeigen/build/linux-64/native/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3330583196.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec3330583196.dir/CMakeCCompilerABI.c.o   -c "/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCCompilerABI.c"
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCCompilerABI.c:11:30: error: CMakeCompilerABI.h: No such file or directory
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCCompilerABI.c: In function ‘main’:
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCCompilerABI.c:22: error: ‘info_sizeof_dptr’ undeclared (first use in this function)
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCCompilerABI.c:22: error: (Each undeclared identifier is reported only once
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCCompilerABI.c:22: error: for each function it appears in.)
+make[1]: *** [CMakeFiles/cmTryCompileExec3330583196.dir/CMakeCCompilerABI.c.o] Error 1
+make: *** [cmTryCompileExec3330583196/fast] Error 2
+
+
+Detecting CXX compiler ABI info failed to compile with the following output:
+Change Dir: /Users/paramveerdhillon/Desktop/NLPStuff/Code/jeigen/build/linux-64/native/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec2198877723/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2198877723.dir/build.make CMakeFiles/cmTryCompileExec2198877723.dir/build
+"/Applications/CMake 2.8-10.app/Contents/bin/cmake" -E cmake_progress_report /Users/paramveerdhillon/Desktop/NLPStuff/Code/jeigen/build/linux-64/native/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec2198877723.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++     -o CMakeFiles/cmTryCompileExec2198877723.dir/CMakeCXXCompilerABI.cpp.o -c "/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCXXCompilerABI.cpp"
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCXXCompilerABI.cpp:7:30: error: CMakeCompilerABI.h: No such file or directory
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCXXCompilerABI.cpp: In function ‘int main(int, char**)’:
+/Applications/CMake 2.8-10.app/Contents/share/cmake-2.8/Modules/CMakeCXXCompilerABI.cpp:14: error: ‘info_sizeof_dptr’ was not declared in this scope
+make[1]: *** [CMakeFiles/cmTryCompileExec2198877723.dir/CMakeCXXCompilerABI.cpp.o] Error 1
+make: *** [cmTryCompileExec2198877723/fast] Error 2
+
+

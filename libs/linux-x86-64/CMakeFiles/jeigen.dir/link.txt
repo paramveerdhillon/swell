@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC -O3 -DNDEBUG   -shared -Wl,-soname,libjeigen.so -o libjeigen.so CMakeFiles/jeigen.dir/jeigen.cpp.o 

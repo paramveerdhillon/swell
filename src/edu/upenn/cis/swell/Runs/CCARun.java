@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.MathUtils.CenterScaleNormalizeUtils;
 import edu.upenn.cis.swell.SpectralRepresentations.CCARepresentation;
+import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 
@@ -32,15 +33,15 @@ public class CCARun implements Serializable {
 	private int _num_hidden;
 	private Options _opt;
 	private ArrayList<Double> _smooths =new ArrayList<Double>();
-	private int _rank;
-	private SingularValueDecomposition _svd;
+	//private int _rank;
+	private EigenvalueDecomposition _eigL,_eigR;
 	private Matrix eigenFeatDictL,eigenFeatDictLAllk;
 	private Matrix eigenFeatDict;
-	private Matrix normSingVal;
-	private Matrix sVals;
+	//private Matrix normEigValL,normEigValR;
+	private double[] realeigValsL,compeigValsL,realeigValsR,compeigValsR;
 	private Matrix eigenFeatDictR,eigenFeatDictRAllk;
 	private CCARepresentation _ccaR;
-	private double[] s=new double[_num_hidden];
+	//private double[] s=new double[_num_hidden];
 	private double prevNorm=0;
 	private double currNorm=0;
 	private CenterScaleNormalizeUtils mathUtils=null;
@@ -68,6 +69,10 @@ public class CCARun implements Serializable {
 			
 			printConvergenceStats();
 		}
+		//Matrix neweigenDict=mathUtils.center_and_scale(_ccaR.getEigenFeatDict());
+		//_ccaR.setEigenFeatDict(neweigenDict);		
+		
+		
 		writeStats();
 	}
 	
@@ -78,56 +83,111 @@ public class CCARun implements Serializable {
 		
 		ccaRep.generateCovForAllDocs();
 		
-		Matrix ccaM= ccaRep.getCovLLAllDocsMatrix().inverse().times(ccaRep.getCovLRAllDocsMatrix()).times(ccaRep.getCovRRAllDocsMatrix().inverse()).times(ccaRep.getCovLRAllDocsMatrix().transpose());
-		_svd=ccaM.svd();
+		Matrix ccaM= ccaRep.getCovLLAllDocsMatrix().inverse().times(ccaRep.getCovLRAllDocsMatrix()).times(ccaRep.getCovRRAllDocsMatrix().inverse()).times(ccaRep.getCovRLAllDocsMatrix());
+		_eigL=ccaM.eig();
+		
+		ccaM= ccaRep.getCovRRAllDocsMatrix().inverse().times(ccaRep.getCovRLAllDocsMatrix()).times(ccaRep.getCovLLAllDocsMatrix().inverse()).times(ccaRep.getCovLRAllDocsMatrix());
+		_eigR=ccaM.eig();
 		
 		
-		normSingVal=_svd.getS().times(1/_svd.getS().normF());
+		/*
+		 * 
+		 * Dont normalize by eigenvalues since they can be negative
+		normEigValL=_eigL.getD();
+		
+		normEigValR=_eigR.getD();
+		double ssL =0,ssR=0;
+		for(int j=0; j<normEigValL.getRowDimension();j++){
+			
+			ssL += Math.abs(normEigValL.get(j,j));
+			ssR += Math.abs(normEigValL.get(j,j));	
+		}
+		for(int j=0; j<normEigValL.getRowDimension();j++){
+			
+			normEigValL.set(j,j, Math.abs(normEigValL.get(j,j)/ssL));
+			normEigValR.set(j,j, Math.abs(normEigValR.get(j,j)/ssR));
+		}
+		
+		*/
+		
+
 		
 		//System.out.println(normSingVal.normF());
 		//System.out.println(normSingVal.norm1());
 		//System.out.println(_svd.getS().normF());
 		
+		/*
 		if(_opt.scaleBySingVals){
-			eigenFeatDictL=_svd.getU().times(normSingVal).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
-			eigenFeatDictLAllk=_svd.getU().times(normSingVal).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
-			sVals=_svd.getS().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
-			eigenFeatDictR=_svd.getV().times(normSingVal).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
-			eigenFeatDictRAllk=_svd.getV().times(normSingVal).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
-			_rank=_svd.rank();
-			s=_svd.getSingularValues();
-		}
-		else{
-			eigenFeatDictL=_svd.getU().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
-			eigenFeatDictLAllk=_svd.getU().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
-			sVals=_svd.getS().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
-			eigenFeatDictR=_svd.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
-			eigenFeatDictRAllk=_svd.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
-			_rank=_svd.rank();
-			s=_svd.getSingularValues();
+			eigenFeatDictL=_eigL.getV().times(normEigValL).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
+			eigenFeatDictLAllk=_eigL.getV().times(normEigValL).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
+			eigValsL=_eigL.getD().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
+			eigenFeatDictR=_eigR.getV().times(normEigValR).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
+			eigenFeatDictRAllk=_eigR.getV().times(normEigValR).getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
+			eigValsR=_eigR.getD().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
 			
 		}
+		else{
+		*/
+			eigenFeatDictL=_eigL.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
+			eigenFeatDictLAllk=_eigL.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
+			realeigValsL=_eigL.getRealEigenvalues();
+			compeigValsL=_eigL.getImagEigenvalues();
+			eigenFeatDictR=_eigR.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
+			eigenFeatDictRAllk=_eigR.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
+			realeigValsR=_eigR.getRealEigenvalues();
+			compeigValsR=_eigR.getImagEigenvalues();
+			
+		//}
 		
 		
 	}
 	
-	public int getRank(){
-		return _rank;
+	
+	public Matrix scaleEigenvectors(Matrix eigVecs, double[] rEvals, double[] cEvals){
+		
+		Matrix eigVecsNew=eigVecs;
+		Double[] d1=new Double[rEvals.length];
+		
+		double sSum=0,s=0;
+		
+		for (int i=0;i<rEvals.length;i++){
+			s =Math.sqrt((rEvals[i]*rEvals[i]) + (cEvals[i]*cEvals[i])) ;
+			Double d=new Double(s);
+			sSum+=d.doubleValue();
+			
+		}
+		for (int i=0;i<rEvals.length;i++){
+			s =Math.sqrt((rEvals[i]*rEvals[i]) + (cEvals[i]*cEvals[i])) ;
+			d1[i]=s/sSum;
+		}
+		
+		for(int ii =0; ii<eigVecs.getRowDimension();ii++){
+			for(int jj =0; jj<eigVecs.getColumnDimension();jj++){
+				eigVecsNew.set(ii, jj, eigVecs.get(ii, jj)*d1[jj]);
+			}
+		}
+		
+		return eigVecsNew;
 	}
 	
-	public Matrix getSingularValues(){
-		return sVals;
+	//public Matrix getEigenValuesL(){
+	//	return eigValsL;
+	//}
+	
+	//public Matrix getEigenValuesR(){
+	//	return eigValsR;
+	//}
+	
+	public Matrix getLeftEigenVecs(){
+		
+		return scaleEigenvectors(eigenFeatDictL,realeigValsL,compeigValsL);
 	}
 	
-	public Matrix getLeftSingularVecs(){
-		return eigenFeatDictL;
-	}
-	
-	public Matrix getLeftSingularVecsAllk(){
+	public Matrix getLeftEigenVecsAllk(){
 		return eigenFeatDictLAllk;
 	}
 	
-	public Matrix getRightSingularVecsAllk(){
+	public Matrix getRightEigenVecsAllk(){
 		return eigenFeatDictRAllk;
 	}
 	
@@ -136,12 +196,16 @@ public class CCARun implements Serializable {
 		return eigenFeatDict;
 	}
 	
-	public Matrix getRightSingularVecs(){
-		return eigenFeatDictR;
+	public Matrix getRightEigenVecs(){
+		return scaleEigenvectors(eigenFeatDictR,realeigValsR,compeigValsR);
 	}
 	
-	public SingularValueDecomposition getSVD(){
-		return _svd;
+	public EigenvalueDecomposition getEigL(){
+		return _eigL;
+	}
+	
+	public EigenvalueDecomposition getEigR(){
+		return _eigR;
 	}
 	
 	
@@ -183,9 +247,10 @@ public class CCARun implements Serializable {
 		Matrix neweigenDict=null;
 		Matrix eigenDict=_ccaR.getEigenFeatDict();
 		
-		_ccaR.left_right_smooths_W(eigenDict,eigenFeatDictL,eigenFeatDictR);
+		_ccaR.left_right_smooths_W(eigenDict,getLeftEigenVecs(),getRightEigenVecs());
 		neweigenDict=mathUtils.center_and_scale(_ccaR.getEigenFeatDict());
 		
+		//neweigenDict=mathUtils.center(_ccaR.getEigenFeatDict());
 		
 		_ccaR.setEigenFeatDict(neweigenDict);		
 	}
@@ -203,18 +268,36 @@ public class CCARun implements Serializable {
 		}
 		try {
 			
-			
-			writer.write("Rank after SVD: "+_rank+"\n\n");
-			writer.write("Eigenvalues in decreasing order:\n");
-			for (int i=0;i<s.length;i++){
-				Double d=new Double(s[i]);
+			double s;
+			writer.write("Left Eigenvalues in decreasing order:\n");
+			for (int i=0;i<_num_hidden;i++){
+				s =Math.sqrt((realeigValsL[i]*realeigValsL[i]) + (compeigValsL[i]*compeigValsL[i])) ;
+				Double d=new Double(s);
 				writer.write(d.toString()+"\n");
 				sSum+=d.doubleValue();
 				
 			}
-			writer.write("\n\nNormalized Eigenvalues in decreasing order:\n");
-			for (int i=0;i<s.length;i++){
-				Double d=new Double(s[i]/sSum);
+			writer.write("\n\nNormalized Left Eigenvalues in decreasing order:\n");
+			for (int i=0;i<_num_hidden;i++){
+				s =Math.sqrt((realeigValsL[i]*realeigValsL[i]) + (compeigValsL[i]*compeigValsL[i])) ;
+				Double d=new Double(s/sSum);
+				writer.write(d.toString()+"\n");
+				
+			}
+			///////////////
+			sSum=0;
+			writer.write("\n\nRight Eigenvalues in decreasing order:\n");
+			for (int i=0;i<_num_hidden;i++){
+				s =Math.sqrt((realeigValsR[i]*realeigValsR[i]) + (compeigValsR[i]*compeigValsR[i])) ;
+				Double d=new Double(s);
+				writer.write(d.toString()+"\n");
+				sSum+=d.doubleValue();
+				
+			}
+			writer.write("\n\nNormalized Right Eigenvalues in decreasing order:\n");
+			for (int i=0;i<_num_hidden;i++){
+				s =Math.sqrt((realeigValsR[i]*realeigValsR[i]) + (compeigValsR[i]*compeigValsR[i])) ;
+				Double d=new Double(s/sSum);
 				writer.write(d.toString()+"\n");
 				
 			}

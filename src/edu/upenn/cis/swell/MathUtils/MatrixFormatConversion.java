@@ -9,12 +9,14 @@ package edu.upenn.cis.swell.MathUtils;
  */
 
 
+import jeigen.SparseMatrixLil;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import Jama.Matrix;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
+import static jeigen.Shortcuts.*;
 
 public class MatrixFormatConversion {
 	
@@ -42,6 +44,19 @@ public class MatrixFormatConversion {
 		}
 		return xMTJ;
 	}
+	
+	public static DenseMatrix createDenseMatrixMTJ(Matrix xomega) {
+		DenseMatrix xMTJ=new DenseMatrix(xomega.getRowDimension(),xomega.getColumnDimension());
+				
+		
+		for (int i=0;i<xomega.getRowDimension();i++){
+			for (int j=0;j<xomega.getColumnDimension();j++){
+				xMTJ.set(i, j, xomega.get(i, j));
+			}
+		}
+		return xMTJ;
+	}
+	
 
 	public static DenseDoubleMatrix2D createDenseMatrixCOLT(DenseMatrix xmtj) {
 		DenseDoubleMatrix2D x_omega=new DenseDoubleMatrix2D(xmtj.numRows(),xmtj.numColumns());
@@ -73,5 +88,99 @@ public class MatrixFormatConversion {
 		
 		return x_omega;
 	}
+	
+	public static FlexCompRowMatrix createSparseMatrixMTJFromJeigen(SparseMatrixLil xjeig) {
+		FlexCompRowMatrix x=new FlexCompRowMatrix(xjeig.rows,xjeig.cols);
+		
+		
+		int count = xjeig.getSize(); 
+		for( int i = 0; i < count; i++ ) {
+			int row =xjeig.getRowIdx(i);
+			int col = xjeig.getColIdx(i); 
+			double value = xjeig.getValue(i);
+			//if(value!=0)
+				x.set(row,col, value ); 
+		}
+		
+		
+		
+		return x;
+	}
+	
+	public static SparseMatrixLil createJeigenMatrix(FlexCompRowMatrix xmtj) {
+		SparseMatrixLil x=new SparseMatrixLil(xmtj.numRows(),xmtj.numColumns());
+		
+		for (MatrixEntry e : xmtj){
+			 x.append(e.row(), e.column(), e.get());
+		}
+		
+		System.out.println("Size:"+" "+xmtj.numRows()+" "+xmtj.numColumns()+" "+xmtj.numRows()*xmtj.numColumns()+" "+x.getSize()+" "+(x.getSize()*1.0/xmtj.numRows()/xmtj.numColumns()));
+		
+		System.out.println("+++Converted Matrix+++");
+		
+		return x;
+	}
+	
+	
+	
+	
+	
+	public static FlexCompRowMatrix multLargeSparseMatricesJEIGEN(FlexCompRowMatrix x, FlexCompRowMatrix y){
+		SparseMatrixLil prodMatrix=new SparseMatrixLil(x.numRows(),y.numColumns());	
+		SparseMatrixLil xm=new SparseMatrixLil(x.numRows(),x.numColumns());
+		SparseMatrixLil ym=new SparseMatrixLil(y.numRows(),y.numColumns());
+		
+		System.out.println("+++Before Multiply+++");
+		xm=createJeigenMatrix(x);
+		ym=createJeigenMatrix(y);
+		
+		prodMatrix=xm.mmul(ym);
+		System.out.println("+++After Multiply+++");
+		
+		return createSparseMatrixMTJFromJeigen(prodMatrix);
+	}
+	
+	
+	
+	
+	
+	public static DenseDoubleMatrix2D multiplySparseDenseScaleRow(SparseDoubleMatrix2D x, DenseDoubleMatrix2D y){
+		
+		
+		DenseDoubleMatrix2D prodMatrix=new DenseDoubleMatrix2D(x.rows(),y.columns());	
+		System.out.println("+++Before Multiply+++");
+		
+		for(int i=0; i<x.rows();i++){
+			for(int j=0;j < y.columns();j++){
+				prodMatrix.set(i,j, y.get(i, j)/x.get(i, i));
+			}
+		}
+		
+		
+		System.out.println("+++After Multiply+++");
+		
+		return prodMatrix;
+	}
+	
+public static DenseDoubleMatrix2D multiplySparseDenseScaleCol(DenseDoubleMatrix2D x,SparseDoubleMatrix2D y){
+		
+		
+		DenseDoubleMatrix2D prodMatrix=new DenseDoubleMatrix2D(x.rows(),y.columns());	
+		System.out.println("+++Before Multiply+++");
+		
+		for(int i=0; i<y.columns();i++){
+			for(int j=0;j < x.rows();j++){
+				prodMatrix.set(j,i, x.get(j, i)/y.get(i, i));
+			}
+		}
+		
+		
+		System.out.println("+++After Multiply+++");
+		
+		return prodMatrix;
+	}
+	
+	
+	
 
 }

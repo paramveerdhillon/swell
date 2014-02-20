@@ -10,9 +10,12 @@ package edu.upenn.cis.swell.SpectralRepresentations;
 
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Random;
+
 import Jama.Matrix;
 import edu.upenn.cis.swell.IO.Options;
+import edu.upenn.cis.swell.MainMethods.ContextPCA;
 import edu.upenn.cis.swell.MathUtils.CenterScaleNormalizeUtils;
 
 public abstract class SpectralRepresentation implements Serializable{
@@ -45,16 +48,25 @@ public abstract class SpectralRepresentation implements Serializable{
 				eigenFeatDict[i][j]=r.nextGaussian();
 		}
 		
+		/*
+		try {
+			ContextPCA.embedMatrixProcess(_opt);
+			eigenFeatDictMatrix=ContextPCA.getEmbedMatrix();
+			System.out.println("A matrix initialized");
+			//eigenFeatDictMatrix=ContextPCA.getwordDict()();
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
 		
 		eigenFeatDictMatrix= new Matrix(eigenFeatDict); //v times k matrix
 		eigenFeatDictMatrix=mathUtils.center_and_scale(eigenFeatDictMatrix);
 	}
 	
 	
-	
-	
-	
-	
+		
 	public Matrix getEigenFeatDict(){
 		return eigenFeatDictMatrix;
 	}
