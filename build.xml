@@ -23,30 +23,15 @@
         <pathelement location="libs/jna-4.0.0.jar"/>
         <pathelement location="libs/Jeigen.jar"/>
     </path>
-    <path id="run.CCAVariants.bootclasspath">
+    <path id="run.CCAVariantsOSCCA.bootclasspath">
         <fileset dir="${java.home}/lib" includes="*.jar"/>
         <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
     </path>
-    <path id="run.CCAVariantsNGrams.bootclasspath">
+     <path id="run.CCAVariantsTSCCA.bootclasspath">
         <fileset dir="${java.home}/lib" includes="*.jar"/>
         <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
     </path>
-    <path id="run.ContextPCA.bootclasspath">
-        <fileset dir="${java.home}/lib" includes="*.jar"/>
-        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
-    </path>
-    <path id="run.ContextPCANGrams.bootclasspath">
-        <fileset dir="${java.home}/lib" includes="*.jar"/>
-        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
-    </path>
-    <path id="run.LRMVLEmbed.bootclasspath">
-        <fileset dir="${java.home}/lib" includes="*.jar"/>
-        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
-    </path>
-    <path id="run.LSA.bootclasspath">
-        <fileset dir="${java.home}/lib" includes="*.jar"/>
-        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
-    </path>
+   
     <target name="init">
         <mkdir dir="bin"/>
         <copy includeemptydirs="false" todir="bin">
