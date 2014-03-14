@@ -16,7 +16,7 @@ Dhillon, Foster and Ungar, NIPS 11
 "Two Step CCA: A new spectral method for estimating vector models of words"
 Dhillon, Rodu, Foster and Ungar, ICML 12
 
-Dependencies: SWELL relies on JEIGEN, a Java wrapper for the C++ Eigen library. So you need to build it, separately.
+Dependencies: SWELL relies on JEIGEN, a Java wrapper for the C++ Eigen library. You need to build it separately.
 
 https://github.com/hughperkins/jeigen
 
