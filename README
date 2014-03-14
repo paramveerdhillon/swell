@@ -34,7 +34,7 @@ For trigrams and 5-grams all the 4 options "WvsR", "WvsL", "WvsLR", "TwoStepLRvs
 
 
 
-The SpectralLearning code can be run via "ant" as "ant CCAVariants" etc. where all the 4 targets are mentioned in the build.xml file. Since, the unlabeled data can be huge, so there might be memory issues. In Java the default heap size allotted is 4G, so you might want to increase that by adding "-Xmx" option in the relevant target in the "build.xml" file.  
+The SpectralLearning code can be run via "ant" as "ant CCAVariants" etc. where all the targets (which are currently stable and working) are mentioned in the build.xml file. Since, the unlabeled data can be huge, so there might be memory issues. In Java the default heap size allotted is 4G, so you might want to increase that by adding "-Xmx" option in the relevant target in the "build.xml" file.  
 
 
 Program Arguments (mentioned in build.xml) file.
