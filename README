@@ -27,7 +27,6 @@ The algorithms.variants currently implemented in the toolkit are:
 
 2). LR-MVL embeddings. This is a variant of the CCA based algorithm proposed in the NIPS 11 paper .
 
-
 3). OSCCA and TSCCA for NGrams : These algorithms are exactly the same as above except that they expect bigrams, trigrams or 5-grams of text followed by count as input and not running text. See the "Input_Files" for the exact format of input. For the bigrams, the algorithm option should be "WvsR".
 For trigrams and 5-grams all the 4 options "WvsR", "WvsL", "WvsLR", "TwoStepLRvsW" work. If the option is WvsR or WvsL for trigram/5-grams, the "W" is always the first word and "R"/"L" context are the remaining n-1 grams. For "WvsLR", "W" is the middle word and "L"/ "R" is its (n-1)/2 sized context on either side.  
 
@@ -57,6 +56,7 @@ You might want to run both of "train" and "unlab-train" together or separately. 
 
 1). algorithm:CCARunningText:2viewWvsLR       (OSCCA)
 2). algorithm:CCARunningText:TwoStepLRvsW     (TSCCA)
+3). algorithm:CCARunningText:LRMVLVariant2     (LRMVL Variant)
 4). algorithm:CCARunningText:2viewWvsR
 5). algorithm:CCARunningText:2viewWvsL
 6). algorithm:CCANGram:2viewWvsLR
