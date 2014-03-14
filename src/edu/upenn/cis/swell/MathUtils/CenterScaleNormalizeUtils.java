@@ -52,6 +52,64 @@ public Matrix center_and_scale(Matrix eigen_dict){
 		}
 
 
+public Matrix sqrtTransform(Matrix eigen_dict){
+	
+	double[][] eigenFeatDict=new double[_opt.vocabSize+1][_opt.hiddenStateSize];
+	
+	eigenFeatDict=eigen_dict.getArray();
+	
+	for (int i=0; i<eigen_dict.getColumnDimension();i++){
+		for(int j=0;j<eigen_dict.getRowDimension();j++){
+			if(eigenFeatDict[j][i] >=0){
+				eigenFeatDict[j][i]= Math.sqrt(eigenFeatDict[j][i]);
+			}
+			else{
+				eigenFeatDict[j][i]= -1*Math.sqrt(-1*eigenFeatDict[j][i]);
+			}
+	}
+	}
+		Matrix new_eigen_dict=new Matrix(eigenFeatDict);
+		
+		
+		
+		return new_eigen_dict;
+	
+	}
+
+public Matrix normalize(Matrix eigen_dict){
+	
+	double[][] eigenFeatDict=new double[_opt.vocabSize+1][_opt.hiddenStateSize];
+	
+	eigenFeatDict=eigen_dict.getArray();
+	
+	double[] maxInThisDimension= new double[eigen_dict.getRowDimension()];
+	
+	double arr=0;
+	
+	for (int i=0; i<eigen_dict.getRowDimension();i++){
+		arr=0;
+		for(int j=0;j<eigen_dict.getColumnDimension();j++){
+			arr=eigenFeatDict[i][j];
+			if(maxInThisDimension[i]<Math.abs(arr))
+				maxInThisDimension[i]=Math.abs(arr);
+		}
+	}
+	
+	
+	for (int i=0; i<eigen_dict.getRowDimension();i++){
+		for(int j=0;j<eigen_dict.getColumnDimension();j++){
+				eigenFeatDict[i][j]= eigenFeatDict[i][j]/maxInThisDimension[i];
+			}		
+	}
+	
+		Matrix new_eigen_dict=new Matrix(eigenFeatDict);	
+		return new_eigen_dict;
+	
+	}
+
+
+
+
 public Matrix center(Matrix eigen_dict){
 	
 	double[][] eigenFeatDict=new double[_opt.vocabSize+1][_opt.hiddenStateSize];

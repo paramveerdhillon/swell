@@ -23,6 +23,8 @@ import java.util.ArrayList;
 
 import edu.upenn.cis.swell.IO.Options;
 import edu.upenn.cis.swell.MathUtils.CenterScaleNormalizeUtils;
+import edu.upenn.cis.swell.MathUtils.MatrixFormatConversion;
+import edu.upenn.cis.swell.MathUtils.SVDTemplates;
 import edu.upenn.cis.swell.SpectralRepresentations.CCARepresentation;
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
@@ -79,7 +81,8 @@ public class CCARun implements Serializable {
 	
 	private void computeCCA(CCARepresentation ccaRep){
 		
-		
+		SVDTemplates svdTC;
+		svdTC=new SVDTemplates(_opt,ccaRep.getCovLLAllDocsMatrix().getColumnDimension());
 		
 		ccaRep.generateCovForAllDocs();
 		
@@ -88,7 +91,6 @@ public class CCARun implements Serializable {
 		
 		ccaM= ccaRep.getCovRRAllDocsMatrix().inverse().times(ccaRep.getCovRLAllDocsMatrix()).times(ccaRep.getCovLLAllDocsMatrix().inverse()).times(ccaRep.getCovLRAllDocsMatrix());
 		_eigR=ccaM.eig();
-		
 		
 		/*
 		 * 
@@ -128,11 +130,11 @@ public class CCARun implements Serializable {
 		}
 		else{
 		*/
-			eigenFeatDictL=_eigL.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
+			eigenFeatDictL=MatrixFormatConversion.createDenseMatrixJAMA(svdTC.computeDenseInverseSqRoot(MatrixFormatConversion.createDenseMatrixCOLT(ccaRep.getCovLLAllDocsMatrix()))).times(_eigL.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1));
 			eigenFeatDictLAllk=_eigL.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
 			realeigValsL=_eigL.getRealEigenvalues();
 			compeigValsL=_eigL.getImagEigenvalues();
-			eigenFeatDictR=_eigR.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1);
+			eigenFeatDictR=MatrixFormatConversion.createDenseMatrixJAMA(svdTC.computeDenseInverseSqRoot(MatrixFormatConversion.createDenseMatrixCOLT(ccaRep.getCovRRAllDocsMatrix()))).times(_eigR.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden/2)-1));
 			eigenFeatDictRAllk=_eigR.getV().getMatrix(0,(_smooths.size()*_num_hidden)-1,0,(_num_hidden)-1);
 			realeigValsR=_eigR.getRealEigenvalues();
 			compeigValsR=_eigR.getImagEigenvalues();
@@ -180,8 +182,16 @@ public class CCARun implements Serializable {
 	
 	public Matrix getLeftEigenVecs(){
 		
-		return scaleEigenvectors(eigenFeatDictL,realeigValsL,compeigValsL);
+		//return scaleEigenvectors(eigenFeatDictL,realeigValsL,compeigValsL);
+		
+		return eigenFeatDictL;
 	}
+	public Matrix getRightEigenVecs(){
+		//return scaleEigenvectors(eigenFeatDictR,realeigValsR,compeigValsR);
+		
+		return eigenFeatDictR;
+	}
+	
 	
 	public Matrix getLeftEigenVecsAllk(){
 		return eigenFeatDictLAllk;
@@ -196,9 +206,7 @@ public class CCARun implements Serializable {
 		return eigenFeatDict;
 	}
 	
-	public Matrix getRightEigenVecs(){
-		return scaleEigenvectors(eigenFeatDictR,realeigValsR,compeigValsR);
-	}
+	
 	
 	public EigenvalueDecomposition getEigL(){
 		return _eigL;
@@ -248,7 +256,9 @@ public class CCARun implements Serializable {
 		Matrix eigenDict=_ccaR.getEigenFeatDict();
 		
 		_ccaR.left_right_smooths_W(eigenDict,getLeftEigenVecs(),getRightEigenVecs());
-		neweigenDict=mathUtils.center_and_scale(_ccaR.getEigenFeatDict());
+		//neweigenDict=mathUtils.center_and_scale(_ccaR.getEigenFeatDict());
+		
+		neweigenDict=mathUtils.normalize(_ccaR.getEigenFeatDict());
 		
 		//neweigenDict=mathUtils.center(_ccaR.getEigenFeatDict());
 		

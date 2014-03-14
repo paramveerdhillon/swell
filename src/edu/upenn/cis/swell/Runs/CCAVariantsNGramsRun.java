@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import no.uib.cipr.matrix.MatrixEntry;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import Jama.Matrix;
@@ -36,7 +37,7 @@ public class CCAVariantsNGramsRun {
 	private int dim2=0;
 	static final long serialVersionUID = 42L;
 	HashMap<Double, Integer> _allDocs;
-	Matrix phiL, phiR, phiLT,phiRT;
+	Matrix phiL, phiR, phiLT,phiRT,phiLCSU, phiRCSU, phiLTCSU,phiRTCSU;
 	double[] s;
 	
 	public CCAVariantsNGramsRun(Options opt,
@@ -229,16 +230,17 @@ private void computeCCAVariantNGrams(ContextPCANGramsRepresentation _cpcaR2) {
 		if(_opt.typeofDecomp.equals("TwoStepLRvsW")){
 			
 			
-			wtl=transform(_cpcaR2.getWL3gramMatrix());
-			wtr=transform(_cpcaR2.getWR3gramMatrix());
-			ltw=transform(_cpcaR2.getWLT3gramMatrix());
-			rtw=transform(_cpcaR2.getWRT3gramMatrix());
+			wtw=transform(_cpcaR2.getWTWMatrix());
 			L1L2_OR_R1R2_L1R1=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesv());
 			L1L2_OR_R1R2_L1R1T=transform(_cpcaR2.getL1L2_OR_R1R2_L1R1Matrix_vTimesvT());
-			wtw=transform(_cpcaR2.getWTWMatrix());
 			
 			
 			if(_opt.numGrams==3){
+				wtl=transform(_cpcaR2.getWL3gramMatrix());
+				wtr=transform(_cpcaR2.getWR3gramMatrix());
+				ltw=transform(_cpcaR2.getWLT3gramMatrix());
+				rtw=transform(_cpcaR2.getWRT3gramMatrix());
+				
 				computeCCATwoStepLRvsWNGrams(wtl,wtr,ltw,rtw,wtw,L1L2_OR_R1R2_L1R1,L1L2_OR_R1R2_L1R1T,null,null,null,null,null,null,null,null,null,null,svdTC,_cpcaR2,wtl.numRows(),wtl.numColumns());
 			}
 			
@@ -310,6 +312,9 @@ return a;
 		FlexCompRowMatrix auxMat3=new FlexCompRowMatrix(auxMat5.numRows(),auxMat5.numRows());
 		FlexCompRowMatrix auxMat4=new FlexCompRowMatrix(auxMat2.numRows(),auxMat2.numRows());
 				
+		DenseDoubleMatrix2D phiLCOLT=new DenseDoubleMatrix2D(xtx.numRows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRCOLT=new DenseDoubleMatrix2D(yty.numRows(),_opt.hiddenStateSize);
+		
 		
 		if(_opt.numGrams==3){
 			
@@ -377,13 +382,24 @@ return a;
 		auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(yty));
 		
 		
-		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat2), _cpcaR2.getOmegaMatrix(auxMat2.numColumns()),dim2);
+		phiLCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat2), _cpcaR2.getOmegaMatrix(auxMat2.numColumns()),dim2);
 		s=svdTC.getSingularVals();
+		
+		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(xtx))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiLCSU), phiLCOLT);
+		phiL=MatrixFormatConversion.createDenseMatrixJAMA(phiLCOLT);
+		
+		
+		
 		if(!_opt.typeofDecomp.equals("TwoStepLRvsW")){
 			auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(yty),ytx);
 			auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat4,svdTC.computeSparseInverseSqRoot(xtx));
 			
-			phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat2), _cpcaR2.getOmegaMatrix(auxMat2.numColumns()),dim1);
+			phiRCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat2), _cpcaR2.getOmegaMatrix(auxMat2.numColumns()),dim1);
+			s=svdTC.getSingularVals();
+			
+			MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(yty))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiRCSU), phiRCOLT);
+			phiR=MatrixFormatConversion.createDenseMatrixJAMA(phiRCOLT);
+		
 		}
 		
 	}
@@ -402,8 +418,11 @@ return a;
 		FlexCompRowMatrix auxMat2=new FlexCompRowMatrix(yty.numRows(),ytx.numColumns());
 		FlexCompRowMatrix auxMat3=new FlexCompRowMatrix(auxMat5.numRows(),auxMat5.numRows());
 		FlexCompRowMatrix auxMat4=new FlexCompRowMatrix(auxMat2.numRows(),auxMat2.numRows());
-				
+			
+		DenseDoubleMatrix2D phiLCOLT=new DenseDoubleMatrix2D(xtx.numRows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRCOLT=new DenseDoubleMatrix2D(yty.numRows(),_opt.hiddenStateSize);
 		
+	
 		FlexCompRowMatrix row1=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns()+ L1L3_OR_R1R3_L1R2.numColumns()+ L1L4_OR_R1R4_L2R1.numColumns());
 		FlexCompRowMatrix row2=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns()+ L1L3_OR_R1R3_L1R2.numColumns()+ L1L4_OR_R1R4_L2R1.numColumns());
 		FlexCompRowMatrix row3=new FlexCompRowMatrix(xtx.numRows(),xtx.numColumns()+L1L2_OR_R1R2_L1R1.numColumns()+ L1L3_OR_R1R3_L1R2.numColumns()+ L1L4_OR_R1R4_L2R1.numColumns());
@@ -506,16 +525,27 @@ return a;
 		auxMat5=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(xtx),xty);
 		auxMat3=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(yty));
 		
-		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),dim2);
+		phiLCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),dim2);
 		s=svdTC.getSingularVals();
+		
+		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(xtx))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiLCSU), phiLCOLT);
+		phiL=MatrixFormatConversion.createDenseMatrixJAMA(phiLCOLT);
+		
+		
+		
 		
 		if(!_opt.typeofDecomp.equals("TwoStepLRvsW")){
 		
 			auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(yty),ytx);
 			auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat2, svdTC.computeSparseInverseSqRoot(xtx));
+		
+			phiRCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),dim1);
+		    s=svdTC.getSingularVals();
+			
+			MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(yty))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiRCSU), phiRCOLT);
+			phiR=MatrixFormatConversion.createDenseMatrixJAMA(phiRCOLT);
 			
 			
-			phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),dim1);
 		}
 		
 	}
@@ -529,7 +559,11 @@ return a;
 		FlexCompRowMatrix auxMat2=new FlexCompRowMatrix(wtw.numRows(),rtl.numColumns());
 		FlexCompRowMatrix auxMat3=new FlexCompRowMatrix(auxMat5.numRows(),auxMat5.numRows());
 		FlexCompRowMatrix auxMat4=new FlexCompRowMatrix(auxMat2.numRows(),auxMat2.numRows());
-				
+			
+		DenseDoubleMatrix2D phiLCOLT=new DenseDoubleMatrix2D(wtw.numRows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRCOLT=new DenseDoubleMatrix2D(wtw.numRows(),_opt.hiddenStateSize);
+	
+		
 		
 		auxMat5=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(wtw),ltr);
 		auxMat3=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(wtw));
@@ -537,13 +571,23 @@ return a;
 		//(svdTC.computeSparseInverse(wtw)).zMult(ltr, auxMat5);
 		//(svdTC.computeSparseInverse(wtw)).zMult(rtl, auxMat2);
 		//auxMat5.zMult(auxMat2,auxMat3);
-		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),auxMat3.numColumns());
+		phiLCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),auxMat3.numColumns());
+		s=svdTC.getSingularVals();
 		
+		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(wtw))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiLCSU), phiLCOLT);
+		phiL=MatrixFormatConversion.createDenseMatrixJAMA(phiLCOLT);
+		
+	
 		auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(wtw),rtl);
 		auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat2, svdTC.computeSparseInverseSqRoot(wtw));
 		
-	
-		phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),auxMat4.numColumns());
+		phiRCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),auxMat4.numColumns());
+		s=svdTC.getSingularVals();
+		
+		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(wtw))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiRCSU), phiRCOLT);
+		phiR=MatrixFormatConversion.createDenseMatrixJAMA(phiRCOLT);
+		
+		
 		
 	}
 	
@@ -640,6 +684,11 @@ return a;
 		FlexCompRowMatrix row1=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
 		FlexCompRowMatrix row2=new FlexCompRowMatrix(l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows(),l1l2_OR_R1R2_L1R1.numRows()+l1l3_OR_R1R3_L1R2.numRows());
 		
+		DenseDoubleMatrix2D phiLCOLT=new DenseDoubleMatrix2D(ltl.numRows(),_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRCOLT=new DenseDoubleMatrix2D(rtr.numRows(),_opt.hiddenStateSize);
+	
+		
+		
 		row1=_cpcaR2.concatenateLR(wtw,l2l4_OR_R2R4_L1L2);
 		row2=_cpcaR2.concatenateLR(l2l4_OR_R2R4_L1L2T,wtw);
 		ltl=_cpcaR2.concatenateLRT(row1,row2);
@@ -660,14 +709,20 @@ return a;
 		auxMat5=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(ltl),ltr);
 		auxMat3=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat5,svdTC.computeSparseInverseSqRoot(rtr));
 		
+		phiLCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),auxMat3.numColumns());
 		
-		phiL=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),auxMat3.numColumns());
+		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(ltl))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiLCSU), phiLCOLT);
+		phiL=MatrixFormatConversion.createDenseMatrixJAMA(phiLCOLT);
+		
 		
 		auxMat2=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(svdTC.computeSparseInverseSqRoot(rtr),rtl);
 		auxMat4=MatrixFormatConversion.multLargeSparseMatricesJEIGEN(auxMat2, svdTC.computeSparseInverseSqRoot(ltl));
 		
+		phiRCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),auxMat4.numColumns());
 		
-		phiR=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),auxMat4.numColumns());
+		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(rtr))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiRCSU), phiRCOLT);
+		phiR=MatrixFormatConversion.createDenseMatrixJAMA(phiRCOLT);
+		
 		
 	}
 

@@ -49,7 +49,7 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 	
 	
 	
-	SparseDoubleMatrix2D LMatrix_nTimeshv,RMatrix_nTimeshv,
+	FlexCompRowMatrix LMatrix_nTimeshv,RMatrix_nTimeshv,
 	LMatrix_nTimesv,RMatrix_nTimesv,WMatrix_nTimesv,LTMatrix_nTimeshv,RTMatrix_nTimeshv,
 	LTMatrix_nTimesv,RTMatrix_nTimesv,WTMatrix_nTimesv;
 	
@@ -87,13 +87,13 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 
 	public void computeTrainLRMatrices(){
 	
-			LMatrix_nTimeshv=new SparseDoubleMatrix2D((int) _numTok,_contextSize*(_vocab_size+1));
-			RMatrix_nTimeshv=new SparseDoubleMatrix2D((int) _numTok,_contextSize*(_vocab_size+1));
-			LTMatrix_nTimeshv=new SparseDoubleMatrix2D(_contextSize*(_vocab_size+1),(int) _numTok);
-			RTMatrix_nTimeshv=new SparseDoubleMatrix2D(_contextSize*(_vocab_size+1),(int) _numTok);
+			LMatrix_nTimeshv=new FlexCompRowMatrix((int) _numTok,_contextSize*(_vocab_size+1));
+			RMatrix_nTimeshv=new FlexCompRowMatrix((int) _numTok,_contextSize*(_vocab_size+1));
+			LTMatrix_nTimeshv=new FlexCompRowMatrix(_contextSize*(_vocab_size+1),(int) _numTok);
+			RTMatrix_nTimeshv=new FlexCompRowMatrix(_contextSize*(_vocab_size+1),(int) _numTok);
 		//}
-		WMatrix_nTimesv=new SparseDoubleMatrix2D((int) _numTok,(_vocab_size+1));
-		WTMatrix_nTimesv=new SparseDoubleMatrix2D((_vocab_size+1),(int) _numTok);
+		WMatrix_nTimesv=new FlexCompRowMatrix((int) _numTok,(_vocab_size+1));
+		WTMatrix_nTimesv=new FlexCompRowMatrix((_vocab_size+1),(int) _numTok);
 		
 		int idx_doc=0;
 		int idx_toksAllDocs=0;
@@ -126,7 +126,7 @@ public class ContextPCARepresentation extends SpectralRepresentation implements 
 	
 		//We can not have n*hv sparse matrices due to limits on max. matrix sizes so we will have to perform the multiplication here only.
 		
-		if( _opt.typeofDecomp.equals("TwoStepLRvsW") ){
+		if( _opt.typeofDecomp.equals("TwoStepLRvsW") ||  _opt.typeofDecomp.equals("LRMVLVariant2") ){
 		
 			LTRMatrix_hvTimeshv=new FlexCompRowMatrix(_contextSize*(_vocab_size+1),_contextSize*(_vocab_size+1));
 			RTLMatrix_hvTimeshv=new FlexCompRowMatrix(_contextSize*(_vocab_size+1),_contextSize*(_vocab_size+1));
@@ -986,39 +986,42 @@ if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("WvsLR")){
 	
 	/////
 	
-	public SparseDoubleMatrix2D getWnMatrix(){
+	public FlexCompRowMatrix getWnMatrix(){
 		
 		return WMatrix_nTimesv;
 	}
 	
-	public SparseDoubleMatrix2D getLnMatrix(){
+	public FlexCompRowMatrix getLnMatrix(){
 			return LMatrix_nTimeshv;
 		
 	}
 	
-	public SparseDoubleMatrix2D getRnMatrix(){
+	public FlexCompRowMatrix getRnMatrix(){
 			return RMatrix_nTimeshv;
 	}
 	
 	
-public SparseDoubleMatrix2D getWnTMatrix(){
+public FlexCompRowMatrix getWnTMatrix(){
 		
 		return WTMatrix_nTimesv;
 	}
 	
-	public SparseDoubleMatrix2D getLnTMatrix(){
+	public FlexCompRowMatrix getLnTMatrix(){
 			return LTMatrix_nTimeshv;
 		
 	}
 	
-	public SparseDoubleMatrix2D getRnTMatrix(){
+	public FlexCompRowMatrix getRnTMatrix(){
 			return RTMatrix_nTimeshv;
 	}
 	
-	
-	public SparseDoubleMatrix2D concatenateLR(SparseDoubleMatrix2D lProjectionMatrix,
-			SparseDoubleMatrix2D rProjectionMatrix) {
-		SparseDoubleMatrix2D finalProjection=new SparseDoubleMatrix2D(lProjectionMatrix.rows(),(lProjectionMatrix.columns()+rProjectionMatrix.columns()));
+/*	
+	public FlexCompRowMatrix concatenateLR(FlexCompRowMatrix lProjectionMatrix,
+			FlexCompRowMatrix rProjectionMatrix) {
+		FlexCompRowMatrix finalProjection=new FlexCompRowMatrix(lProjectionMatrix.rows(),(lProjectionMatrix.columns()+rProjectionMatrix.columns()));
+		
+		lProjectionMatrix.forEachNonZero(arg0)
+		
 		
 		for (int i=0;i<lProjectionMatrix.rows();i++){
 			for(int j=0; j<lProjectionMatrix.columns();j++){
@@ -1028,7 +1031,7 @@ public SparseDoubleMatrix2D getWnTMatrix(){
 		}
 		return finalProjection;
 	}
-	
+*/	
 	
 	
 	
@@ -1078,12 +1081,25 @@ public SparseDoubleMatrix2D getWnTMatrix(){
 			FlexCompRowMatrix rProjectionMatrix) {
 		FlexCompRowMatrix finalProjection=new FlexCompRowMatrix(lProjectionMatrix.numRows(),(lProjectionMatrix.numColumns()+rProjectionMatrix.numColumns()));
 		
-		for (int i=0;i<lProjectionMatrix.numRows();i++){
-			for(int j=0; j<lProjectionMatrix.numColumns();j++){
-				finalProjection.set(i, j, lProjectionMatrix.get(i, j));
-				finalProjection.set(i, j+lProjectionMatrix.numColumns(), rProjectionMatrix.get(i, j));
+		
+		Iterator<MatrixEntry> lEntry = lProjectionMatrix.iterator();
+		Iterator<MatrixEntry> rEntry = rProjectionMatrix.iterator();
+		double ent=0;
+		
+		while(lEntry.hasNext())
+			{
+			MatrixEntry ment = lEntry.next();
+			ent =ment.get();
+			finalProjection.set(ment.row(), ment.column(), ent);		
 			}
+		while(rEntry.hasNext())
+		{
+		MatrixEntry ment = rEntry.next();
+		ent =ment.get();
+		finalProjection.set(ment.row(), (lProjectionMatrix.numColumns()+ment.column()), ent);		
 		}
+		
+		
 		return finalProjection;
 	}
 	
@@ -1122,6 +1138,18 @@ public SparseDoubleMatrix2D getWnTMatrix(){
 			Omega= new DenseDoubleMatrix2D(rows,_num_hidden+20);//Oversampled the rank k
 			for (int i=0;i<(rows);i++){
 				for (int j=0;j<_num_hidden+20;j++)
+					Omega.set(i,j,r.nextGaussian());
+			}
+		return Omega;
+	}
+	
+	public Matrix initializeRandomly(int rows){//Refer Tropp's notation
+		Random r= new Random();
+		Matrix Omega;
+		
+			Omega= new Matrix(rows,_num_hidden);//Oversampled the rank k
+			for (int i=0;i<(rows);i++){
+				for (int j=0;j<_num_hidden;j++)
 					Omega.set(i,j,r.nextGaussian());
 			}
 		return Omega;
@@ -1183,30 +1211,68 @@ public SparseDoubleMatrix2D getWnTMatrix(){
 		return new Matrix(wProjection);
 	}
 
-	public Matrix generateProjections(Matrix matrixEig, Matrix matrixL,
-			Matrix matrixR) {
+	public Matrix generateProjections(Matrix matrixEig, Matrix matrixContext,Matrix matrixContextR) {
 		
 		computeTrainLRMatrices();
 		DenseDoubleMatrix2D L=new DenseDoubleMatrix2D((int) _numTok,_num_hidden);
 		DenseDoubleMatrix2D R=new DenseDoubleMatrix2D((int) _numTok,_num_hidden);
+		
+		DenseDoubleMatrix2D LU=new DenseDoubleMatrix2D((int) _numTok,_num_hidden);
+		DenseDoubleMatrix2D RU=new DenseDoubleMatrix2D((int) _numTok,_num_hidden);
+		
+		DenseDoubleMatrix2D contextLR=new DenseDoubleMatrix2D((int) _numTok,_num_hidden);
+		
+		FlexCompRowMatrix LRn2hv=new FlexCompRowMatrix((int) _numTok,2*LMatrix_nTimeshv.numColumns());
+		
 		DenseDoubleMatrix2D W=new DenseDoubleMatrix2D((int) _numTok,_num_hidden);
-		DenseDoubleMatrix2D contextSpecificEmbed=new DenseDoubleMatrix2D((int) _numTok,3*_num_hidden);
+		DenseDoubleMatrix2D contextSpecificEmbed=new DenseDoubleMatrix2D((int) _numTok,2*_num_hidden);
+		DenseDoubleMatrix2D contextSpecificEmbedWLR=new DenseDoubleMatrix2D((int) _numTok,3*_num_hidden);
+		DenseDoubleMatrix2D contextWL=new DenseDoubleMatrix2D((int) _numTok,2*_num_hidden);
 		
-		//if (_opt.bagofWordsSVD){
-			//LMatrix_nTimesv.zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixL), L);
-			//RMatrix_nTimesv.zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixR), R);
-		//}
-		//else{
-			LMatrix_nTimeshv.zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixL), L);
-			RMatrix_nTimeshv.zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixR), R);
-		//}
-		WMatrix_nTimesv.zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixEig), W);
 		
-		contextSpecificEmbed=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(L, W);
+		System.out.println("Computed Train Matrices");
 		
-		contextSpecificEmbed=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(contextSpecificEmbed, R);
+		LRn2hv=concatenateLR(LMatrix_nTimeshv, RMatrix_nTimeshv);
+		System.out.println("Concatenated Train Matrices");
 		
-		return MatrixFormatConversion.createDenseMatrixJAMA(contextSpecificEmbed);
+		MatrixFormatConversion.createSparseMatrixCOLT(WMatrix_nTimesv).zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixEig), W);
+		System.out.println("Computed W Embeds");
+		
+		if(_opt.typeofDecomp.equals("2viewWvsL")){
+			MatrixFormatConversion.createSparseMatrixCOLT(LMatrix_nTimeshv).zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixContext), L);
+			contextSpecificEmbed=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(W,L);
+		}
+		
+		if(_opt.typeofDecomp.equals("2viewWvsR")){
+			MatrixFormatConversion.createSparseMatrixCOLT(RMatrix_nTimeshv).zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixContext), R);
+			contextSpecificEmbed=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(W,R);
+		}
+		
+		if(_opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("TwoStepLRvsW")|| _opt.typeofDecomp.equals("LRMVLVariant2")){
+		
+			if(_opt.typeofDecomp.equals("2viewWvsLR")){
+				MatrixFormatConversion.createSparseMatrixCOLT(LRn2hv).zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixContext), contextLR);
+				contextSpecificEmbed=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(W,contextLR);
+			}
+			else{
+				MatrixFormatConversion.createSparseMatrixCOLT(LMatrix_nTimeshv).zMult(concatenateLRT(MatrixFormatConversion.createDenseMatrixCOLT(matrixEig),MatrixFormatConversion.createDenseMatrixCOLT(matrixEig)), LU);
+				MatrixFormatConversion.createSparseMatrixCOLT(RMatrix_nTimeshv).zMult(concatenateLRT(MatrixFormatConversion.createDenseMatrixCOLT(matrixEig),MatrixFormatConversion.createDenseMatrixCOLT(matrixEig)), RU);
+				
+				
+				LU.zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixContext), L);
+				RU.zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixContextR), R);
+				
+				contextWL=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(W,L);
+				contextSpecificEmbedWLR=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(contextWL,R);
+			}
+			
+		}
+		
+		System.out.println("Before Return");
+		if(_opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVLVariant2") )
+			return MatrixFormatConversion.createDenseMatrixJAMA(contextSpecificEmbedWLR);
+		else
+			return MatrixFormatConversion.createDenseMatrixJAMA(contextSpecificEmbed);
 	}
 
 	

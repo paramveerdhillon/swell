@@ -307,9 +307,9 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 			while(tok_idx<doc.size()){
 				writer.write(_rin.getTokForIntTrain(idx++));
 				writer.write(' ');
-				for (int j=0;j<_opt.hiddenStateSize*3;j++){
+				for (int j=0;j<_opt.hiddenStateSize*2;j++){
 					
-					if ( j != (3*_opt.hiddenStateSize)-1){
+					if ( j != (2*_opt.hiddenStateSize)-1){
 						writer.write(Double.toString(contextSpecificEmbed.get(i, j)));
 						writer.write(' ');
 					}
@@ -342,8 +342,9 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 			e.printStackTrace();
 		}
 		
+		double[] maxInThisDimension= new double[vocab.size()+1];
 		for (int i=0; i<=vocab.size(); i++) {
-			
+			double arr=0;
 			if (i==0){
 				writer.write("<OOV>");
 				writer.write(' ');
@@ -352,24 +353,30 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 				writer.write(vocab.get(i-1));
 				writer.write(' ');
 			}
+			
+			for(int k=0;k<_opt.hiddenStateSize-1;k++){
+				arr=dictL[i][k];
+				if(maxInThisDimension[i]<Math.abs(arr))
+					maxInThisDimension[i]=Math.abs(arr);
+			}
+			
 			for (int j=0; j<_opt.hiddenStateSize;j++){
 				
 				if ( j != _opt.hiddenStateSize-1){
-					writer.write(Double.toString(dictL[i][j]));
+					writer.write(Double.toString(dictL[i][j]/maxInThisDimension[i]));
 					writer.write(' ');
 				}
 				else{
-					writer.write(Double.toString(dictL[i][j]));
+					writer.write(Double.toString(dictL[i][j]/maxInThisDimension[i]));
 					writer.write('\n');
 				}
-			}
-			
+			}	
 		}
-		
 		writer.close();
-		
 	}
 
+	
+	
 	public void writeEigenDictRandom() throws IOException{
 		Random r= new Random();
 		DenseDoubleMatrix2D dictLMatrix=createDenseMatrixCOLT((Matrix)_matrices[0]);

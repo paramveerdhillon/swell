@@ -94,7 +94,7 @@ public class CCAVariants implements Serializable {
 
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
 			wout.writeEigenDict();
-			if(!opt.typeofDecomp.equals("TwoStepLRvsW") && !opt.kdimDecomp)
+			if(!opt.typeofDecomp.equals("TwoStepLRvsW") && !opt.typeofDecomp.equals("LRMVLVariant2") && !opt.kdimDecomp)
 				wout.writeEigContextVectors();
 			
 			
@@ -105,8 +105,7 @@ public class CCAVariants implements Serializable {
 			
 			
 		    /* Total memory currently in use by the JVM */
-		    System.out.println("Total memory (bytes): " + 
-		        Runtime.getRuntime().totalMemory());
+		    System.out.println("Total memory (bytes): " + Runtime.getRuntime().totalMemory());
 			
 			
 			System.out.println("+++CCA Embedddings Induced+++\n");
@@ -125,9 +124,9 @@ public class CCAVariants implements Serializable {
 			//corpus=new Corpus(all_Docs,docSize,opt);
 			matrices=deserializeCCAVariantsRun(opt);
 			contextPCARep= new ContextPCARepresentation(opt, numTokens,rin,all_Docs);
-			
-			Matrix contextSpecificEmbed=contextPCARep.generateProjections((Matrix)matrices[0], 
-					(Matrix)matrices[1], (Matrix)matrices[2]);
+			Matrix contextSpecificEmbed;
+			contextSpecificEmbed=contextPCARep.generateProjections((Matrix)matrices[0], 
+						(Matrix)matrices[1],(Matrix)matrices[2]);
 			
 			Matrix contextObliviousEmbed=contextPCARep.getContextOblEmbeddings((Matrix)matrices[0]);
 	
@@ -216,7 +215,7 @@ public static HashMap<Integer,Integer> setwordDict(HashMap<Integer,Integer> wDic
 
 	public static Object[] deserializeCCAVariantsRun(Options opt) throws ClassNotFoundException{
 		
-		Object[] matrixObj =new Object[2];
+		Object[] matrixObj =new Object[3];
 		
 		String contextDict=opt.serializeRun+"Context";
 		File fContext= new File(contextDict);
@@ -224,8 +223,14 @@ public static HashMap<Integer,Integer> setwordDict(HashMap<Integer,Integer> wDic
 		String eigDict=opt.serializeRun+"Eig";
 		File fEig= new File(eigDict);
 		
+		String eigDictL=opt.serializeRun+"EigL";
+		File fEigL= new File(eigDictL);
 		
-		Matrix eigDictMat=null,contextDictMat=null;
+		String eigDictR=opt.serializeRun+"EigR";
+		File fEigR= new File(eigDictR);
+		
+		
+		Matrix eigDictMat=null,contextDictMat=null,eigDictLMat=null,eigDictRMat=null;
 		
 		
 		try{
@@ -243,7 +248,32 @@ public static HashMap<Integer,Integer> setwordDict(HashMap<Integer,Integer> wDic
 		}
 		matrixObj[0]=(Object)eigDictMat;
 		matrixObj[1]=(Object)contextDictMat;
+		matrixObj[2]=null;
 		
+		if(opt.typeofDecomp.equals("TwoStepLRvsW") || opt.typeofDecomp.equals("LRMVLVariant2")){
+			
+			try{
+				
+				ObjectInput cpcaEig=new ObjectInputStream(new FileInputStream(fEig));
+				ObjectInput cpcaEigL=new ObjectInputStream(new FileInputStream(fEigL));
+				ObjectInput cpcaEigR=new ObjectInputStream(new FileInputStream(fEigR));
+				
+				eigDictMat=(Matrix)cpcaEig.readObject();
+				eigDictLMat=(Matrix)cpcaEigL.readObject();
+				eigDictRMat=(Matrix)cpcaEigR.readObject();
+				
+				
+				System.out.println("=======De-serialized the CCA Variant Run=======");
+			}
+			catch (IOException ioe){
+				System.out.println(ioe.getMessage());
+			}
+			matrixObj[0]=(Object)eigDictMat;
+			matrixObj[1]=(Object)eigDictLMat;
+			matrixObj[2]=(Object)eigDictRMat;
+			
+			
+		}
 	
 		return matrixObj;
 		

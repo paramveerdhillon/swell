@@ -152,7 +152,7 @@ public class MatrixFormatConversion {
 		
 		for(int i=0; i<x.rows();i++){
 			for(int j=0;j < y.columns();j++){
-				prodMatrix.set(i,j, y.get(i, j)/x.get(i, i));
+				prodMatrix.set(i,j, y.get(i, j)*x.get(i, i));
 			}
 		}
 		
@@ -170,7 +170,7 @@ public static DenseDoubleMatrix2D multiplySparseDenseScaleCol(DenseDoubleMatrix2
 		
 		for(int i=0; i<y.columns();i++){
 			for(int j=0;j < x.rows();j++){
-				prodMatrix.set(j,i, x.get(j, i)/y.get(i, i));
+				prodMatrix.set(j,i, x.get(j, i)*y.get(i, i));
 			}
 		}
 		
@@ -179,6 +179,30 @@ public static DenseDoubleMatrix2D multiplySparseDenseScaleCol(DenseDoubleMatrix2
 		
 		return prodMatrix;
 	}
+
+public static jeigen.DenseMatrix createDenseMatrixJEIGEN(
+		DenseDoubleMatrix2D uHatT) {
+	
+	jeigen.DenseMatrix X=new jeigen.DenseMatrix(uHatT.rows(),uHatT.columns());
+	for (int i=0;i<uHatT.rows();i++){
+		for (int j=0;j<uHatT.columns();j++){
+			X.set(i, j, uHatT.get(i, j));
+		}
+	}
+	return X;
+}
+
+public static DenseDoubleMatrix2D createDenseMatrixCOLT(
+		jeigen.DenseMatrix uSVNew) {
+	
+	DenseDoubleMatrix2D X=new DenseDoubleMatrix2D(uSVNew.rows,uSVNew.cols);
+	for (int i=0;i<uSVNew.rows;i++){
+		for (int j=0;j<uSVNew.cols;j++){
+			X.set(i, j, uSVNew.get(i, j));
+		}
+	}
+	return X;
+}
 	
 	
 	
