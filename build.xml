@@ -98,6 +98,16 @@
             </bootclasspath>
         </java>
     </target>
+    <target name="CCAVariantsNGrams">
+        <java classname="edu.upenn.cis.swell.MainMethods.CCAVariantsNGrams" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx4G"/>
+            <arg line="unlab-train unlab-train-file:../reuters.rcv1.tokenized  vocab-size:300000 hidden-state:100 algorithm:CCANGram:2viewWvsLR num-grams:3 sqrt-trans"/>
+            <classpath refid="swell.classpath"/>
+            <bootclasspath>
+                <path refid="run.CCAVariantsNGrams.bootclasspath"/>
+            </bootclasspath>
+        </java>
+    </target>
 
 
 
