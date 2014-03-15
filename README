@@ -1,7 +1,7 @@
 SpectralLearning Toolkit README Ver. 0.0.2
 ==========================================
 
-The spectral learning toolkit contains implementation of 8 spectral learning algorithms. All the algorithms learn from some large amounts of unlabeled text (e.g. WSJ, NYT, Reuters etc.) and output a dictionary (context oblivious) or context sensitive mapping from each word in the text to a low dimensional, typically ~30-50 dimensional real valued vector. The dictionary (or context oblivious mapping) maps each word (type) to a vector e.g. "bank" will have a single vector associated with it for all occurrences of "bank" in the text, irrespective of the fact whether it referred to "river bank" or "JPM Chase bank". On the other hand, context sensitive mappings map each word (token) to a vector, and hence would map "river bank" and "JPM Chase bank" to differ vectors based on context.
+The spectral learning toolkit contains implementation of various spectral learning algorithms. All the algorithms learn from some large amounts of unlabeled text (e.g. WSJ, NYT, Reuters etc.) and output a dictionary (context oblivious) or context sensitive mapping from each word in the text to a low dimensional, typically ~30-50 dimensional real valued vector. The dictionary (or context oblivious mapping) maps each word (type) to a vector e.g. "bank" will have a single vector associated with it for all occurrences of "bank" in the text, irrespective of the fact whether it referred to "river bank" or "JPM Chase bank". On the other hand, context sensitive mappings map each word (token) to a vector, and hence would map "river bank" and "JPM Chase bank" to differ vectors based on context.
 
 The goal behind learning all these embeddings is that they should provide supplementary information in addition to a baseline set of features that one might use for a task. For example, if you're doing NER where the standard train/test sets are sections of CoNLL '03 data and your classifier is some discriminative classifier e.g. CRF, where its easy to add new features. Then you would have a baseline set of features for NER e.g. word identities, capitalization in a fixed window around the given word etc. Now in order to improve the performance of your NER system, you might want to add spectral embeddings learned above as extra features with the hope that they would provide some non-redundant information in addition to the baseline set of features and hence would give a boost in classification accuracy for the task concerned, NER in this case. 
 
@@ -9,34 +9,36 @@ With that in mind, the processing occurs in two stages. In the first stage we le
 
 Now, you might ask that why don't we add even the CoNLL train/test sets to the unlabeled learning in first stage? In principle you can do that and that would certainly improve the performance over not doing so since now there won't be any out-of-vocabulary words, however I'd prefer not do it for the risk of overfitting. 
 
-The basic experimental framework I described above is the one used in our NIPS 11 paper. You also might want to have a look at the paper.
+The basic experimental framework I described above is the one used in our NIPS 11 paper. You also might want to have a look at our papers.
 "Multi-View Learning of Word Embeddings via CCA" 
-Dhillon, Foster and Ungar
+Dhillon, Foster and Ungar, NIPS 11
+
+"Two Step CCA: A new spectral method for estimating vector models of words"
+Dhillon, Rodu, Foster and Ungar, ICML 12
+
+Dependencies: SWELL relies on JEIGEN, a Java wrapper for the C++ Eigen library. You need to build it separately.
+
+https://github.com/hughperkins/jeigen
 
 =================================================
-The eight algorithms/variants currently implemented in the toolkit are:
+The algorithms.variants currently implemented in the toolkit are:
 
-1). LR-MVL embeddings. This is the CCA based algorithm proposed in the NIPS 11 paper and the one that I have played around with the most. I was successfully able to train it on ~850 million tokens of corpora with vocab size of 300k and k=50, with ~45G memory.
+1). OSCCA, TSCCA- Refer ICML 12 paper.
 
-2). LSA (Latent Semantic Analysis) Embeddings. This is a standard algorithm which performs SVD decomposition of document-term matrix. You might want to check its Wikipedia page. The right eigenvectors of the LSA matrix give us eigenwords (i.e a context oblivious dictionary) respectively.
+2). LR-MVL embeddings. This is a variant of the CCA based algorithm proposed in the NIPS 11 paper .
 
-3). ContextCCA and 4). ContextPCA: These algorithms perform CCA or PCA on word contexts and require running text as input. There are possibilities "WvsR", "WvsL", "WvsLR", "TwoStepLRvsW". The first two will perform CCA/PCA for a given word and its right or left context. See the option below to specify the size of the context. The third one concatenates the left and right contexts before performing CCA. The fourth algorithm is the one from our ICML 12 paper "Two Step CCA". The CCA objective being optimized is SVD( (W'W)^-1 W'L (L'L)^-1 L'W ) for WvsL option for instance, which gives the left singular vectors (the eigenwords); similarly SVD(L'L)^-1 L'W (W'W)^-1 W'W) gives the right singular vectors or the eigen-contexts. The SVD performed is approximate using Halko and Tropp's method. The difference between CCA and PCA option is that in the PCA option there is only normalization by (W'W) and there's no normalization on the other side. But I'll recommend using CCA algorithms as normalization plays a key role in inducing good embeddings.
-
-5). ContextCCANGrams and 6). ContextPCANGrams: These algorithms are exactly the same as above except that they expect bigrams, trigrams or 5-grams of text followed by count as input and not running text. See the "Input_Files" for the exact format of input. For the bigrams, the algorithm option should be "WvsR".
+3). OSCCA and TSCCA for NGrams : These algorithms are exactly the same as above except that they expect bigrams, trigrams or 5-grams of text followed by count as input and not running text. See the "Input_Files" for the exact format of input. For the bigrams, the algorithm option should be "WvsR".
 For trigrams and 5-grams all the 4 options "WvsR", "WvsL", "WvsLR", "TwoStepLRvsW" work. If the option is WvsR or WvsL for trigram/5-grams, the "W" is always the first word and "R"/"L" context are the remaining n-1 grams. For "WvsLR", "W" is the middle word and "L"/ "R" is its (n-1)/2 sized context on either side.  
 
 
-7).  Dependency-bigrams?:  The algorithms 5 and 6 can also run with dependency bigrams, however only bigrams i.e. a word followed by its dependency and the count. Since, the words and dependencies will be mapped to separate vocabulary sizes. See the "dep-bigram" and "num-grams" options below.
-
-8). Bigger Contexts?: The algorithms 3) and 4) are inefficient for contexts larger than ~2-3 due to sparse matrix manipulation and other memory issues. So in case you want to use bigger contexts, there is an option for that. Basically instead of having "hv" sized context where "h" is context size and "v" is the vocabulary size, one could instead use a low "k" dimensional vector for the words in context, giving a context size of "hk". So, this would proceed in two stages. I recommend that firstly you induce word embeddings using a big vocabulary size with some small context (say) 1 using the above algorithms and then induce embeddings with bigger contexts using those embeddings learned.    
 
 
-The SpectralLearning code can be run via "ant" as "ant ContextPCA" etc. where all the 4 targets are mentioned in the build.xml file. Since, the unlabeled data can be huge, so there might be memory issues. In Java the default heap size allotted is 4G, so you might want to increase that by adding "-Xmx" option in the relevant target in the "build.xml" file.  
+The SpectralLearning code can be run via "ant" as "ant CCAVariants" etc. where all the targets (which are currently stable and working) are mentioned in the build.xml file. Since, the unlabeled data can be huge, so there might be memory issues. In Java the default heap size allotted is 4G, so you might want to increase that by adding "-Xmx" option in the relevant target in the "build.xml" file.  
 
 
 Program Arguments (mentioned in build.xml) file.
 ===============================================
-All the 8 algorithms have some common set of arguments and they have the same meaning for each one of them.
+All the algorithms have some common set of arguments and they have the same meaning for each one of them.
 
 
 "unlab-train": This is the option to run the 1st stage unsupervised learning part from some big corpora (e.g. WSJ, NYT, Reuters etc.). The location of data is specified by: "unlab-train-file". There are some preprocessed datasets in the correct format available on sobolev e.g. Reuters RCV (~205M tokens).
@@ -47,22 +49,20 @@ You might want to run both of "train" and "unlab-train" together or separately. 
 
 "output-dir-prefix": Name of the directory where you want to save the outputs of the algorithms including the embeddings. By default it saves the outputs in the "Output_Files" folder.
 
-"scaleDictBySingVals": This option if set scales the output embeddings by the corresponding singular values. By default its false. This is pretty useful for visualization of the eigenwords. 
 
 
 "algorithm:" This is a necessary option. It choses the algorithm to run. Options are 
 
-1). algorithm:LRMVL:2viewCCA 
-2). algorithm:CCARunningText:2viewWvsLR
-3). algorithm:CCARunningText:2viewWvsR
-4). algorithm:CCARunningText:2viewWvsL
-5). algorithm:CCARunningText:TwoStepLRvsW
+
+1). algorithm:CCARunningText:2viewWvsLR       (OSCCA)
+2). algorithm:CCARunningText:TwoStepLRvsW     (TSCCA)
+3). algorithm:CCARunningText:LRMVLVariant2     (LRMVL Variant)
+4). algorithm:CCARunningText:2viewWvsR
+5). algorithm:CCARunningText:2viewWvsL
 6). algorithm:CCANGram:2viewWvsLR
 7). algorithm:CCANGram:2viewWvsR
 8). algorithm:CCANGram:2viewWvsL
 9). algorithm:CCANGram:TwoStepLRvsW
-10). algorithm:LSA:TermDoc
-11). All the CCA algorithms work for ContextPCA also as algorithm:ContextPCA:2viewWvsLR, algorithm:ContextPCANGrams:2viewWvsLR etc. But I'll recommend using CCA algorithms as normalization plays a key role in inducing good embeddings.
 
 "doc-separator:" For some algorithms we care about document boundaries and collect/aggregate statistics across different documents. So, we need to specify the document separator, currently, I am using "DOCSTART-X-0" as separator. Note that 3 of the 4 algorithms i.e. ContextPCA, LSA, LRMVLEmbed expect the input files to be running text with documents separated via the document separator. ContextPCANGrams works with different kind of input file. Its input file contains bigrams separated by space by their counts and needs no document separators. If you're using Google n-gram data then ContextPCANGrams might be the algorithm you might want to consider running. 
 
@@ -70,41 +70,27 @@ You might want to run both of "train" and "unlab-train" together or separately. 
 
 "vocab-size": This option specifies the size of dictionary i.e. how many unique words (types) we want to learn the embeddings for, from the 1st stage of unlabeled data learning. Typical sizes that I used were 100k to 300k. However, there are not more than 50k words in typical english, so you might want to play around with this number or choose it based on some linguistic knowledge that you might have. The final dictionary size is "vocab-size +1" i.e. for all the other words less frequent words which don't make it to the "vocab-size" we learn an "Out Of Vocabulary (OOV)" vector, which is a generic embedding to use for an unseen word.
 
-"hidden-state": This is the size of embeddings. Typical numbers vary from 20-50.
+"hidden-state": This is the size of embeddings. Typical numbers vary from 50-100.
 
-**Note that if even after increasing heap size you're getting memory errors, then you might want to try with a slightly smaller vocab-size and hidden state size. However, I won't go below vocab-size of 30k and hidden state size of 10. If, even then you get memory errors, the only remaining option is to try smaller unlabeled data sizes for stage 1. I am using standard linear algebra libraries for JAVA like parallel COLT and MTJ, which are supposed to be very fast and efficient. However, if you know of better ones, I would love to hear from you.**
 
 "eigen-dict-name": This is the name of the output dictionary after the 1st stage of learning. It is a matrix of size (num-vocab +1)* hidden-state.
 
-For LRMVLEmbed you can learn context specific as well as context oblivious embeddings for the 2nd stage smaller corpora using options. The name of the output files is specified as "context-obl-embed-name" and "context-specific-embed-name".
-
-For LSA and ContextPCANGrams, its not totally clear what context specific embeddings would mean so for these algorithms you can only learn context oblivious embeddings where the name of the output embeddings is specified as "context-obl-embed-name".
 
 
 Extra Algorithm specific options
 ================================
 
-"smooths": LRMVLEmbed performs exponential smooths on the neighboring words and concatenates them. So, you should specify a single or combination (comma separated) of smooths you want to consider. Using lots of smooths might slow down the algorithm (!). For details about exponential smooths please see the NIPS 11 paper.
 
-"contextSizeEachSide": All algorithms except LRMVL and LSA require this option. It specifies the amount of context on each size to consider while constructing the word by context matrix. I won't go beyond 2 or at max. 3.
+"contextSizeEachSide": All algorithms except n-grams based ones require this option. It specifies the amount of context on each size to consider while constructing the word by context matrix.
 
 
-"num-grams": 2,3 or 5. All the algorithms except LRMVL and LSA require it. Note that for dependency data "num-grams" can only be 2.
-
-"dep-bigram": Set this option if the input data is dependency bigrams.
-
-"num-labels": This option requires dependency data and it specifies the scaling of the vocabulary for dependency data. Since the dependencies have a different vocabulary than the words, we would need to mention the scaling factor >= 1. Default is 1, i.e. the dependency vocabulary is the same as word vocabulary.
-
-"kdim-decomp": Option for bigger contexts i.e. using a eigencontexts instead of contexts. 
-
-"eigenCCA-dict-file": This specifies the name of the eigenword dictionary to use for the bigger context embedding induction. E.g. eigenCCA-dict-file"eigenDictCCARunningText2viewWvsLRDict:200000:50. The last two entries are the size of the eigenword embeddings present in the input file. 
-
+"num-grams": 2,3 or 5. All the n-gram algorithms require this option
 
 **Lastly, I invite you to look at the code yourself if you are curious about how things are implemented or if something is misbehaving etc. Also, please feel free to report potential bugs or other suggestions. We plan to release the code sometime in the next few months so it will be good to get feedback.**
 
 **Also note that there are dummy input files in the Input_Files folder, so the code is in "just push play" state. You can just run one of the algorithms with the specified options in build.xml and it should run. The generated output will be in Output_Files folder.**
 
-**This is a continuously evolving document and I have tried my best to ensure everything is factually correct, however there might be some discrepancies, so I will keep on updating this document. (9/11/13)**
+**This is a continuously evolving document and I have tried my best to ensure everything is factually correct, however there might be some discrepancies, so I will keep on updating this document. (3/14/14)**
 
 cheers and best of luck!
 dhillon@cis.upenn.edu 
