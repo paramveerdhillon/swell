@@ -95,17 +95,18 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 		DenseDoubleMatrix2D dictLMatrix=createDenseMatrixCOLT((Matrix)_matrices[0]);
 		double[][] dictL=dictLMatrix.toArray();
 		ArrayList<String> vocab=_rin.getSortedWordListString();
-		String eigDict =_opt.outputDir+"EigDict"+_opt.algorithm+ _opt.typeofDecomp;
+		String eigenDict=_opt.outputDir+"eigenDict"+_opt.algorithm+_opt.typeofDecomp;
 		try {
-			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigDict),"UTF8"));
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigenDict),"UTF8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		
+		double[] maxInThisDimension= new double[vocab.size()+1];
 		for (int i=0; i<=vocab.size(); i++) {
-			
+			double arr=0;
 			if (i==0){
 				writer.write("<OOV>");
 				writer.write(' ');
@@ -114,21 +115,26 @@ public class ContextPCANGramsWriter extends WriteDataFile implements EmbeddingWr
 				writer.write(vocab.get(i-1));
 				writer.write(' ');
 			}
+			
+			for(int k=0;k<_opt.hiddenStateSize-1;k++){
+				arr=dictL[i][k];
+				if(maxInThisDimension[i]<Math.abs(arr))
+					maxInThisDimension[i]=Math.abs(arr);
+			}
+			
 			for (int j=0; j<_opt.hiddenStateSize;j++){
 				
 				if ( j != _opt.hiddenStateSize-1){
-					writer.write(Double.toString(dictL[i][j]));
+					writer.write(Double.toString(dictL[i][j]/maxInThisDimension[i]));
 					writer.write(' ');
 				}
 				else{
-					writer.write(Double.toString(dictL[i][j]));
+					writer.write(Double.toString(dictL[i][j]/maxInThisDimension[i]));
 					writer.write('\n');
 				}
-			}
-			
+			}	
 		}
-		
-		writer.close();	
+		writer.close();
 	}
 	
 	
