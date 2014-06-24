@@ -533,8 +533,6 @@ public Matrix addNormalize(Matrix cov,int numRows){
 		int threads = Runtime.getRuntime().availableProcessors();
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
-
-		
 		final Iterator<ArrayList<Integer>> it =_allDocs.iterator();
 		
 		while (it.hasNext()) {

@@ -43,6 +43,7 @@ public class ContextPCA implements Serializable {
 		ContextPCARun contextPCARun;
 		ContextPCAWriter wout;
 		Object[] matrices=new Object[3];
+		Matrix contextSpecificEmbed;
 		
 		
 		long numTokens;
@@ -87,7 +88,7 @@ public class ContextPCA implements Serializable {
 			matrices=deserializeContextPCARun(opt);
 
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
-			wout.writeEigenDict();
+			wout.writeEigenDictCPCA();
 			wout.writeEigContextVectors();
 			
 			if (opt.randomBaseline){
@@ -120,8 +121,16 @@ public class ContextPCA implements Serializable {
 				//	(Matrix)matrices[1], (Matrix)matrices[2]);
 			//wout.writeContextSpecificEmbed(contextSpecificEmbed);
 			
+			contextSpecificEmbed=contextPCARep.generateProjections((Matrix)matrices[0], 
+					(Matrix)matrices[1],(Matrix)matrices[2]);
+			
+			wout.writeContextSpecificEmbed(contextSpecificEmbed);
+			
 			Matrix contextObliviousEmbed=contextPCARep.getContextOblEmbeddings((Matrix)matrices[1]);
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
+			
+			
+			
 			
 			Matrix contextObliviousEmbedContext=contextPCARep.getContextOblEmbeddings((Matrix)matrices[0]);
 			wout.writeContextObliviousEmbedContext(contextObliviousEmbedContext);
@@ -243,7 +252,7 @@ public static HashMap<String,Integer> getwordDict(){
 	
 public static Object[] deserializeContextPCARun(Options opt) throws ClassNotFoundException{
 	
-	Object[] matrixObj =new Object[2];
+	Object[] matrixObj =new Object[3];
 	String serRun =opt.serializeRun;
 	
 	if (opt.embedToInduce !=null){
@@ -276,6 +285,7 @@ public static Object[] deserializeContextPCARun(Options opt) throws ClassNotFoun
 	}
 	matrixObj[0]=(Object)eigDictMat;
 	matrixObj[1]=(Object)contextDictMat;
+	matrixObj[2]=null;
 	
 	return matrixObj;
 	

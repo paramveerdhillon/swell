@@ -37,8 +37,10 @@ public final class Options implements Serializable {
  public boolean scaleBySingVals=false;
  public boolean induceEmbeds=false;
  public boolean ngrams = false;
+ public boolean writeContextMatrix=false;
  public int numLabels = 1;
  public boolean normalize = false;
+ public boolean parallel = false;
  public String eigendictName = "eigenWord.dict";
  public String docSeparator = "DOCSTART-X-0";
  public String lSVecName=null;
@@ -57,6 +59,7 @@ public final class Options implements Serializable {
  public boolean depbigram=false;
  public boolean diagOnlyInverse=false;
  public boolean contextSensitive=false;
+ public boolean descendingVocab=false;
  public String outputDir="Output_Files/";
  public String embedToInduce=null;
  public String eigenWordCCAFile=null;
@@ -125,10 +128,24 @@ public final class Options implements Serializable {
 		
 		rSVecName = outputDir+"PhiLSingVect."+algorithm;
 		
-	    
+		if (pair[0].equals("writeContextMatrix"))
+		{
+			writeContextMatrix=true;
+		}
+		
+		if (pair[0].equals("descendingVocab"))
+		{
+			descendingVocab=true;
+		}
+		
 		if (pair[0].equals("context-sensitive"))
 		{
 			contextSensitive=true;
+		}
+		
+		if (pair[0].equals("parallel"))
+		{
+			parallel=true;
 		}
 		
 		if (pair[0].equals("kdim-decomp"))
