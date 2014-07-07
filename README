@@ -1,6 +1,7 @@
 SpectralLearning Toolkit README Ver. 0.0.2
 ==========================================
 
+
 The spectral learning toolkit contains implementation of various spectral learning algorithms. All the algorithms learn from some large amounts of unlabeled text (e.g. WSJ, NYT, Reuters etc.) and output a dictionary (context oblivious) or context sensitive mapping from each word in the text to a low dimensional, typically ~30-50 dimensional real valued vector. The dictionary (or context oblivious mapping) maps each word (type) to a vector e.g. "bank" will have a single vector associated with it for all occurrences of "bank" in the text, irrespective of the fact whether it referred to "river bank" or "JPM Chase bank". On the other hand, context sensitive mappings map each word (token) to a vector, and hence would map "river bank" and "JPM Chase bank" to differ vectors based on context.
 
 The goal behind learning all these embeddings is that they should provide supplementary information in addition to a baseline set of features that one might use for a task. For example, if you're doing NER where the standard train/test sets are sections of CoNLL '03 data and your classifier is some discriminative classifier e.g. CRF, where its easy to add new features. Then you would have a baseline set of features for NER e.g. word identities, capitalization in a fixed window around the given word etc. Now in order to improve the performance of your NER system, you might want to add spectral embeddings learned above as extra features with the hope that they would provide some non-redundant information in addition to the baseline set of features and hence would give a boost in classification accuracy for the task concerned, NER in this case. 
@@ -25,7 +26,7 @@ The algorithms.variants currently implemented in the toolkit are:
 
 1). OSCCA, TSCCA- Refer ICML 12 paper.
 
-2). LR-MVL embeddings. This is a variant of the CCA based algorithm proposed in the NIPS 11 paper .
+2). LR-MVL embeddings. These are two algorithms similar to the one proposed in the NIPS 11 paper .
 
 3). OSCCA and TSCCA for NGrams : These algorithms are exactly the same as above except that they expect bigrams, trigrams or 5-grams of text followed by count as input and not running text. See the "Input_Files" for the exact format of input. For the bigrams, the algorithm option should be "WvsR".
 For trigrams and 5-grams all the 4 options "WvsR", "WvsL", "WvsLR", "TwoStepLRvsW" work. If the option is WvsR or WvsL for trigram/5-grams, the "W" is always the first word and "R"/"L" context are the remaining n-1 grams. For "WvsLR", "W" is the middle word and "L"/ "R" is its (n-1)/2 sized context on either side.  
@@ -51,18 +52,19 @@ You might want to run both of "train" and "unlab-train" together or separately. 
 
 
 
-"algorithm:" This is a necessary option. It choses the algorithm to run. Options are 
+"algorithm:" This is a necessary option. It chooses the algorithm to run. Options are 
 
 
-1). algorithm:CCARunningText:2viewWvsLR       (OSCCA)
-2). algorithm:CCARunningText:TwoStepLRvsW     (TSCCA)
-3). algorithm:CCARunningText:LRMVLVariant2     (LRMVL Variant)
-4). algorithm:CCARunningText:2viewWvsR
-5). algorithm:CCARunningText:2viewWvsL
-6). algorithm:CCANGram:2viewWvsLR
-7). algorithm:CCANGram:2viewWvsR
-8). algorithm:CCANGram:2viewWvsL
-9). algorithm:CCANGram:TwoStepLRvsW
+1). algorithm:CCARunningText:2viewWvsLR       (OSCCA) (Main method in: CCAVariants.java)
+2). algorithm:CCARunningText:TwoStepLRvsW     (TSCCA) (Main method in: CCAVariants.java)
+3). algorithm:CCARunningText:LRMVL1     (LRMVL1) (Main method in: CCAVariants.java)
+4). algorithm:CCARunningText:LRMVL     (LRMVL2) (Main method in: LRMVL2.java)
+5). algorithm:CCARunningText:2viewWvsR   (OSCCA with only Right Context) (Main method in: CCAVariants.java)
+6). algorithm:CCARunningText:2viewWvsL   (OSCCA with only Left Context) (Main method in: CCAVariants.java)
+7). algorithm:CCANGram:2viewWvsLR   (Main method in: CCAVariantsNGrams.java)
+8). algorithm:CCANGram:2viewWvsR    (Main method in: CCAVariantsNGrams.java)
+9). algorithm:CCANGram:2viewWvsL     (Main method in: CCAVariantsNGrams.java)
+10). algorithm:CCANGram:TwoStepLRvsW  (Main method in: CCAVariantsNGrams.java)
 
 "doc-separator:" For some algorithms we care about document boundaries and collect/aggregate statistics across different documents. So, we need to specify the document separator, currently, I am using "DOCSTART-X-0" as separator. Note that 3 of the 4 algorithms i.e. ContextPCA, LSA, LRMVLEmbed expect the input files to be running text with documents separated via the document separator. ContextPCANGrams works with different kind of input file. Its input file contains bigrams separated by space by their counts and needs no document separators. If you're using Google n-gram data then ContextPCANGrams might be the algorithm you might want to consider running. 
 
@@ -70,7 +72,7 @@ You might want to run both of "train" and "unlab-train" together or separately. 
 
 "vocab-size": This option specifies the size of dictionary i.e. how many unique words (types) we want to learn the embeddings for, from the 1st stage of unlabeled data learning. Typical sizes that I used were 100k to 300k. However, there are not more than 50k words in typical english, so you might want to play around with this number or choose it based on some linguistic knowledge that you might have. The final dictionary size is "vocab-size +1" i.e. for all the other words less frequent words which don't make it to the "vocab-size" we learn an "Out Of Vocabulary (OOV)" vector, which is a generic embedding to use for an unseen word.
 
-"hidden-state": This is the size of embeddings. Typical numbers vary from 50-100.
+"hidden-state": This is the size of embeddings. Typical numbers vary from 100-200.
 
 
 "eigen-dict-name": This is the name of the output dictionary after the 1st stage of learning. It is a matrix of size (num-vocab +1)* hidden-state.
@@ -81,14 +83,24 @@ Extra Algorithm specific options
 ================================
 
 
-"contextSizeEachSide": All algorithms except n-grams based ones require this option. It specifies the amount of context on each size to consider while constructing the word by context matrix.
+"contextSizeEachSide": All algorithms except n-grams based ones and LRMVL2  require this option. It specifies the amount of context on each size to consider while constructing the word by context matrix.
+
+"sqrt-trans": Highly recommended to get good embeddings. It takes square root of word counts before running the algorithm. Works for all algorithms.
+
+"smooths": E.g. 0.1,0.5 Comma separated smooth values to be used for LRMVL2
 
 
 "num-grams": 2,3 or 5. All the n-gram algorithms require this option
 
+
+
+
 **Lastly, I invite you to look at the code yourself if you are curious about how things are implemented or if something is misbehaving etc. Also, please feel free to report potential bugs or other suggestions. We plan to release the code sometime in the next few months so it will be good to get feedback.**
 
 **Also note that there are dummy input files in the Input_Files folder, so the code is in "just push play" state. You can just run one of the algorithms with the specified options in build.xml and it should run. The generated output will be in Output_Files folder.**
+
+So, just do a git clone. CD to that directory and type "ant" to build. Then build any target as "ant CCAVariantsOSCCA" etc. The embeddings will be in the output folder with name eigenDict*.
+
 
 **This is a continuously evolving document and I have tried my best to ensure everything is factually correct, however there might be some discrepancies, so I will keep on updating this document. (3/14/14)**
 
