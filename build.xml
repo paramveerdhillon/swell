@@ -23,19 +23,11 @@
         <pathelement location="libs/jna-4.0.0.jar"/>
         <pathelement location="libs/Jeigen.jar"/>
     </path>
-    <path id="run.CCAVariantsOSCCA.bootclasspath">
-        <fileset dir="${java.home}/lib" includes="*.jar"/>
-        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
-    </path>
-     <path id="run.CCAVariantsTSCCA.bootclasspath">
+    <path id="run.CCAVariants.bootclasspath">
         <fileset dir="${java.home}/lib" includes="*.jar"/>
         <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
     </path>
     <path id="run.LRMVL2.bootclasspath">
-        <fileset dir="${java.home}/lib" includes="*.jar"/>
-        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
-    </path>
-    <path id="run.CCAVariantsLRMVL1.bootclasspath">
         <fileset dir="${java.home}/lib" includes="*.jar"/>
         <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
     </path>
@@ -83,7 +75,7 @@
     <target name="CCAVariantsTSCCA">
         <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
             <jvmarg line="-Xmx50G"/>
-            <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt unlab-train-file:../reuters.rcv1.tokenized output-dir-prefix:Output_FilesCCA_TwoStepLRvsW vocab-size:300000 hidden-state:100 algorithm:CCARunningText:TwoStepLRvsW contextSizeEachSide:2 sqrt-trans"/>
+            <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt unlab-train-file:../train_demo1.txt output-dir-prefix:Output_Files_TSCCA vocab-size:100 hidden-state:20 algorithm:CCARunningText:TwoStepLRvsW contextSizeEachSide:2 sqrt-trans"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.CCAVariants.bootclasspath"/>
@@ -93,7 +85,7 @@
     <target name="CCAVariantsOSCCA">
             <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
 	          <jvmarg line="-Xmx50G"/>
-              <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt unlab-train-file:../reuters.rcv1.tokenized output-dir-prefix:Output_FilesCCA_2viewWvsLR vocab-size:300000 hidden-state:100 algorithm:CCARunningText:2viewWvsLR contextSizeEachSide:2 sqrt-trans"/>
+              <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt unlab-train-file:../reuters.rcv1.tokenized output-dir-prefix:Output_Files_OSCCA_2viewWvsLR vocab-size:100 hidden-state:20 algorithm:CCARunningText:2viewWvsLR contextSizeEachSide:2 sqrt-trans"/>
               <classpath refid="swell.classpath"/>
               <bootclasspath>
                 <path refid="run.CCAVariants.bootclasspath"/>
@@ -103,7 +95,7 @@
     <target name="CCAVariantsLRMVL1">
             <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
 	          <jvmarg line="-Xmx50G"/>
-              <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt  unlab-train-file:../reuters.rcv1.tokenized output-dir-prefix:Output_FilesCCA_LRMVL1 vocab-size:100 hidden-state:20 algorithm:CCARunningText:LRMVL1 contextSizeEachSide:2 sqrt-trans"/>
+              <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt  unlab-train-file:../train_demo1.txt output-dir-prefix:Output_FilesCCA_LRMVL1 vocab-size:100 hidden-state:20 algorithm:CCARunningText:LRMVL1 contextSizeEachSide:2 sqrt-trans"/>
               <classpath refid="swell.classpath"/>
               <bootclasspath>
                 <path refid="run.CCAVariants.bootclasspath"/>
@@ -113,7 +105,7 @@
     <target name="CCAVariantsNGrams">
         <java classname="edu.upenn.cis.swell.MainMethods.CCAVariantsNGrams" failonerror="true" fork="yes">
             <jvmarg line="-Xmx50G"/>
-            <arg line="unlab-train unlab-train-file:../reuters.rcv1.tokenized  vocab-size:100 hidden-state:20 algorithm:CCANGram:2viewWvsR num-grams:2 sqrt-trans"/>
+            <arg line="unlab-train unlab-train-file:../train_demo1.txt  vocab-size:100 hidden-state:20 algorithm:CCANGram:2viewWvsR num-grams:2 sqrt-trans"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.CCAVariantsNGrams.bootclasspath"/>
@@ -123,7 +115,7 @@
 
     <target name="LRMVL2">
         <java classname="edu.upenn.cis.swell.MainMethods.LRMVL2" failonerror="true" fork="yes">
-            <arg line="unlab-train train context-specific  unlab-train-file:Input_Files/train_demo2.txt   train-file:Input_Files/all.txt sqrt-trans  output-dir-prefix:Output_Files_new vocab-size:50 hidden-state:30 algorithm:CCARunningText:LRMVL smooths:.1,.5,.9"/>
+            <arg line="unlab-train train context-specific  unlab-train-file:Input_Files/train_demo1.txt   train-file:Input_Files/all.txt sqrt-trans  output-dir-prefix:Output_Files_new vocab-size:50 hidden-state:30 algorithm:CCARunningText:LRMVL smooths:.1,.5,.9"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.LRMVL2.bootclasspath"/>
