@@ -88,10 +88,10 @@
             </bootclasspath>
         </java>
     </target>
-    <target name="CCAVariantsLRMVL2">
+    <target name="CCAVariantsLRMVL1">
             <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
 	          <jvmarg line="-Xmx50G"/>
-              <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt  unlab-train-file:../reuters.rcv1.tokenized output-dir-prefix:Output_FilesCCA_LRMVL2 vocab-size:300000 hidden-state:100 algorithm:CCARunningText:LRMVLVariant2 contextSizeEachSide:2 sqrt-trans"/>
+              <arg line="unlab-train train context-sensitive  train-file:Input_Files/train_demo1.txt  unlab-train-file:../reuters.rcv1.tokenized output-dir-prefix:Output_FilesCCA_LRMVL1 vocab-size:100 hidden-state:20 algorithm:CCARunningText:LRMVLVariant2 contextSizeEachSide:2 sqrt-trans"/>
               <classpath refid="swell.classpath"/>
               <bootclasspath>
                 <path refid="run.CCAVariants.bootclasspath"/>
@@ -108,6 +108,19 @@
             </bootclasspath>
         </java>
     </target>
+
+   <target name="LRMVL2">
+        <java classname="edu.upenn.cis.swell.MainMethods.LRMVLEmbedNew" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx100G"/>
+            <arg line="unlab-train   unlab-train-file:Input_Files/train_demo1.txt output-dir-prefix:Output_FilesCCA_LRMVLEmbed2_100.20.smoothp5 vocab-size:100 hidden-state:20 algorithm:CCARunningText:LRMVL sqrt-trans  smooths:.5 "/>
+
+            <classpath refid="swell.classpath"/>
+            <bootclasspath>
+                <path refid="run.LRMVLEmbedNew.bootclasspath"/>
+            </bootclasspath>
+        </java>
+</target>
+	
 
 
 
