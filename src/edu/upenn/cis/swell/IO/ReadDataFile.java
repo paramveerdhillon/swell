@@ -43,7 +43,7 @@ public class ReadDataFile implements Serializable {
 	private static String docEndSymbol="DOCSTART-X-0";
 	ArrayList<Integer> docSizes=new ArrayList<Integer>();
 	long numTokens =0;
-	
+	int numD=0;
 	private HashMap<String,Integer> countW=new HashMap<String,Integer>();
 	private HashMap<String,Integer> countContext=new HashMap<String,Integer>();
 	private HashMap<String,Integer> corpusIntMapped =new HashMap<String,Integer>();
@@ -92,7 +92,7 @@ public class ReadDataFile implements Serializable {
 		
 		String line=in.readLine();
 		int docCounter=0,numDocs=0;
-		int idx=0;
+		int idx=0,counter=0;
 		while (line != null ) {
 			
 			
@@ -101,10 +101,10 @@ public class ReadDataFile implements Serializable {
 				continue;
 			}
 				
-			
-			if (!line.equals(docEndSymbol)){
-				docCounter++;
-				ArrayList<String> norm1=new ArrayList<String>();
+			if(!_opt.typeofDecomp.equals("LRMVLVariant2")){
+				if (!line.equals(docEndSymbol)){
+					docCounter++;
+					ArrayList<String> norm1=new ArrayList<String>();
 				
 				norm1=tokenize(line);
 				for(String w:norm1){
@@ -140,6 +140,51 @@ public class ReadDataFile implements Serializable {
 				docCounter=0;
 				eachDoc.clear();
 			}
+			}
+			else{
+				ArrayList<String> norm1=new ArrayList<String>();
+				norm1=tokenize(line);
+				
+				while(numTokens <norm1.size()){
+				
+				for(String w:norm1){
+					if (dataOption==1){
+						strMap.put(idx++, w);
+					}
+				}
+				
+				if (lowercase)
+					norm1=lowercase(norm1);
+				if (normalize)
+					norm1=(normalize(norm1));
+				
+				
+				for(String w:norm1){
+					
+					int wInt=-1;
+					if (corpusIntMapped.containsKey(w))
+						wInt=corpusIntMapped.get(w);
+					else
+						wInt=corpusIntMapped.get("<OOV>");
+					numTokens++;
+					counter++;
+					eachDoc.add(wInt);	
+					//For Smoothing
+					if(counter==999){
+						docCounter++;
+						numDocs++;
+						counter=0;
+						
+						allDocs.add((ArrayList<Integer>) eachDoc.clone());
+						docSizes.add(docCounter);
+						eachDoc.clear();
+					}	
+				}
+		
+			}
+			
+			}
+			
 			line=in.readLine();
 		}
 		    in.close();
@@ -753,7 +798,7 @@ public void readAllDocsNGramsSingleVocab() throws Exception{
 		
 		
 		String line=in.readLine();
-		int docCounter=0,numDocs=0;
+		int docCounter=0;
 		while (line != null ) {
 			
 			if(line.equals("")){
@@ -788,6 +833,10 @@ public void readAllDocsNGramsSingleVocab() throws Exception{
 					}
 				}
 			}
+			else{
+				numD++;
+			}
+			
 			
 			line=in.readLine();
 		}
@@ -915,7 +964,9 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 						countW.put(w,1);
 				}
 			}
-			
+			else{
+				numD++;
+			}
 			line=in.readLine();
 		}
 		    in.close();
@@ -924,12 +975,23 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 			int i=0;
 			if (i==0)
 				corpusIntMapped.put("<OOV>",i++);
-			
+		
+		int count=0;	
+		if(!_opt.descendingVocab){
 			for (String keys:sorted_countW.keySet()){
 				if (i<= _opt.vocabSize)
 					corpusIntMapped.put(keys,i++);
 			}
-		    
+		}
+		else{
+			for (String keys:sorted_countW.keySet()){
+				if(count%50==0){
+				if (i<= _opt.vocabSize)
+					corpusIntMapped.put(keys,i++);
+				}
+				count++;
+			}
+		}
 		return corpusIntMapped;
 		
 	}
@@ -992,15 +1054,32 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 	
 	public ArrayList<String> getSortedWordListString(){
 		ArrayList<String> wordsList= new ArrayList<String>();
-		int count=0;
+		int count=0,count1=0;
 		
+		
+		if(!_opt.descendingVocab){
 		for (String keys:sorted_countW.keySet()){
 			if (count <_opt.vocabSize){
 				wordsList.add(keys);
 				count++;
 			}
 			else 
-				break;
+				break;	
+		}
+		}
+		else{
+			for (String keys:sorted_countW.keySet()){
+				if(count1%50==0){
+				
+				if (count <_opt.vocabSize){
+					wordsList.add(keys);
+					count++;
+				}
+				else 
+					break;
+				}
+				count1++;
+			}
 			
 		}
 		return wordsList;
@@ -1008,8 +1087,9 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 	
 	public ArrayList<String> getSortedWordListContextString(){
 		ArrayList<String> wordsList= new ArrayList<String>();
-		int count=0;
+		int count=0,count1=0;
 		
+		if(!_opt.descendingVocab){
 		for (String keys:sorted_countContext.keySet()){
 			if (count <_opt.numLabels*_opt.vocabSize){
 				wordsList.add(keys);
@@ -1017,7 +1097,20 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 			}
 			else 
 				break;
-			
+		}	
+		}
+		else{
+			for (String keys:sorted_countContext.keySet()){
+				if(count1%50==0){
+				if (count <_opt.numLabels*_opt.vocabSize){
+					wordsList.add(keys);
+					count++;
+				}
+				else 
+					break;
+				}
+				count1++;
+			}	
 		}
 		return wordsList;
 	}
@@ -1107,6 +1200,10 @@ public HashMap<String, Integer> convertAllDocsIntNGramsSingleVocab() throws Exce
 		}
 	}
 	
+	
+	public long getNDoc(){
+		return numD;
+	}
 	
 	public long getNumTokens(){
 		return numTokens;

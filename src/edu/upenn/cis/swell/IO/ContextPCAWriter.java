@@ -22,7 +22,12 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import no.uib.cipr.matrix.MatrixEntry;
+import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
+import cern.colt.matrix.tfloat.impl.DenseFloatMatrix2D;
+import cern.colt.matrix.tint.impl.DenseIntMatrix2D;
 import Jama.Matrix;
 
 public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
@@ -65,23 +70,34 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+	
 		
 	
 	while(idxDoc<_allDocs.size()){	
 			int tok_idx=0;	
 			ArrayList<Integer> doc=_allDocs.get(idxDoc++);
 			
+			double maxInThisDimension= 0;
 			while(tok_idx<doc.size()){
+				double arr=0;
+				maxInThisDimension= 0;
 				writer.write(_rin.getTokForIntTrain(idx++));
 				writer.write(' ');
+				
+				for(int k=0;k<_opt.hiddenStateSize;k++){
+					arr=contextObliviousEmbed.get(i, k);
+					if(maxInThisDimension<Math.abs(arr))
+						maxInThisDimension=Math.abs(arr);
+				}
+				
 				for (int j=0;j<_opt.hiddenStateSize;j++){
 					
 					if ( j != (_opt.hiddenStateSize)-1){
-						writer.write(Double.toString(contextObliviousEmbed.get(i, j)));
+						writer.write(Double.toString(contextObliviousEmbed.get(i, j)/maxInThisDimension));
 						writer.write(' ');
 					}
 					else{
-						writer.write(Double.toString(contextObliviousEmbed.get(i, j)));
+						writer.write(Double.toString(contextObliviousEmbed.get(i, j)/maxInThisDimension));
 						writer.write('\n');
 					}
 				}
@@ -107,19 +123,31 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 	
 	while(idxDoc<_allDocs.size()){	
 			int tok_idx=0;	
+			
 			ArrayList<Integer> doc=_allDocs.get(idxDoc++);
 			
+			double maxInThisDimension= 0;
+			
 			while(tok_idx<doc.size()){
+				double arr=0;
+				maxInThisDimension= 0;
 				writer.write(_rin.getTokForIntTrain(idx++));
 				writer.write(' ');
+				
+				for(int k=0;k<_opt.hiddenStateSize;k++){
+					arr=contextObliviousEmbed.get(i, k);
+					if(maxInThisDimension<Math.abs(arr))
+						maxInThisDimension=Math.abs(arr);
+				}
+				
 				for (int j=0;j<_opt.hiddenStateSize;j++){
 					
 					if ( j != (_opt.hiddenStateSize)-1){
-						writer.write(Double.toString(contextObliviousEmbed.get(i, j)));
+						writer.write(Double.toString(contextObliviousEmbed.get(i, j)/maxInThisDimension));
 						writer.write(' ');
 					}
 					else{
-						writer.write(Double.toString(contextObliviousEmbed.get(i, j)));
+						writer.write(Double.toString(contextObliviousEmbed.get(i, j)/maxInThisDimension));
 						writer.write('\n');
 					}
 				}
@@ -187,7 +215,11 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		else
 			counter=2*_opt.contextSizeOneSide;
 		int c=0;
+		
+		double maxInThisDimension= 0;
 		for (int i=0; i<counter*(vocab.size()+1); i++) {
+			double arr=0;
+			maxInThisDimension= 0;
 			if(i%(vocab.size()+1)==0 && i!=0)
 				c++;
 				
@@ -205,24 +237,30 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 				}
 					
 			}
+			for(int k=0;k<_opt.hiddenStateSize;k++){
+				arr=eigenDictArrContext[i][k];
+				if(maxInThisDimension<Math.abs(arr))
+					maxInThisDimension=Math.abs(arr);
+			}
+			
 			for (int j=0; j<_opt.hiddenStateSize;j++){
 				if(i<=vocab.size()){
 					if ( j != _opt.hiddenStateSize-1){
-						writer.write(Double.toString(eigenDictArrContext[i][j]));
+						writer.write(Double.toString(eigenDictArrContext[i][j]/maxInThisDimension));
 						writer.write(' ');
 					}
 					else{
-						writer.write(Double.toString(eigenDictArrContext[i][j]));
+						writer.write(Double.toString(eigenDictArrContext[i][j]/maxInThisDimension));
 						writer.write('\n');
 					}
 				}
 				else{
 					if ( j != _opt.hiddenStateSize-1){
-						writer.write(Double.toString(eigenDictArrContext[i-c*vocab.size()][j]));
+						writer.write(Double.toString(eigenDictArrContext[i-c*vocab.size()][j]/maxInThisDimension));
 						writer.write(' ');
 					}
 					else{
-						writer.write(Double.toString(eigenDictArrContext[i-c*vocab.size()][j]));
+						writer.write(Double.toString(eigenDictArrContext[i-c*vocab.size()][j]/maxInThisDimension));
 						writer.write('\n');
 					}
 				}
@@ -304,17 +342,81 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 			int tok_idx=0;	
 			ArrayList<Integer> doc=_allDocs.get(idxDoc++);
 			
+			double maxInThisDimension= 0;
 			while(tok_idx<doc.size()){
+				double arr=0;
+				maxInThisDimension= 0;
 				writer.write(_rin.getTokForIntTrain(idx++));
 				writer.write(' ');
+				
+				for(int k=0;k<_opt.hiddenStateSize*2;k++){
+					arr=contextSpecificEmbed.get(i, k);
+					if(maxInThisDimension<Math.abs(arr))
+						maxInThisDimension=Math.abs(arr);
+				}
+				
 				for (int j=0;j<_opt.hiddenStateSize*2;j++){
 					
+					
+					
+					
 					if ( j != (2*_opt.hiddenStateSize)-1){
-						writer.write(Double.toString(contextSpecificEmbed.get(i, j)));
+						writer.write(Float.toString((float) (contextSpecificEmbed.get(i, j)/maxInThisDimension)));
 						writer.write(' ');
 					}
 					else{
-						writer.write(Double.toString(contextSpecificEmbed.get(i, j)));
+						writer.write(Float.toString((float) (contextSpecificEmbed.get(i, j)/maxInThisDimension)));
+						writer.write('\n');
+					}
+				}
+				i++;
+				tok_idx++;
+			}
+	}
+		writer.close();
+		
+	}
+	
+	
+	
+
+	
+	public void writeContextSpecificEmbedLRMVL(Matrix contextSpecificEmbed) throws IOException {
+		int i=0,idxDoc=0,idx=0;
+		
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_opt.contextSpecificEmbed),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	
+	while(idxDoc<_allDocs.size()){	
+			int tok_idx=0;	
+			ArrayList<Integer> doc=_allDocs.get(idxDoc++);
+			
+			double maxInThisDimension= 0;
+			while(tok_idx<doc.size()){
+				double arr=0;
+				maxInThisDimension=0;
+				writer.write(_rin.getTokForIntTrain(idx++));
+				writer.write(' ');
+				
+				for(int k=0;k<_opt.hiddenStateSize*3;k++){
+					arr=contextSpecificEmbed.get(i, k);
+					if(maxInThisDimension<Math.abs(arr))
+						maxInThisDimension=Math.abs(arr);
+				}
+				
+				for (int j=0;j<_opt.hiddenStateSize*3;j++){
+					
+					if ( j != (3*_opt.hiddenStateSize)-1){
+						writer.write(Double.toString(contextSpecificEmbed.get(i, j)/maxInThisDimension));
+						writer.write(' ');
+					}
+					else{
+						writer.write(Double.toString(contextSpecificEmbed.get(i, j)/maxInThisDimension));
 						writer.write('\n');
 					}
 				}
@@ -342,6 +444,55 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 			e.printStackTrace();
 		}
 		
+		double maxInThisDimension= 0;
+		for (int i=0; i<=vocab.size(); i++) {
+			double arr=0;
+			maxInThisDimension= 0;
+			if (i==0){
+				writer.write("<OOV>");
+				writer.write(' ');
+			}
+			else{
+				writer.write(vocab.get(i-1));
+				writer.write(' ');
+			}
+			
+			for(int k=0;k<_opt.hiddenStateSize;k++){
+				arr=dictL[i][k];
+				if(maxInThisDimension<Math.abs(arr))
+					maxInThisDimension=Math.abs(arr);
+			}
+			
+			for (int j=0; j<_opt.hiddenStateSize;j++){
+				
+				if ( j != _opt.hiddenStateSize-1){
+					writer.write(Double.toString(dictL[i][j]/maxInThisDimension));
+					writer.write(' ');
+				}
+				else{
+					writer.write(Double.toString(dictL[i][j]/maxInThisDimension));
+					writer.write('\n');
+				}
+			}
+		}
+		writer.close();
+	}
+
+	
+	
+	public void writeEigenDictCPCA() throws IOException{
+		DenseDoubleMatrix2D dictLMatrix=createDenseMatrixCOLT((Matrix)_matrices[0]);
+		double[][] dictL=dictLMatrix.toArray();
+		ArrayList<String> vocab=_rin.getSortedWordListString();
+		String eigenDict=_opt.outputDir+"eigenDict"+_opt.algorithm+_opt.typeofDecomp;
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(eigenDict),"UTF8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
 		double[] maxInThisDimension= new double[vocab.size()+1];
 		for (int i=0; i<=vocab.size(); i++) {
 			double arr=0;
@@ -354,27 +505,21 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 				writer.write(' ');
 			}
 			
-			for(int k=0;k<_opt.hiddenStateSize-1;k++){
-				arr=dictL[i][k];
-				if(maxInThisDimension[i]<Math.abs(arr))
-					maxInThisDimension[i]=Math.abs(arr);
-			}
 			
 			for (int j=0; j<_opt.hiddenStateSize;j++){
 				
 				if ( j != _opt.hiddenStateSize-1){
-					writer.write(Double.toString(dictL[i][j]/maxInThisDimension[i]));
+					writer.write(Double.toString(dictL[i][j]));
 					writer.write(' ');
 				}
 				else{
-					writer.write(Double.toString(dictL[i][j]/maxInThisDimension[i]));
+					writer.write(Double.toString(dictL[i][j]));
 					writer.write('\n');
 				}
 			}	
 		}
 		writer.close();
 	}
-
 	
 	
 	public void writeEigenDictRandom() throws IOException{
@@ -532,6 +677,56 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		while(st.hasMoreTokens())
 			res.add(st.nextToken());
 		return res;
+	}
+	public void writeSparseMatrix(FlexCompRowMatrix wtlrMatrix,FlexCompRowMatrix wtwMatrix) {
+		
+		DenseDoubleMatrix2D d =new DenseDoubleMatrix2D(wtlrMatrix.numRows(),wtlrMatrix.numColumns());
+		
+		for(MatrixEntry e: wtlrMatrix){
+			d.setQuick(e.row(), e.column(), e.get()/wtwMatrix.get(e.row(), e.row()));
+		}
+		
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ContextMatrix"),"UTF8"));
+		} catch (UnsupportedEncodingException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (FileNotFoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		try {
+		for(int i=0; i<wtlrMatrix.numRows(); i++){
+			for(int j=0; j<wtlrMatrix.numColumns(); j++){
+
+				if(j!=wtlrMatrix.numColumns()-1){
+					writer.write(Double.toString(d.getQuick(i, j)));
+					writer.write(' ');	
+				}
+				else{
+					writer.write(Double.toString(d.getQuick(i, j)));
+				}
+			}
+			writer.write('\n');
+		}
+		writer.close();
+		} 
+		catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		//wtlrMatrix.
+		
+		//writer.write(Double.toString(embedMatrix.get(wordDict.get(("<OOV>")), j)));
+		//writer.write('\n');
+		
+		
+		for (MatrixEntry e : wtlrMatrix){
+			d.setQuick(e.row(), e.column(), (int)e.get());
+		}
+		
+	
+		
 	}	
 	
 	

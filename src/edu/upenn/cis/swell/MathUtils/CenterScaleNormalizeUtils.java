@@ -78,7 +78,7 @@ public Matrix sqrtTransform(Matrix eigen_dict){
 
 public Matrix normalize(Matrix eigen_dict){
 	
-	double[][] eigenFeatDict=new double[_opt.vocabSize+1][_opt.hiddenStateSize];
+	double[][] eigenFeatDict=new double[eigen_dict.getRowDimension()][eigen_dict.getColumnDimension()];
 	
 	eigenFeatDict=eigen_dict.getArray();
 	

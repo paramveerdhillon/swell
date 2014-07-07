@@ -80,12 +80,19 @@ public class MatrixFormatConversion {
 	}
 	
 	public static SparseDoubleMatrix2D createSparseMatrixCOLT(FlexCompRowMatrix xmtj) {
+		
+		System.out.println(" Number Rows: "+xmtj.numRows());
+		System.out.println(" Number Cols: "+ xmtj.numColumns());
+		
+		xmtj.compact();
+		
 		SparseDoubleMatrix2D x_omega=new SparseDoubleMatrix2D(xmtj.numRows(),xmtj.numColumns(),0,0.70,0.75);
 		
 		for (MatrixEntry e : xmtj){
 			x_omega.set(e.row(), e.column(), e.get());
 		}
 		
+		System.out.println("==Created Sparse Matrix==");
 		return x_omega;
 	}
 	

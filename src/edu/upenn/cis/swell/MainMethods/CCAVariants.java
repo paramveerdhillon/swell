@@ -93,6 +93,8 @@ public class CCAVariants implements Serializable {
 			matrices=deserializeCCAVariantsRun(opt);
 
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
+			
+			
 			wout.writeEigenDict();
 			if(!opt.typeofDecomp.equals("TwoStepLRvsW") && !opt.typeofDecomp.equals("LRMVLVariant2") && !opt.kdimDecomp)
 				wout.writeEigContextVectors();
@@ -106,6 +108,9 @@ public class CCAVariants implements Serializable {
 			
 		    /* Total memory currently in use by the JVM */
 		    System.out.println("Total memory (bytes): " + Runtime.getRuntime().totalMemory());
+			
+		    if(opt.writeContextMatrix)
+				wout.writeSparseMatrix(contextPCARep.getWTLRMatrix(),contextPCARep.getWTWMatrix());
 			
 			
 			System.out.println("+++CCA Embedddings Induced+++\n");
@@ -128,10 +133,12 @@ public class CCAVariants implements Serializable {
 			contextSpecificEmbed=contextPCARep.generateProjections((Matrix)matrices[0], 
 						(Matrix)matrices[1],(Matrix)matrices[2]);
 			
-			Matrix contextObliviousEmbed=contextPCARep.getContextOblEmbeddings((Matrix)matrices[0]);
-	
+			Matrix contextObliviousEmbed=contextPCARep.getContextOblEmbeddings((Matrix)matrices[0]);			
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
-			wout.writeContextSpecificEmbed(contextSpecificEmbed);
+			if(opt.typeofDecomp.equals("TwoStepLRvsW") || opt.typeofDecomp.equals("LRMVLVariant2") )
+				wout.writeContextSpecificEmbedLRMVL(contextSpecificEmbed);
+			else	
+				wout.writeContextSpecificEmbed(contextSpecificEmbed);
 			wout.writeContextObliviousEmbed(contextObliviousEmbed);
 			System.out.println("+++Generated CCA Embedddings for training data+++\n");
 		}
