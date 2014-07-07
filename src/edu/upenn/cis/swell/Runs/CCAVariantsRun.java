@@ -145,26 +145,26 @@ public class CCAVariantsRun implements Serializable {
 		}
 		
 		//3 view is not implemented as yet.
-		if(_opt.typeofDecomp.equals("3viewLvsWvsR") || _opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVLVariant2") || _opt.typeofDecomp.equals("LRMVL")){
+		if(_opt.typeofDecomp.equals("3viewLvsWvsR") || _opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVL1") || _opt.typeofDecomp.equals("LRMVL")){
 		
 			if(_opt.typeofDecomp.equals("TwoStepLRvsW"))
 				computeCCATwoStepLRvsW(_cpcaR2.getLTRMatrix(),_cpcaR2.getRTLMatrix(),_cpcaR2.getLTLMatrix(),_cpcaR2.getRTRMatrix(),_cpcaR2.getWTWMatrix(),
 						_cpcaR2.getWTLMatrix(),_cpcaR2.getWTRMatrix(),
 						_cpcaR2.getLTWMatrix(),_cpcaR2.getRTWMatrix(),svdTC,_cpcaR2);
 			
-			if(_opt.typeofDecomp.equals("LRMVLVariant2"))
-				computeCCALRMVL2(_cpcaR2.getLTRMatrix(),_cpcaR2.getRTLMatrix(),_cpcaR2.getLTLMatrix(),_cpcaR2.getRTRMatrix(),_cpcaR2.getWTWMatrix(),
+			if(_opt.typeofDecomp.equals("LRMVL1"))
+				computeCCALRMVL1(_cpcaR2.getLTRMatrix(),_cpcaR2.getRTLMatrix(),_cpcaR2.getLTLMatrix(),_cpcaR2.getRTRMatrix(),_cpcaR2.getWTWMatrix(),
 						_cpcaR2.getWTLMatrix(),_cpcaR2.getWTRMatrix(),
 						_cpcaR2.getLTWMatrix(),_cpcaR2.getRTWMatrix(),svdTC,_cpcaR2);
 			
 			if(_opt.typeofDecomp.equals("LRMVL"))
-				computeCCALRMVL(_cpcaR2.getWTWMatrix(),svdTC,_cpcaR2);
+				computeCCALRMVL2(_cpcaR2.getWTWMatrix(),svdTC,_cpcaR2);
 					
 			
 		}
 	}
 	
-	private void computeCCALRMVL(FlexCompRowMatrix wtwMatrix,
+	private void computeCCALRMVL2(FlexCompRowMatrix wtwMatrix,
 			SVDTemplates svdTC, ContextPCARepresentation _cpcaR2) {
 		
 		CenterScaleNormalizeUtils mathUtils=new CenterScaleNormalizeUtils(_opt);
@@ -834,7 +834,7 @@ public class CCAVariantsRun implements Serializable {
 	}
 
 	
-	private void computeCCALRMVL2(FlexCompRowMatrix ltr,
+	private void computeCCALRMVL1(FlexCompRowMatrix ltr,
 			FlexCompRowMatrix rtl, FlexCompRowMatrix ltl,
 			FlexCompRowMatrix rtr, FlexCompRowMatrix wtw,
 			FlexCompRowMatrix wtl, FlexCompRowMatrix wtr, FlexCompRowMatrix ltw, FlexCompRowMatrix rtw, SVDTemplates svdTC,ContextPCARepresentation _cpcaR2) {
@@ -958,9 +958,11 @@ public class CCAVariantsRun implements Serializable {
 					tempM=_cpcaR2.concatenateLRT(tempM1,MatrixFormatConversion.createDenseMatrixCOLT(phiL));	
 					tempM1=(DenseDoubleMatrix2D)tempM.copy();
 				}
+				
+				UHat=MatrixFormatConversion.createDenseMatrixJAMA(tempM);
 			}
 			
-			UHat=MatrixFormatConversion.createDenseMatrixJAMA(tempM);
+			
 			
 			//if(iter ==10){
 				UHat = mathUtils.normalize(UHat);
@@ -1132,7 +1134,7 @@ public void serializeCCAVariantsRun() {
 			ObjectOutput ccaEigR=new ObjectOutputStream(new FileOutputStream(fEigR));
 			ObjectOutput ccaContext=new ObjectOutputStream(new FileOutputStream(fContext));
 			
-		if(_opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVLVariant2")|| _opt.typeofDecomp.equals("LRMVL") ){
+		if(_opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVL1")|| _opt.typeofDecomp.equals("LRMVL") ){
 			
 				ccaEig.writeObject(phiL);
 				ccaEig.flush();

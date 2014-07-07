@@ -27,7 +27,7 @@ import edu.upenn.cis.swell.IO.ReadDataFile;
 import edu.upenn.cis.swell.Runs.CCAVariantsRun;
 import edu.upenn.cis.swell.SpectralRepresentations.ContextPCARepresentation;
 
-public class LRMVLEmbedNew implements Serializable {
+public class LRMVL2 implements Serializable {
  
 	static final long serialVersionUID = 42L;
 	static HashMap<Integer,Integer> words_Dict;

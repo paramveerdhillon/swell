@@ -96,7 +96,7 @@ public class CCAVariants implements Serializable {
 			
 			
 			wout.writeEigenDict();
-			if(!opt.typeofDecomp.equals("TwoStepLRvsW") && !opt.typeofDecomp.equals("LRMVLVariant2") && !opt.kdimDecomp)
+			if(!opt.typeofDecomp.equals("TwoStepLRvsW") && !opt.typeofDecomp.equals("LRMVL1") && !opt.kdimDecomp)
 				wout.writeEigContextVectors();
 			
 			
@@ -135,7 +135,7 @@ public class CCAVariants implements Serializable {
 			
 			Matrix contextObliviousEmbed=contextPCARep.getContextOblEmbeddings((Matrix)matrices[0]);			
 			wout=new ContextPCAWriter(opt,all_Docs,matrices,rin);
-			if(opt.typeofDecomp.equals("TwoStepLRvsW") || opt.typeofDecomp.equals("LRMVLVariant2") )
+			if(opt.typeofDecomp.equals("TwoStepLRvsW") || opt.typeofDecomp.equals("LRMVL1") )
 				wout.writeContextSpecificEmbedLRMVL(contextSpecificEmbed);
 			else	
 				wout.writeContextSpecificEmbed(contextSpecificEmbed);
@@ -257,7 +257,7 @@ public static HashMap<Integer,Integer> setwordDict(HashMap<Integer,Integer> wDic
 		matrixObj[1]=(Object)contextDictMat;
 		matrixObj[2]=null;
 		
-		if(opt.typeofDecomp.equals("TwoStepLRvsW") || opt.typeofDecomp.equals("LRMVLVariant2")){
+		if(opt.typeofDecomp.equals("TwoStepLRvsW") || opt.typeofDecomp.equals("LRMVL1")){
 			
 			try{
 				

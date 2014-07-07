@@ -959,7 +959,7 @@ public Object[] computeLRMVLCovMatricesParallel(Matrix UHat,ArrayList<Integer> d
 	
 		//We can not have n*hv sparse matrices due to limits on max. matrix sizes so we will have to perform the multiplication here only.
 		
-		if( _opt.typeofDecomp.equals("TwoStepLRvsW") ||  _opt.typeofDecomp.equals("LRMVLVariant2") ){
+		if( _opt.typeofDecomp.equals("TwoStepLRvsW") ||  _opt.typeofDecomp.equals("LRMVL1") ){
 		
 			LTRMatrix_hvTimeshv=new FlexCompRowMatrix(_contextSize*(_vocab_size+1),_contextSize*(_vocab_size+1));
 			RTLMatrix_hvTimeshv=new FlexCompRowMatrix(_contextSize*(_vocab_size+1),_contextSize*(_vocab_size+1));
@@ -1048,7 +1048,7 @@ public Object[] computeLRMVLCovMatricesParallel(Matrix UHat,ArrayList<Integer> d
 		//We can not have n*hv sparse matrices due to limits on max. matrix sizes so we will have to perform the multiplication here only.
 		
 	 
-		if( _opt.typeofDecomp.equals("TwoStepLRvsW") ){
+		if( _opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVL1") ){
 		
 			LTRMatrix_hvTimeshv=transform(LTRMatrix_hvTimeshv);
 			RTLMatrix_hvTimeshv=transform(RTLMatrix_hvTimeshv);
@@ -2190,7 +2190,7 @@ public FlexCompRowMatrix getWnTMatrix(){
 			contextSpecificEmbed=(DenseDoubleMatrix2D)DoubleFactory2D.dense.appendColumns(W,R);
 		}
 		
-		if(_opt.typeofDecomp.equals("WvsLR") || _opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("TwoStepLRvsW")|| _opt.typeofDecomp.equals("LRMVLVariant2")){
+		if(_opt.typeofDecomp.equals("WvsLR") || _opt.typeofDecomp.equals("2viewWvsLR")|| _opt.typeofDecomp.equals("TwoStepLRvsW")|| _opt.typeofDecomp.equals("LRMVL1")){
 		
 			if(_opt.typeofDecomp.equals("2viewWvsLR") || _opt.typeofDecomp.equals("WvsLR")){
 				MatrixFormatConversion.createSparseMatrixCOLT(LRn2hv).zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixContext), contextLR);
@@ -2198,7 +2198,7 @@ public FlexCompRowMatrix getWnTMatrix(){
 			}
 			else{
 				
-				if(_opt.typeofDecomp.equals("LRMVLVariant2")){
+				if(_opt.typeofDecomp.equals("LRMVL1")){
 				
 					if(_opt.contextSizeOneSide==1){
 						MatrixFormatConversion.createSparseMatrixCOLT(LMatrix_nTimeshv).zMult(MatrixFormatConversion.createDenseMatrixCOLT(matrixEig), LU);
@@ -2234,7 +2234,7 @@ public FlexCompRowMatrix getWnTMatrix(){
 		}
 		
 		System.out.println("Before Return");
-		if(_opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVLVariant2") )
+		if(_opt.typeofDecomp.equals("TwoStepLRvsW") || _opt.typeofDecomp.equals("LRMVL1") )
 			return MatrixFormatConversion.createDenseMatrixJAMA(contextSpecificEmbedWLR);
 		else
 			return MatrixFormatConversion.createDenseMatrixJAMA(contextSpecificEmbed);

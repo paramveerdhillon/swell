@@ -27,7 +27,7 @@ import edu.upenn.cis.swell.MathUtils.CenterScaleNormalizeUtils;
 import edu.upenn.cis.swell.Runs.CCARun;
 import edu.upenn.cis.swell.SpectralRepresentations.CCARepresentation;
 
-public class LRMVLEmbed implements Serializable {
+public class LRMVLEmbedOld implements Serializable {
 	
 	static final long serialVersionUID = 42L;
 	
