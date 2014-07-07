@@ -105,7 +105,7 @@
     <target name="CCAVariantsNGrams">
         <java classname="edu.upenn.cis.swell.MainMethods.CCAVariantsNGrams" failonerror="true" fork="yes">
             <jvmarg line="-Xmx50G"/>
-            <arg line="unlab-train unlab-train-file:../train_demo1.txt  vocab-size:100 hidden-state:20 algorithm:CCANGram:2viewWvsR num-grams:2 sqrt-trans"/>
+            <arg line="unlab-train unlab-train-file:../2grams.txt  vocab-size:100 hidden-state:20 algorithm:CCANGram:2viewWvsR num-grams:2 sqrt-trans"/>
             <classpath refid="swell.classpath"/>
             <bootclasspath>
                 <path refid="run.CCAVariantsNGrams.bootclasspath"/>
