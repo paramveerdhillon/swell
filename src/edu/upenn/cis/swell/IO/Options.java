@@ -50,7 +50,7 @@ public final class Options implements Serializable {
  public int vocabSize = 30000;
  public int hiddenStateSize=50;
  public int contextSizeOneSide=2;
- public boolean randomBaseline=true;
+ public boolean randomBaseline=false;
  public int numIters = 2;
  public int numGrams=2;
  public String outfile = "out.txt";
