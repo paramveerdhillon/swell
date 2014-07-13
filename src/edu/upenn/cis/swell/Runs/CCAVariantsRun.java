@@ -530,8 +530,8 @@ public class CCAVariantsRun implements Serializable {
 		DenseDoubleMatrix2D phiLCOLT,phiRCOLT;
 		
 		if (twoStageFlag==1){
-			phiLCOLT=new DenseDoubleMatrix2D(xtx.numRows(),2*_opt.hiddenStateSize);
-			phiRCOLT=new DenseDoubleMatrix2D(yty.numRows(),2*_opt.hiddenStateSize);
+			phiLCOLT=new DenseDoubleMatrix2D(xtx.numRows(),1*_opt.hiddenStateSize);
+			phiRCOLT=new DenseDoubleMatrix2D(yty.numRows(),1*_opt.hiddenStateSize);
 		}
 		else{
 			phiLCOLT=new DenseDoubleMatrix2D(xtx.numRows(),_opt.hiddenStateSize);
@@ -577,15 +577,19 @@ public class CCAVariantsRun implements Serializable {
 		
 		if(twoStageFlag==1){
 		
-		phiLCSU=svdTC.computeSVD_Tropp_1Stage(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix1Stage(auxMat3.numColumns()),dim1);
+		phiLCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix(auxMat3.numColumns()),dim1);
 		s=svdTC.getSingularVals();
+		
+		//svdTC.computeSVD_Tropp_1Stage(MatrixFormatConversion.createSparseMatrixCOLT(auxMat3), _cpcaR2.getOmegaMatrix1Stage(auxMat3.numColumns()),dim1);
 		
 		//phiL=phiLCSU; 
 		
 		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(xtx))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiLCSU), phiLCOLT);
 		phiL=MatrixFormatConversion.createDenseMatrixJAMA(phiLCOLT);
 		
-		phiRCSU=svdTC.computeSVD_Tropp_1Stage(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix1Stage(auxMat4.numColumns()),dim2);
+		phiRCSU=svdTC.computeSVD_Tropp(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix(auxMat4.numColumns()),dim2);
+		
+		//svdTC.computeSVD_Tropp_1Stage(MatrixFormatConversion.createSparseMatrixCOLT(auxMat4), _cpcaR2.getOmegaMatrix1Stage(auxMat4.numColumns()),dim2);
 		
 		MatrixFormatConversion.createSparseMatrixCOLT((svdTC.computeSparseInverseSqRoot(yty))).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiRCSU), phiRCOLT);
 		phiR=MatrixFormatConversion.createDenseMatrixJAMA(phiRCOLT);
@@ -631,8 +635,8 @@ public class CCAVariantsRun implements Serializable {
 		
 		CenterScaleNormalizeUtils csu =new CenterScaleNormalizeUtils(_opt);
 		System.out.println("+++Entering CCA Compute Function+++");
-		DenseDoubleMatrix2D phiLCOLT=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D phiRCOLT=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiLCOLT=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRCOLT=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
 		
 		
 		DenseDoubleMatrix2D a1Mat=new DenseDoubleMatrix2D(UTminusHalf.rows(),xtx.numColumns());
@@ -775,31 +779,31 @@ public class CCAVariantsRun implements Serializable {
 		
 		
 		
-		DenseDoubleMatrix2D WTLphiL=new DenseDoubleMatrix2D(wtl.numRows(),2* _opt.hiddenStateSize);
-		DenseDoubleMatrix2D WTRphiR=new DenseDoubleMatrix2D(wtr.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D LTWphiL=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtl.numRows());
-		DenseDoubleMatrix2D RTWphiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtr.numRows());
-		DenseDoubleMatrix2D WTLphiLWTRphiR=new DenseDoubleMatrix2D(wtl.numRows(),4*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D phiLTLTWphiRTRTW=new DenseDoubleMatrix2D(4*_opt.hiddenStateSize,wtl.numRows());
+		DenseDoubleMatrix2D WTLphiL=new DenseDoubleMatrix2D(wtl.numRows(),1* _opt.hiddenStateSize);
+		DenseDoubleMatrix2D WTRphiR=new DenseDoubleMatrix2D(wtr.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D LTWphiL=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,wtl.numRows());
+		DenseDoubleMatrix2D RTWphiR=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,wtr.numRows());
+		DenseDoubleMatrix2D WTLphiLWTRphiR=new DenseDoubleMatrix2D(wtl.numRows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiLTLTWphiRTRTW=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtl.numRows());
 		
-		DenseDoubleMatrix2D LRTLRphiLphiR=new DenseDoubleMatrix2D(4*_opt.hiddenStateSize,4*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D LRTLRphiLphiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
 				
-		DenseDoubleMatrix2D phiLT_LTL_phiL=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D phiLT_LTR_phiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D phiRT_RTL_phiL=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D phiRT_RTR_phiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiLT_LTL_phiL=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiLT_LTR_phiR=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRT_RTL_phiL=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiRT_RTR_phiR=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
 		
-		DenseDoubleMatrix2D  ltl_phiL=new DenseDoubleMatrix2D(ltl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D  ltr_phiR=new DenseDoubleMatrix2D(ltr.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D  rtl_phiL=new DenseDoubleMatrix2D(rtl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D  rtr_phiR=new DenseDoubleMatrix2D(rtr.numRows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D  ltl_phiL=new DenseDoubleMatrix2D(ltl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D  ltr_phiR=new DenseDoubleMatrix2D(ltr.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D  rtl_phiL=new DenseDoubleMatrix2D(rtl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D  rtr_phiR=new DenseDoubleMatrix2D(rtr.numRows(),1*_opt.hiddenStateSize);
 		
 		
 		computeCCA2(ltr,rtl, rtr,ltl,svdTC,_cpcaR2,1);
 		
+		
 		MatrixFormatConversion.createSparseMatrixCOLT(wtl).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiL), WTLphiL);
 		MatrixFormatConversion.createSparseMatrixCOLT(wtr).zMult(MatrixFormatConversion.createDenseMatrixCOLT(phiR), WTRphiR);
-		
 		
 		phiL_1stage=phiL;
 		phiR_1stage=phiR;
@@ -820,8 +824,8 @@ public class CCAVariantsRun implements Serializable {
 		
 		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltl_phiL, phiLT_LTL_phiL);
 		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltr_phiR, phiLT_LTR_phiR);
-		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(rtl_phiL, phiRT_RTL_phiL);
-		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(rtr_phiR, phiRT_RTR_phiR);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(rtl_phiL, phiRT_RTL_phiL);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(rtr_phiR, phiRT_RTR_phiR);
 		
 		LRTLRphiLphiR=_cpcaR2.concatenateLRT(_cpcaR2.concatenateLR(phiLT_LTL_phiL,phiLT_LTR_phiR),_cpcaR2.concatenateLR(phiRT_RTL_phiL,phiRT_RTR_phiR));
 		
@@ -841,7 +845,7 @@ public class CCAVariantsRun implements Serializable {
 		
 		CenterScaleNormalizeUtils mathUtils=new CenterScaleNormalizeUtils(_opt);
 		
-		Matrix UHat= _cpcaR2.initializeRandomly1Stage(ltr.numRows());
+		Matrix UHat= _cpcaR2.initializeRandomly(ltr.numRows());
 		
 		DenseDoubleMatrix2D tempM=new DenseDoubleMatrix2D(_opt.contextSizeOneSide,UHat.getColumnDimension());
 		DenseDoubleMatrix2D tempM1=new DenseDoubleMatrix2D(_opt.contextSizeOneSide,UHat.getColumnDimension());
@@ -856,44 +860,44 @@ public class CCAVariantsRun implements Serializable {
 		
 			
 		
-		DenseDoubleMatrix2D WTLphiL=new DenseDoubleMatrix2D(wtl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D WTRphiR=new DenseDoubleMatrix2D(wtr.numRows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D WTLphiL=new DenseDoubleMatrix2D(wtl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D WTRphiR=new DenseDoubleMatrix2D(wtr.numRows(),1*_opt.hiddenStateSize);
 		
-		DenseDoubleMatrix2D WTLUHat=new DenseDoubleMatrix2D(wtl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D WTRUHat=new DenseDoubleMatrix2D(wtr.numRows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D WTLUHat=new DenseDoubleMatrix2D(wtl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D WTRUHat=new DenseDoubleMatrix2D(wtr.numRows(),1*_opt.hiddenStateSize);
 		
-		DenseDoubleMatrix2D LTWphiL=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtl.numRows());
-		DenseDoubleMatrix2D RTWphiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtr.numRows());
+		DenseDoubleMatrix2D LTWphiL=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,wtl.numRows());
+		DenseDoubleMatrix2D RTWphiR=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,wtr.numRows());
 		
-		DenseDoubleMatrix2D UHatTLTW=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtl.numColumns());
-		DenseDoubleMatrix2D UHatTRTW=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtr.numColumns());
+		DenseDoubleMatrix2D UHatTLTW=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,wtl.numColumns());
+		DenseDoubleMatrix2D UHatTRTW=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,wtr.numColumns());
 		
 		
 		
-		DenseDoubleMatrix2D WTLphiLWTRphiR=new DenseDoubleMatrix2D(wtl.numRows(),4*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D phiLTLTWphiRTRTW=new DenseDoubleMatrix2D(4*_opt.hiddenStateSize,wtl.numRows());
+		DenseDoubleMatrix2D WTLphiLWTRphiR=new DenseDoubleMatrix2D(wtl.numRows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D phiLTLTWphiRTRTW=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtl.numRows());
 		
-		DenseDoubleMatrix2D LRTLRphiLphiR=new DenseDoubleMatrix2D(4*_opt.hiddenStateSize,4*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D LRTLRphiLphiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
 				
-		DenseDoubleMatrix2D UHatTltlUHat_phiL=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D UHatTltrUHat_phiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D UHatTrtlUHat_phiL=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D UHatTrtrUHat_phiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D UHatTltlUHat_phiL=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D UHatTltrUHat_phiR=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D UHatTrtlUHat_phiL=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D UHatTrtrUHat_phiR=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
 		
 		
-		DenseDoubleMatrix2D ltlUHat=new DenseDoubleMatrix2D(ltl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D ltrUHat=new DenseDoubleMatrix2D(ltr.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D rtlUHat=new DenseDoubleMatrix2D(rtl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D rtrUHat=new DenseDoubleMatrix2D(rtr.numRows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D ltlUHat=new DenseDoubleMatrix2D(ltl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D ltrUHat=new DenseDoubleMatrix2D(ltr.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D rtlUHat=new DenseDoubleMatrix2D(rtl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D rtrUHat=new DenseDoubleMatrix2D(rtr.numRows(),1*_opt.hiddenStateSize);
 		
-		DenseDoubleMatrix2D ltlUHat_phiL=new DenseDoubleMatrix2D(ltl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D ltrUHat_phiR=new DenseDoubleMatrix2D(ltr.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D rtlUHat_phiL=new DenseDoubleMatrix2D(rtl.numRows(),2*_opt.hiddenStateSize);
-		DenseDoubleMatrix2D rtrUHat_phiR=new DenseDoubleMatrix2D(rtr.numRows(),2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D ltlUHat_phiL=new DenseDoubleMatrix2D(ltl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D ltrUHat_phiR=new DenseDoubleMatrix2D(ltr.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D rtlUHat_phiL=new DenseDoubleMatrix2D(rtl.numRows(),1*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D rtrUHat_phiR=new DenseDoubleMatrix2D(rtr.numRows(),1*_opt.hiddenStateSize);
 		
 		System.out.println("Beginning Frob. Norm: "+UHat.normF());
 		
-		for(int iter=0; iter<11; iter++){
+		for(int iter=0; iter<6; iter++){
 			computeCCA2LRMVL2(MatrixFormatConversion.createDenseMatrixCOLT(UHat), UHatT,UHatminusHalf,UHatTminusHalf, ltr,rtl, rtr,ltl,svdTC,_cpcaR2);
 
 			MatrixFormatConversion.createSparseMatrixCOLT(wtl).zMult(MatrixFormatConversion.createDenseMatrixCOLT(UHat), WTLUHat);
@@ -936,7 +940,7 @@ public class CCAVariantsRun implements Serializable {
 
 			LRTLRphiLphiR=_cpcaR2.concatenateLRT(_cpcaR2.concatenateLR(UHatTltlUHat_phiL,UHatTltrUHat_phiR),_cpcaR2.concatenateLR(UHatTrtlUHat_phiL,UHatTrtrUHat_phiR));
 
-			if(iter ==10){
+			if(iter ==5){
 				computeCCA2(WTLphiLWTRphiR,phiLTLTWphiRTRTW, LRTLRphiLphiR,MatrixFormatConversion.createSparseMatrixCOLT(wtw),svdTC,_cpcaR2);
 				
 				//Keep only the first k evecs to get context specific projections.
@@ -946,7 +950,7 @@ public class CCAVariantsRun implements Serializable {
 				
 			}
 			else{
-				computeCCA2_1Stage(WTLphiLWTRphiR,phiLTLTWphiRTRTW, LRTLRphiLphiR,MatrixFormatConversion.createSparseMatrixCOLT(wtw),svdTC,_cpcaR2);
+				computeCCA2(WTLphiLWTRphiR,phiLTLTWphiRTRTW, LRTLRphiLphiR,MatrixFormatConversion.createSparseMatrixCOLT(wtw),svdTC,_cpcaR2);
 			}
 		
 			tempM1=MatrixFormatConversion.createDenseMatrixCOLT(phiL);
@@ -1058,8 +1062,8 @@ public class CCAVariantsRun implements Serializable {
 		
 		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltl_phiL, phiLT_LTL_phiL);
 		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(ltr_phiR, phiLT_LTR_phiR);
-		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(rtl_phiL, phiRT_RTL_phiL);
-		MatrixFormatConversion.createDenseMatrixCOLT(phiLT).zMult(rtr_phiR, phiRT_RTR_phiR);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(rtl_phiL, phiRT_RTL_phiL);
+		MatrixFormatConversion.createDenseMatrixCOLT(phiRT).zMult(rtr_phiR, phiRT_RTR_phiR);
 		
 		LRTLRphiLphiR=_cpcaR2.concatenateLRT(_cpcaR2.concatenateLR(phiLT_LTL_phiL,phiLT_LTR_phiR),_cpcaR2.concatenateLR(phiRT_RTL_phiL,phiRT_RTR_phiR));
 		

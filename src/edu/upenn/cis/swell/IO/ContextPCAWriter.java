@@ -729,5 +729,37 @@ public class ContextPCAWriter extends WriteDataFile implements EmbeddingWriter {
 		
 	}	
 	
+public void writeDenseMatrix(DenseDoubleMatrix2D y) {
+		
+		try {
+			writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Matrix"),"UTF8"));
+		} catch (UnsupportedEncodingException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (FileNotFoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		try {
+		for(int i=0; i<y.rows(); i++){
+			for(int j=0; j<y.columns(); j++){
+
+				if(j!=y.columns()-1){
+					writer.write(Double.toString(y.getQuick(i, j)));
+					writer.write(' ');	
+				}
+				else{
+					writer.write(Double.toString(y.getQuick(i, j)));
+				}
+			}
+			writer.write('\n');
+		}
+		writer.close();
+		} 
+		catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	
+	}	
 }

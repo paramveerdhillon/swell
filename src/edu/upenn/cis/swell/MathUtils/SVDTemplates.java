@@ -26,6 +26,7 @@ import cern.colt.matrix.tdouble.algo.DenseDoubleAlgebra;
 import cern.colt.matrix.tdouble.algo.decomposition.DenseDoubleSingularValueDecomposition;
 import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
+import edu.upenn.cis.swell.IO.ContextPCAWriter;
 import edu.upenn.cis.swell.IO.Options;
 
 public class SVDTemplates implements Serializable {
@@ -661,6 +662,10 @@ public FlexCompRowMatrix computeSparseInverse(FlexCompRowMatrix X){
 
 	public DenseDoubleMatrix2D computeDenseInverseSqRoot(DenseDoubleMatrix2D yty) {
 			
+		
+		//ContextPCAWriter cw =new ContextPCAWriter(_opt);
+		//cw.writeDenseMatrix(yty);
+		
 		DenseDoubleSingularValueDecomposition svd= new DenseDoubleSingularValueDecomposition(yty,true,true);
 		DenseDoubleMatrix2D u=(DenseDoubleMatrix2D)svd.getU();
 		SparseDoubleMatrix2D s =(SparseDoubleMatrix2D)svd.getS();
@@ -668,9 +673,13 @@ public FlexCompRowMatrix computeSparseInverse(FlexCompRowMatrix X){
 		DenseDoubleMatrix2D v=(DenseDoubleMatrix2D)svd.getV();
 		DenseDoubleMatrix2D us =new DenseDoubleMatrix2D(u.rows(),s.columns());
 		DenseDoubleMatrix2D x =new DenseDoubleMatrix2D(yty.rows(),yty.columns());
+				
 		
 		for(int i=0; i< s.columns();i++){
-			 sinvSqRoot.set(i, i,1/Math.sqrt(s.get(i, i)));
+			if(s.get(i,i)!=0)
+				sinvSqRoot.set(i, i,1/Math.sqrt(s.get(i, i)));
+			else
+				sinvSqRoot.set(i, i,100000);
 		}
 		
 		u.zMult(sinvSqRoot, us);
@@ -689,7 +698,10 @@ public FlexCompRowMatrix computeSparseInverse(FlexCompRowMatrix X){
 		DenseDoubleMatrix2D x =new DenseDoubleMatrix2D(yty.rows(),yty.columns());
 		
 		for(int i=0; i< s.columns();i++){
-			 sinvSqRoot.set(i, i,1/(s.get(i, i)));
+			if(s.get(i,i)!=0)
+				sinvSqRoot.set(i, i,1/(s.get(i, i)));
+			else
+				sinvSqRoot.set(i, i,100000);
 		}
 		
 		u.zMult(sinvSqRoot, us);
