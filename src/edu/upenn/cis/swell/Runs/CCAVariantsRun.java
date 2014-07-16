@@ -786,7 +786,7 @@ public class CCAVariantsRun implements Serializable {
 		DenseDoubleMatrix2D WTLphiLWTRphiR=new DenseDoubleMatrix2D(wtl.numRows(),2*_opt.hiddenStateSize);
 		DenseDoubleMatrix2D phiLTLTWphiRTRTW=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,wtl.numRows());
 		
-		DenseDoubleMatrix2D LRTLRphiLphiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,2*_opt.hiddenStateSize);
+		DenseDoubleMatrix2D LRTLRphiLphiR=new DenseDoubleMatrix2D(2*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
 				
 		DenseDoubleMatrix2D phiLT_LTL_phiL=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
 		DenseDoubleMatrix2D phiLT_LTR_phiR=new DenseDoubleMatrix2D(1*_opt.hiddenStateSize,1*_opt.hiddenStateSize);
