@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="swell">
+    <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="../../../../../../Applications/eclipse"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="swell.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="libs/Jama-1.0.2.jar"/>
+        <pathelement location="libs/parallelcolt-0.9.4.jar"/>
+        <pathelement location="libs/mtj-0.9.14.jar"/>
+        <pathelement location="libs/Utils.jar"/>
+        <pathelement location="libs/netlib-java-0.9.3.jar"/>
+        <pathelement location="libs/netlib-java.jar"/>
+        <pathelement location="libs/arpack_combined_all.jar"/>
+        <pathelement location="libs/optimization.jar"/>
+        <pathelement location="libs/jna-4.0.0.jar"/>
+        <pathelement location="libs/Jeigen.jar"/>
+    </path>
+    <path id="run.CCAVariants.bootclasspath">
+        <fileset dir="${java.home}/lib" includes="*.jar"/>
+        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
+    </path>
+    <path id="run.LRMVL2.bootclasspath">
+        <fileset dir="${java.home}/lib" includes="*.jar"/>
+        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
+    </path>
+    <path id="run.CCAVariantsNGrams.bootclasspath">
+        <fileset dir="${java.home}/lib" includes="*.jar"/>
+        <fileset dir="${java.home}/lib/ext" includes="*.jar"/>
+    </path>
+   
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="swell.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="CCAVariantsTSCCA">
+        <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx50G"/>
+            <arg line="unlab-train  unlab-train-file:Input_Files/train_demo1.txt output-dir-prefix:Output_Files_TSCCA vocab-size:100 hidden-state:20 algorithm:CCARunningText:TwoStepLRvsW contextSizeEachSide:2 sqrt-trans"/>
+            <classpath refid="swell.classpath"/>
+            <bootclasspath>
+                <path refid="run.CCAVariants.bootclasspath"/>
+            </bootclasspath>
+        </java>
+    </target>
+    <target name="CCAVariantsOSCCA">
+            <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
+	          <jvmarg line="-Xmx4G"/>
+              <arg line="unlab-train  unlab-train-file:Input_Files/train_demo1.txt output-dir-prefix:Output_Files_OSCCA_2viewWvsLR vocab-size:100 hidden-state:20 algorithm:CCARunningText:2viewWvsLR contextSizeEachSide:2 sqrt-trans"/>
+              <classpath refid="swell.classpath"/>
+              <bootclasspath>
+                <path refid="run.CCAVariants.bootclasspath"/>
+            </bootclasspath>
+        </java>
+    </target>
+    <target name="CCAVariantsLRMVL1">
+            <java classname="edu.upenn.cis.swell.MainMethods.CCAVariants" failonerror="true" fork="yes">
+	          <jvmarg line="-Xmx50G"/>
+              <arg line="unlab-train  unlab-train-file:Input_Files/train_demo1.txt output-dir-prefix:Output_FilesCCA_LRMVL1 vocab-size:100 hidden-state:20 algorithm:CCARunningText:LRMVL1 contextSizeEachSide:2 sqrt-trans"/>
+              <classpath refid="swell.classpath"/>
+              <bootclasspath>
+                <path refid="run.CCAVariants.bootclasspath"/>
+            </bootclasspath>
+        </java>
+    </target>
+    <target name="CCAVariantsNGrams">
+        <java classname="edu.upenn.cis.swell.MainMethods.CCAVariantsNGrams" failonerror="true" fork="yes">
+            <jvmarg line="-Xmx4G"/>
+            <arg line="unlab-train unlab-train-file:Input_Files/2grams.txt  vocab-size:100 hidden-state:20 output-dir-prefix:Output_Files_CCA_NGrams algorithm:CCANGram:2viewWvsR num-grams:2 sqrt-trans"/>
+            <classpath refid="swell.classpath"/>
+            <bootclasspath>
+                <path refid="run.CCAVariantsNGrams.bootclasspath"/>
+            </bootclasspath>
+        </java>
+    </target>
+
+    <target name="LRMVL2">
+        <java classname="edu.upenn.cis.swell.MainMethods.LRMVL2" failonerror="true" fork="yes">
+	<jvmarg line="-Xmx4G"/>
+            <arg line="unlab-train  unlab-train-file:Input_Files/train_demo1.txt   train-file:Input_Files/train_demo1.txt sqrt-trans  output-dir-prefix:Output_Files_LRMVL2_wsmooths vocab-size:50 hidden-state:30 algorithm:CCARunningText:LRMVL smooths:.1,.5,.9"/>
+            <classpath refid="swell.classpath"/>
+            <bootclasspath>
+                <path refid="run.LRMVL2.bootclasspath"/>
+            </bootclasspath>
+        </java>
+    </target>
+	
+
+
+
+</project>
